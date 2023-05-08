@@ -13,7 +13,7 @@ namespace semantickernelsample.Skills
         [SKFunction("Gets the current time.")]
         public string Enrich()
         {
-            return "At Mai 8 is every year the great Global Azure.";
+            return "Also mentoin that Mai 8 is every year the great Global Azure day when the community learn about Azure across the globe.";
         }
 
         [SKFunction("State machine.")]

@@ -12,7 +12,7 @@ internal class Program
         //await Sample2();
         //await Sample3_ImportNativeFunctionSkills();
         //await Sample3_BuildSKillPipeline();
-        //await Sample4_UsingVariables();
+        await Sample4_UsingVariables();
         await Sample5_StateMachine();
     }
 
@@ -26,9 +26,9 @@ internal class Program
         Give me the TLDR in 5 words.
         ";
 
-        var tldrFunction = kernel.CreateSemanticFunction(skPrompt);
+        var summarizeSemanticFunc = kernel.CreateSemanticFunction(skPrompt);
 
-        string textToSummarize = @"
+        string inputText = @"
         1) A robot may not injure a human being or, through inaction,
         allow a human being to come to harm.
 
@@ -39,7 +39,7 @@ internal class Program
         does not conflict with the First or Second Law.
         ";
 
-        var summary = await kernel.RunAsync(textToSummarize, tldrFunction);
+        var summary = await kernel.RunAsync(inputText, summarizeSemanticFunc);
 
         Console.WriteLine(summary);
     }
@@ -50,9 +50,9 @@ internal class Program
 
         var prompt = @"{{$input}}
 
-One line TLDR with the fewest words.";
+        One line TLDR with the fewest words.";
 
-        var summarize = kernel.CreateSemanticFunction(prompt);
+        var summarizeSemanticFunc = kernel.CreateSemanticFunction(prompt);
 
         string text1 = @"
 1st Law of Thermodynamics - Energy cannot be created or destroyed.
@@ -64,9 +64,9 @@ One line TLDR with the fewest words.";
 2. The acceleration of an object depends on the mass of the object and the amount of force applied.
 3. Whenever one object exerts a force on another object, the second object exerts an equal and opposite on the first.";
 
-        Console.WriteLine(await summarize.InvokeAsync(text1));
+        Console.WriteLine(await summarizeSemanticFunc.InvokeAsync(text1));
 
-        Console.WriteLine(await summarize.InvokeAsync(text2));
+        Console.WriteLine(await summarizeSemanticFunc.InvokeAsync(text2));
     }
 
     private static async Task Sample3_ImportNativeFunctionSkills()
@@ -79,7 +79,7 @@ One line TLDR with the fewest words.";
 
         var today = await nativeSkills["Today"].InvokeAsync();
 
-        var defaultTimeSkills = kernel.ImportSkill(new TimeSkill());
+        var builtInSkill = kernel.ImportSkill(new TimeSkill());
     }
 
     private static async Task Sample3_BuildSKillPipeline()
@@ -100,7 +100,6 @@ One line TLDR with the fewest words.";
 
         string skPrompt = @"
         You have a knowledge of international days.
-        {{sample.Enrich}}
 
         Is date {{datetime.Today}} known for something?
         ";
@@ -108,9 +107,23 @@ One line TLDR with the fewest words.";
         kernel.ImportSkill(new DateTimeSkill(), "datetime");
         kernel.ImportSkill(new SampleSkill(), "sample");
 
-        var day = kernel.CreateSemanticFunction(skPrompt, maxTokens: 150);
+        var sematicFunc = kernel.CreateSemanticFunction(skPrompt, maxTokens: 150);
 
-        var result = await kernel.RunAsync(day);
+        var result = await kernel.RunAsync(sematicFunc);
+
+        Console.WriteLine(result);
+
+        skPrompt = @"
+        You have a knowledge of international days.
+
+        {{sample.Enrich}}
+
+        Is date {{datetime.Today}} known for something?
+        ";
+
+        sematicFunc = kernel.CreateSemanticFunction(skPrompt, maxTokens: 150);
+
+        result = await kernel.RunAsync(sematicFunc);
 
         Console.WriteLine(result);
     }
