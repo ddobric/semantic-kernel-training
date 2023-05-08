@@ -2,7 +2,9 @@
 using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.KernelExtensions;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.SkillDefinition;
 using semantickernelsample.Skills;
+using System.Collections.Concurrent;
 
 internal class Program
 {
@@ -12,8 +14,9 @@ internal class Program
         //await Sample2();
         //await Sample3_ImportNativeFunctionSkills();
         //await Sample3_BuildSKillPipeline();
-        await Sample4_UsingVariables();
-        await Sample5_StateMachine();
+        //await Sample4_UsingVariables();
+        //await Sample5_StateMachine();
+        await ImportSemanticSkills();
     }
 
     private static async Task Sample1()
@@ -88,7 +91,7 @@ internal class Program
 
         var nativeSkills = kernel.ImportSkill(new DateTimeSkill());
 
-        SKContext result = await kernel.RunAsync("Nothing special in this prompt", 
+        SKContext result = await kernel.RunAsync("Nothing special in this prompt",
           /* nativeSkills["Today"]*/ nativeSkills["Now"]);
 
         Console.WriteLine(result);
@@ -138,7 +141,7 @@ internal class Program
         Tell me about the meaning of the number  {{$mystate}}.
       {{$available_functions}}
         ";
-          
+
         kernel.ImportSkill(new SampleSkill(), "sample");
 
         var semanticFunc = kernel.CreateSemanticFunction(skPrompt, maxTokens: 150);
@@ -146,6 +149,75 @@ internal class Program
         var result = await kernel.RunAsync(semanticFunc);
 
         Console.WriteLine(result);
+    }
+
+    private static async Task ImportSemanticSkills()
+    {
+        IKernel kernel = GetKernel();
+
+        string prompt1 = @"
+We develop tailor-made software solutions that are right for you and ones that are based on your ideas. Our experienced team of internationally recognised experts will help you plan and implement your solution. For our clients, this means: we support you with integrated solutions for important topics such as cloud, 
+digitalisation, Industry 4.0, IoT, machine learning, development of mobile apps, mixed reality or system integration.
+We develop tailor-made software solutions that are right for you and ones that are based on your ideas. Our experienced team of internationally recognised experts will help you plan and implement your solution. For our clients, this means: we support you with integrated solutions for important topics such as cloud, digitalisation, 
+Industry 4.0, IoT, machine learning, development of mobile apps, mixed reality or system integration.We are your Microsoft Azure Gold partner and will support you in the implementation and migration of cloud solutions. With our technical expertise, we can help you tackle existing obstacles and optimise the real advantages of the cloud for your digital transformation.
+
+Customized cloud solutions for Microsoft Azure with technological and economic persuasiveness
+Increasing use of resources means risk of fluctuations in capacity within your company’s internal data centre. Associated with this are, among other things, immense restriction in flexibility and access to essential business applications and continuously increasing operating costs. Protecting your IT landscape by shifting availability, load peaks or traffic to Microsoft Azure or the cloud is, from a technological and economic point of view, a sensible measure.
+
+daenet paves the way to the cloud for you and is your partner when it comes to quickly and effectively realising the benefits of using Microsoft Azure and capitalising from them now and in the future.
+
+Services
+We develop a migration strategy and a cloud/digital strategy with you
+We help you find a hybrid solution (combining between the cloud and on premises)
+We migrate the existing solution to the cloud (lift & shift)
+We modernise the existing solution and migrate it to the cloud (application modernisation)
+Procedure
+We proceed iteratively. Based on our many years of experience, we define three-month work packages. Larger projects can also be divided into such manageable blocks. We, of course, work in an agile way and can adapt such work packages to your wishes and possibilities. This means that the first scenarios can start online productively almost immediately.
+
+An example that has been successfully implemented many times: You want to migrate a solution to the cloud.
+
+More efficiency for your cloud projects
+We offer you our profound cloud knowledge as standardized best-practice service packages including visioning/initial workshops, assessment, design, implementation, operation and support of your chosen solution,. The aim is to accelerate your cloud projects, make them a reality, train and relieve your development teams, and give you the freedom to concentrate on your professional expertise and the development of your digital business.";
+
+
+        //Console.WriteLine(await summarizeSemanticFunc.InvokeAsync(prompt1));
+
+        //Console.WriteLine(await summarizeSemanticFunc.InvokeAsync(prompt2));
+
+        kernel.ImportSemanticSkillFromDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SemanticSkills"), "SummarizeSkill");
+
+        FunctionsView functions = kernel.Skills.GetFunctionsView();
+        ConcurrentDictionary<string, List<FunctionView>> nativeFunctions = functions.NativeFunctions;
+        ConcurrentDictionary<string, List<FunctionView>> semanticFunctions = functions.SemanticFunctions;
+
+        foreach (KeyValuePair<string, List<FunctionView>> skill in semanticFunctions)
+        {
+            Console.WriteLine("Skill: " + skill.Key);
+            foreach (FunctionView func in skill.Value) { PrintFunction(func); }
+        }
+
+        var semanticFunc = kernel.Skills.GetSemanticFunction("SummarizeSkill", "Summarize");
+
+        var result = await kernel.RunAsync(prompt1, semanticFunc);
+
+        Console.WriteLine(result);
+    }
+
+    private static void PrintFunction(FunctionView func)
+    {
+        Console.WriteLine($"   {func.Name}: {func.Description}");
+
+        if (func.Parameters.Count > 0)
+        {
+            Console.WriteLine("      Params:");
+            foreach (var p in func.Parameters)
+            {
+                Console.WriteLine($"      - {p.Name}: {p.Description}");
+                Console.WriteLine($"        default: '{p.DefaultValue}'");
+            }
+        }
+
+        Console.WriteLine();
     }
 
     private static IKernel GetKernel()

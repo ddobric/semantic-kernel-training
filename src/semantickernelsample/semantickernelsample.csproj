@@ -19,4 +19,13 @@
     <PackageReference Include="Microsoft.SemanticKernel.Core" Version="0.13.277.1-preview" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="SemanticSkills\SummarizeSkill\Summarize\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticSkills\SummarizeSkill\Summarize\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
