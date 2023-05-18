@@ -1,4 +1,7 @@
 ﻿using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.AI.ChatCompletion;
+using Microsoft.SemanticKernel.AI.ImageGeneration;
+using Microsoft.SemanticKernel.Connectors.AI.OpenAI.ChatCompletion;
 using Microsoft.SemanticKernel.CoreSkills;
 using Microsoft.SemanticKernel.KernelExtensions;
 using Microsoft.SemanticKernel.Orchestration;
@@ -10,18 +13,18 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        //await Sample1();
-        //await Sample2();
-        //await Sample3_ImportNativeFunctionSkills();
-        //await Sample3_BuildSKillPipeline();
-        //await Sample4_UsingVariables();
-        //await Sample5_StateMachine();
-        await ImportSemanticSkills();
+        //await Sample_HelloCompletion();
+        //await Sample_Completion2();
+        //await Sample_NativeSKills();
+        //await Sample_NativeSkillPipeline();
+        await Sample_GroundingWithNativeSkill();
+        //await Sample_StateMachine();
+        //await Sample_SemanticSkills();
     }
 
-    private static async Task Sample1()
+    private static async Task Sample_HelloCompletion()
     {
-        IKernel kernel = GetKernel();
+        IKernel kernel = GetAzureKernel();
 
         string skPrompt = @"
         {{$input}}
@@ -47,9 +50,9 @@ internal class Program
         Console.WriteLine(summary);
     }
 
-    private static async Task Sample2()
+    private static async Task Sample_Completion2()
     {
-        IKernel kernel = GetKernel();
+        IKernel kernel = GetAzureKernel();
 
         var prompt = @"{{$input}}
 
@@ -72,7 +75,7 @@ internal class Program
         Console.WriteLine(await summarizeSemanticFunc.InvokeAsync(text2));
     }
 
-    private static async Task Sample3_ImportNativeFunctionSkills()
+    private static async Task Sample_NativeSKills()
     {
         IKernel kernel = new KernelBuilder().Build();
 
@@ -85,21 +88,25 @@ internal class Program
         var builtInSkill = kernel.ImportSkill(new TimeSkill());
     }
 
-    private static async Task Sample3_BuildSKillPipeline()
+    private static async Task Sample_NativeSkillPipeline()
     {
         IKernel kernel = new KernelBuilder().Build();
 
         var nativeSkills = kernel.ImportSkill(new DateTimeSkill());
 
         SKContext result = await kernel.RunAsync("Nothing special in this prompt",
-          /* nativeSkills["Today"]*/ nativeSkills["Now"]);
+          nativeSkills["Today"], nativeSkills["Now"]);
 
         Console.WriteLine(result);
     }
 
-    private static async Task Sample4_UsingVariables()
+    /// <summary>
+    /// Using native skill for grounding.
+    /// </summary>
+    /// <returns></returns>
+    private static async Task Sample_GroundingWithNativeSkill()
     {
-        IKernel kernel = GetKernel();
+        IKernel kernel = GetAzureKernel();
 
         string skPrompt = @"
         You have a knowledge of international days.
@@ -121,7 +128,8 @@ internal class Program
 
         {{sample.Enrich}}
 
-        Is date {{datetime.Today}} known for something?
+
+        Is date {{datetime.Today}} known for something? Also provide most useful historical data for at least two popular events at that day.
         ";
 
         sematicFunc = kernel.CreateSemanticFunction(skPrompt, maxTokens: 150);
@@ -131,9 +139,9 @@ internal class Program
         Console.WriteLine(result);
     }
 
-    private static async Task Sample5_StateMachine()
+    private static async Task Sample_StateMachine()
     {
-        IKernel kernel = GetKernel();
+        IKernel kernel = GetAzureKernel();
 
         string skPrompt = @"
         {{sample.AddValue}}
@@ -144,16 +152,18 @@ internal class Program
 
         kernel.ImportSkill(new SampleSkill(), "sample");
 
+        var variables = new ContextVariables("Today is: ");
+
         var semanticFunc = kernel.CreateSemanticFunction(skPrompt, maxTokens: 150);
 
-        var result = await kernel.RunAsync(semanticFunc);
+        var result = await kernel.RunAsync(variables, semanticFunc);
 
         Console.WriteLine(result);
     }
 
-    private static async Task ImportSemanticSkills()
+    private static async Task Sample_SemanticSkills()
     {
-        IKernel kernel = GetKernel();
+        IKernel kernel = GetAzureKernel();
 
         string prompt1 = @"
 We develop tailor-made software solutions that are right for you and ones that are based on your ideas. Our experienced team of internationally recognised experts will help you plan and implement your solution. For our clients, this means: we support you with integrated solutions for important topics such as cloud, 
@@ -180,10 +190,6 @@ More efficiency for your cloud projects
 We offer you our profound cloud knowledge as standardized best-practice service packages including visioning/initial workshops, assessment, design, implementation, operation and support of your chosen solution,. The aim is to accelerate your cloud projects, make them a reality, train and relieve your development teams, and give you the freedom to concentrate on your professional expertise and the development of your digital business.";
 
 
-        //Console.WriteLine(await summarizeSemanticFunc.InvokeAsync(prompt1));
-
-        //Console.WriteLine(await summarizeSemanticFunc.InvokeAsync(prompt2));
-
         kernel.ImportSemanticSkillFromDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SemanticSkills"), "SummarizeSkill");
 
         FunctionsView functions = kernel.Skills.GetFunctionsView();
@@ -203,6 +209,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         Console.WriteLine(result);
     }
 
+
     private static void PrintFunction(FunctionView func)
     {
         Console.WriteLine($"   {func.Name}: {func.Description}");
@@ -220,7 +227,21 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         Console.WriteLine();
     }
 
-    private static IKernel GetKernel()
+    private static IKernel GetAzureKernel()
+    {
+        var kernel = Kernel.Builder.Build();
+        //AddAzureOpenAICompletionBackend
+        kernel.Config.AddAzureTextCompletionService(
+            "davinci-backend",                   // Alias used by the kernel
+            "text-davinci-003-damir-andreas",    // Azure OpenAI *Deployment ID*
+            Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT"), // Azure OpenAI *Endpoint*
+            Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")  // Azure OpenAI *Key*
+        );
+
+        return kernel;
+    }
+
+    private static IKernel GetOpenAIKernel()
     {
         var kernel = Kernel.Builder.Build();
         //AddAzureOpenAICompletionBackend

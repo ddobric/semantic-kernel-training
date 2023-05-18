@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "semantickernelsample": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "OPENAI_API_KEY": "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"
+      }
+    }
+  }
+}

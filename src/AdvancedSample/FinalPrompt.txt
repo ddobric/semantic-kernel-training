@@ -230,4 +230,3 @@ WriterSkill.TwoSentenceSummary:
 [END AVAILABLE FUNCTIONS]
 
 <goal>Write a poem about John Doe, then translate it into Italian.</goal>
-"
