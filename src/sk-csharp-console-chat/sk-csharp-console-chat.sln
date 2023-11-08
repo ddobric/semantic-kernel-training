@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sk-csharp-console-chat", "sk-csharp-console-chat.csproj", "{970E3E9F-29C5-4CFA-8CFD-7D88183A2865}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{970E3E9F-29C5-4CFA-8CFD-7D88183A2865}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{970E3E9F-29C5-4CFA-8CFD-7D88183A2865}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{970E3E9F-29C5-4CFA-8CFD-7D88183A2865}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{970E3E9F-29C5-4CFA-8CFD-7D88183A2865}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {27CB9375-5EF4-4F0C-8B65-F6346C7FD4D0}
+	EndGlobalSection
+EndGlobal

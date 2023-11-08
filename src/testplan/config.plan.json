@@ -1,0 +1,16 @@
+{
+    "name": "testplan",
+    "input": "",
+    "skills": [
+        {
+            "name": "Prompts",
+            "folder": "azure-function",
+            "isSemantic": true,
+            "functions": [
+                {
+                    "label": "Joke"
+                }
+            ]
+        }
+    ]
+}

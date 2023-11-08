@@ -13,12 +13,12 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        //await Sample_HelloCompletion();
+       // await Sample_HelloCompletion();
         //await Sample_Completion2();
         //await Sample_NativeSKills();
         //await Sample_NativeSkillPipeline();
-        await Sample_GroundingWithNativeSkill();
-        //await Sample_StateMachine();
+        //await Sample_GroundingWithNativeSkill();
+        await Sample_StateMachine();
         //await Sample_SemanticSkills();
     }
 

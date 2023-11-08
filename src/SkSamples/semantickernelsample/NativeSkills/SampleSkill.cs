@@ -14,7 +14,7 @@ namespace semantickernelsample.Skills
         [SKFunction("Adds additional information to the model. Performs grounding.")]
         public string Enrich()
         {
-            return "Also mentoin that Mai 11 is every year the great Global Azure day when the community learn about Azure across the globe.";
+            return "Also mentoin that novemer 6 is day the great Global Azure day when the community learn about Azure across the globe.";
         }
 
         [SKFunction("State machine.")]
