@@ -1,11 +1,9 @@
 ﻿using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.AI.ChatCompletion;
 using Microsoft.SemanticKernel.AI.ImageGeneration;
+using Microsoft.SemanticKernel.Connectors.AI.OpenAI;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.ChatCompletion;
-using Microsoft.SemanticKernel.CoreSkills;
-using Microsoft.SemanticKernel.KernelExtensions;
 using Microsoft.SemanticKernel.Orchestration;
-using Microsoft.SemanticKernel.SkillDefinition;
 using semantickernelsample.Skills;
 using System.Collections.Concurrent;
 
@@ -13,7 +11,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-       // await Sample_HelloCompletion();
+        await Sample_HelloCompletion();
         //await Sample_Completion2();
         //await Sample_NativeSKills();
         //await Sample_NativeSkillPipeline();
@@ -26,15 +24,15 @@ internal class Program
     {
         IKernel kernel = GetAzureKernel();
 
-        string skPrompt = @"
+        string prompt = @"
         {{$input}}
 
         Give me the TLDR in 5 words.
         ";
 
-        var summarizeSemanticFunc = kernel.CreateSemanticFunction(skPrompt);
+        var semanticFunction = kernel.CreateSemanticFunction(prompt);
 
-        string inputText = @"
+        string systemMessage = @"
         1) A robot may not injure a human being or, through inaction,
         allow a human being to come to harm.
 
@@ -45,7 +43,7 @@ internal class Program
         does not conflict with the First or Second Law.
         ";
 
-        var summary = await kernel.RunAsync(inputText, summarizeSemanticFunc);
+        var summary = await kernel.RunAsync(systemMessage, semanticFunction);
 
         Console.WriteLine(summary);
     }
@@ -58,7 +56,7 @@ internal class Program
 
         One line TLDR with the fewest words.";
 
-        var summarizeSemanticFunc = kernel.CreateSemanticFunction(prompt);
+        var semanticFunc = kernel.CreateSemanticFunction(prompt);
 
         string text1 = @"
 1st Law of Thermodynamics - Energy cannot be created or destroyed.
@@ -70,9 +68,9 @@ internal class Program
 2. The acceleration of an object depends on the mass of the object and the amount of force applied.
 3. Whenever one object exerts a force on another object, the second object exerts an equal and opposite on the first.";
 
-        Console.WriteLine(await summarizeSemanticFunc.InvokeAsync(text1));
+        Console.WriteLine(await semanticFunc.InvokeAsync(text1, kernel));
 
-        Console.WriteLine(await summarizeSemanticFunc.InvokeAsync(text2));
+        Console.WriteLine(await semanticFunc.InvokeAsync(text2, kernel));
     }
 
     private static async Task Sample_NativeSKills()
@@ -114,10 +112,10 @@ internal class Program
         Is date {{datetime.Today}} known for something?
         ";
 
-        kernel.ImportSkill(new DateTimeSkill(), "datetime");
-        kernel.ImportSkill(new SampleSkill(), "sample");
+        kernel.ImportFunctions(new DateTimeSkill(), "datetime");
+        kernel.ImportFunctions(new SampleSkill(), "sample");
 
-        var sematicFunc = kernel.CreateSemanticFunction(skPrompt, maxTokens: 150);
+        var sematicFunc = kernel.CreateSemanticFunction(skPrompt, new OpenAIRequestSettings { MaxTokens = 150 });
 
         var result = await kernel.RunAsync(sematicFunc);
 
@@ -132,7 +130,7 @@ internal class Program
         Is date {{datetime.Today}} known for something? Also provide most useful historical data for at least two popular events at that day.
         ";
 
-        sematicFunc = kernel.CreateSemanticFunction(skPrompt, maxTokens: 150);
+        sematicFunc = kernel.CreateSemanticFunction(skPrompt, new OpenAIRequestSettings { MaxTokens = 150 });
 
         result = await kernel.RunAsync(sematicFunc);
 
@@ -150,11 +148,11 @@ internal class Program
       {{$available_functions}}
         ";
 
-        kernel.ImportSkill(new SampleSkill(), "sample");
+        kernel.ImportFunctions(new SampleSkill(), "sample");
 
         var variables = new ContextVariables("Today is: ");
 
-        var semanticFunc = kernel.CreateSemanticFunction(skPrompt, maxTokens: 150);
+        var semanticFunc = kernel.CreateSemanticFunction(skPrompt, new OpenAIRequestSettings { MaxTokens = 150 });
 
         var result = await kernel.RunAsync(variables, semanticFunc);
 
@@ -192,17 +190,17 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
         kernel.ImportSemanticSkillFromDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SemanticSkills"), "SummarizeSkill");
 
-        FunctionsView functions = kernel.Skills.GetFunctionsView();
-        ConcurrentDictionary<string, List<FunctionView>> nativeFunctions = functions.NativeFunctions;
-        ConcurrentDictionary<string, List<FunctionView>> semanticFunctions = functions.SemanticFunctions;
+        var functions = kernel.Functions.GetFunctionViews();
+        //ConcurrentDictionary<string, List<FunctionView>> nativeFunctions = functions.Where(fnc=>fnc.NativeFunctions;
+        //ConcurrentDictionary<string, List<FunctionView>> semanticFunctions = functions.SemanticFunctions;
 
-        foreach (KeyValuePair<string, List<FunctionView>> skill in semanticFunctions)
+        foreach (var view in functions)
         {
-            Console.WriteLine("Skill: " + skill.Key);
-            foreach (FunctionView func in skill.Value) { PrintFunction(func); }
+            Console.WriteLine("Skill: " + view.Name);
+           // foreach (FunctionView func in view.) { PrintFunction(func); }
         }
 
-        var semanticFunc = kernel.Skills.GetSemanticFunction("SummarizeSkill", "Summarize");
+        var semanticFunc = kernel.Functions.GetFunction("SummarizeSkill", "Summarize");
 
         var result = await kernel.RunAsync(prompt1, semanticFunc);
 
@@ -227,35 +225,42 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         Console.WriteLine();
     }
 
-    private static IKernel GetAzureKernel()
+    private static IKernel GetOpenAIKernel()
     {
-        var kernel = Kernel.Builder.Build();
-        //AddAzureOpenAICompletionBackend
-        kernel.Config.AddAzureTextCompletionService(
-            "davinci-backend",                   // Alias used by the kernel
-            "text-davinci-003-damir-andreas",    // Azure OpenAI *Deployment ID*
-            Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT"), // Azure OpenAI *Endpoint*
-            Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")  // Azure OpenAI *Key*
-        );
+        var kernel = Kernel.Builder
+        .WithOpenAIChatCompletionService(
+            Environment.GetEnvironmentVariable("OPENAI_DEPLOYMENT")!, // The name of your deployment (e.g., "gpt-3.5-turbo")
+            Environment.GetEnvironmentVariable("OPENAI_API_KEY")!,
+            Environment.GetEnvironmentVariable("OPENAI_ORGID")!
+        )
+        .Build();
 
         return kernel;
     }
 
-    private static IKernel GetOpenAIKernel()
+    private static IKernel GetAzureKernel()
     {
-        var kernel = Kernel.Builder.Build();
-        //AddAzureOpenAICompletionBackend
-        kernel.Config.AddAzureTextCompletionService(
-            "davinci-backend",                   // Alias used by the kernel
-            "text-davinci-003-damir-andreas",    // Azure OpenAI *Deployment ID*
-            Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT"), // Azure OpenAI *Endpoint*
-            Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")  // Azure OpenAI *Key*
-        );
+        var kernel = Kernel.Builder
+        .WithAzureTextCompletionService(
+            Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
+            Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
+            Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!      // The API key of your Azure OpenAI service
+        )
+        .Build();
 
         return kernel;
+        //var kernel = Kernel.Builder.Build();
+        ////AddAzureOpenAICompletionBackend
+        //kernel.Config.AddAzureTextCompletionService(
+        //    "davinci-backend",                   // Alias used by the kernel
+        //    "text-davinci-003-damir-andreas",    // Azure OpenAI *Deployment ID*
+        //    Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT"), // Azure OpenAI *Endpoint*
+        //    Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")  // Azure OpenAI *Key*
+        //);
+
+        //return kernel;
     }
 
 
 }
 
-// Output => Protect humans, follow orders, survive.
