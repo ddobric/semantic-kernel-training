@@ -18,6 +18,9 @@ namespace semantickernelsample.Skills
             return "Also mentoin that novemer 6 is day the great Global Azure day when the community learn about Azure across the globe.";
         }
 
+
+        //[SKFunction("Describe the function")]
+        //[SKFunctionInput(Description = "DEscribes the function input")]
         [SKFunction, Description("State machine.")]
         //[SKFunctionContextParameter(Name = "mystate", Description = "Holds the state of the state machine.")]
         public Task<SKContext> AddValue(SKContext context)

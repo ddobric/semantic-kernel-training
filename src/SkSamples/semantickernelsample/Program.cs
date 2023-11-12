@@ -1,4 +1,6 @@
-﻿using Microsoft.SemanticKernel;
+﻿using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.AI.ChatCompletion;
 using Microsoft.SemanticKernel.AI.ImageGeneration;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI;
@@ -11,18 +13,43 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        await Sample_HelloCompletion();
+        await Sample_NativeSkillPipeline();
+        //await Sample_HelloCompletion();
         //await Sample_Completion2();
-        //await Sample_NativeSKills();
-        //await Sample_NativeSkillPipeline();
+        await Sample_NativeSKills();
+      
         //await Sample_GroundingWithNativeSkill();
         await Sample_StateMachine();
         //await Sample_SemanticSkills();
     }
 
+
+    /// <summary>
+    /// Demonstrates the SK pipleni mechanism.
+    /// </summary>
+    /// <returns></returns>
+    private static async Task Sample_NativeSkillPipeline()
+    {
+        IKernel kernel = new KernelBuilder().Build();
+     
+        var nativeSkills = kernel.ImportFunctions(new StringSkill());
+
+        KernelResult result = await kernel.RunAsync("  Nothing special in this prompt   ",
+                                                     nativeSkills["ToUpper"], nativeSkills["Trim"]);
+
+        result = await kernel.RunAsync("Nothing special in this prompt", nativeSkills.Values.ToArray());
+
+
+        Console.WriteLine(result);
+    }
+
+    /// <summary>
+    /// Sample method that demonstrates the use of the Azure Semantic Kernel.
+    /// </summary>
+    /// <returns></returns>
     private static async Task Sample_HelloCompletion()
     {
-        IKernel kernel = GetAzureKernel();
+        IKernel kernel = GetKernel();
 
         string prompt = @"
         {{$input}}
@@ -48,9 +75,14 @@ internal class Program
         Console.WriteLine(summary);
     }
 
+
+    /// <summary>
+    /// Demonsrates completions with Semantc Kernel.
+    /// </summary>
+    /// <returns></returns>
     private static async Task Sample_Completion2()
     {
-        IKernel kernel = GetAzureKernel();
+        IKernel kernel = GetKernel();
 
         var prompt = @"{{$input}}
 
@@ -59,44 +91,39 @@ internal class Program
         var semanticFunc = kernel.CreateSemanticFunction(prompt);
 
         string text1 = @"
-1st Law of Thermodynamics - Energy cannot be created or destroyed.
-2nd Law of Thermodynamics - For a spontaneous process, the entropy of the universe increases.
-3rd Law of Thermodynamics - A perfect crystal at zero Kelvin has zero entropy.";
+        1st Law of Thermodynamics - Energy cannot be created or destroyed.
+        2nd Law of Thermodynamics - For a spontaneous process, the entropy of the universe increases.
+        3rd Law of Thermodynamics - A perfect crystal at zero Kelvin has zero entropy.";
 
         string text2 = @"
-1. An object at rest remains at rest, and an object in motion remains in motion at constant speed and in a straight line unless acted on by an unbalanced force.
-2. The acceleration of an object depends on the mass of the object and the amount of force applied.
-3. Whenever one object exerts a force on another object, the second object exerts an equal and opposite on the first.";
+        1. An object at rest remains at rest, and an object in motion remains in motion at constant speed and in a straight line unless acted on by an unbalanced force.
+        2. The acceleration of an object depends on the mass of the object and the amount of force applied.
+        3. Whenever one object exerts a force on another object, the second object exerts an equal and opposite on the first.";
 
         Console.WriteLine(await semanticFunc.InvokeAsync(text1, kernel));
 
         Console.WriteLine(await semanticFunc.InvokeAsync(text2, kernel));
     }
 
+
+    /// <summary>
+    /// Demonstrats how to import native functions from the skill and how to execute them.
+    /// </summary>
+    /// <returns></returns>
     private static async Task Sample_NativeSKills()
     {
         IKernel kernel = new KernelBuilder().Build();
 
-        var nativeSkills = kernel.ImportSkill(new DateTimeSkill());
+        SKContext ctx = kernel.CreateNewContext();
 
-        var time = await nativeSkills["Now"].InvokeAsync();
+        var functions = kernel.ImportFunctions(new DateTimeSkill());
 
-        var today = await nativeSkills["Today"].InvokeAsync();
+        var time = await functions["Now"].InvokeAsync(ctx);
 
-        var builtInSkill = kernel.ImportSkill(new TimeSkill());
+        var today = await functions["Today"].InvokeAsync(ctx);
     }
 
-    private static async Task Sample_NativeSkillPipeline()
-    {
-        IKernel kernel = new KernelBuilder().Build();
-
-        var nativeSkills = kernel.ImportSkill(new DateTimeSkill());
-
-        SKContext result = await kernel.RunAsync("Nothing special in this prompt",
-          nativeSkills["Today"], nativeSkills["Now"]);
-
-        Console.WriteLine(result);
-    }
+   
 
     /// <summary>
     /// Using native skill for grounding.
@@ -104,7 +131,7 @@ internal class Program
     /// <returns></returns>
     private static async Task Sample_GroundingWithNativeSkill()
     {
-        IKernel kernel = GetAzureKernel();
+        IKernel kernel = GetKernel();
 
         string skPrompt = @"
         You have a knowledge of international days.
@@ -139,7 +166,7 @@ internal class Program
 
     private static async Task Sample_StateMachine()
     {
-        IKernel kernel = GetAzureKernel();
+        IKernel kernel = GetKernel();  
 
         string skPrompt = @"
         {{sample.AddValue}}
@@ -161,7 +188,7 @@ internal class Program
 
     private static async Task Sample_SemanticSkills()
     {
-        IKernel kernel = GetAzureKernel();
+        IKernel kernel = GetKernel();
 
         string prompt1 = @"
 We develop tailor-made software solutions that are right for you and ones that are based on your ideas. Our experienced team of internationally recognised experts will help you plan and implement your solution. For our clients, this means: we support you with integrated solutions for important topics such as cloud, 
@@ -225,9 +252,17 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         Console.WriteLine();
     }
 
+
+    private static IKernel GetKernel()
+    {
+        return GetOpenAIKernel();
+        //return GetAzureKernel();
+    }
+
+
     private static IKernel GetOpenAIKernel()
     {
-        var kernel = Kernel.Builder
+        var kernel = new KernelBuilder()
         .WithOpenAIChatCompletionService(
             Environment.GetEnvironmentVariable("OPENAI_DEPLOYMENT")!, // The name of your deployment (e.g., "gpt-3.5-turbo")
             Environment.GetEnvironmentVariable("OPENAI_API_KEY")!,
@@ -240,7 +275,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static IKernel GetAzureKernel()
     {
-        var kernel = Kernel.Builder
+        var kernel = new KernelBuilder()
         .WithAzureTextCompletionService(
             Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
             Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
@@ -249,18 +284,6 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         .Build();
 
         return kernel;
-        //var kernel = Kernel.Builder.Build();
-        ////AddAzureOpenAICompletionBackend
-        //kernel.Config.AddAzureTextCompletionService(
-        //    "davinci-backend",                   // Alias used by the kernel
-        //    "text-davinci-003-damir-andreas",    // Azure OpenAI *Deployment ID*
-        //    Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT"), // Azure OpenAI *Endpoint*
-        //    Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")  // Azure OpenAI *Key*
-        //);
-
-        //return kernel;
     }
-
-
 }
 
