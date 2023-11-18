@@ -31,9 +31,8 @@ namespace semantickernelsample.Skills
                 context.Variables.Set("mystate", "0");
 
             var state = context.Variables["mystate"];
-            context.Variables.Set("mystate", (int.Parse(state) + 1).ToString());
-
-            state = context.Variables["mystate"];
+           
+            context.Variables.Set("mystate", "stopped!");
 
             return Task.FromResult<SKContext>(context);
         }

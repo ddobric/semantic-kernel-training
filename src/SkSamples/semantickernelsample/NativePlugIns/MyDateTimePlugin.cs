@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace semantickernelsample.Skills
 {
-    public  class DateTimeSkill
+    public  class MyDateTimePlugin
     {
         [SKFunction, Description("Gets the current time.")]
         public string Now()
@@ -17,13 +17,21 @@ namespace semantickernelsample.Skills
             return DateTime.Now.ToString();
         }
 
-        [SKFunction, Description("Gets the day of today")]
+        [SKFunction, Description("Gets the UTC current time.")]
+        public string UtcNow()
+        {
+            return DateTime.UtcNow.ToString();
+        }
+
+        [SKFunction]
+        [Description("Gets the day of today")]
         public string DayOfWeek(string input, SKContext context)
         {
             return Enum.GetName(DateTime.Now.DayOfWeek)!;
         }
 
-        [SKFunction, Description("Gets the day of today")]
+        [SKFunction]
+        [Description("Get the current day")]
         public string Today(string input, SKContext context)
         {
             return DateTime.Now.ToString("MMM/dd")!;

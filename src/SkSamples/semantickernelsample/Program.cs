@@ -6,6 +6,7 @@ using Microsoft.SemanticKernel.AI.ImageGeneration;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.ChatCompletion;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Plugins.Core;
 using semantickernelsample.Skills;
 using System.Collections.Concurrent;
 
@@ -13,11 +14,14 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        await Sample_NativeSkillPipeline();
+        await Sample_HelloSk();
+        await Sample_HelloPipeline();
+        await Sample_NativeFunctions();
+
         //await Sample_HelloCompletion();
         //await Sample_Completion2();
-        await Sample_NativeSKills();
-      
+
+
         //await Sample_GroundingWithNativeSkill();
         await Sample_StateMachine();
         //await Sample_SemanticSkills();
@@ -25,23 +29,64 @@ internal class Program
 
 
     /// <summary>
-    /// Demonstrates the SK pipleni mechanism.
+    /// Demonstrates the initialization of the kernel and execution of the single function in the pipeline. 
     /// </summary>
     /// <returns></returns>
-    private static async Task Sample_NativeSkillPipeline()
+    private static async Task Sample_HelloSk()
     {
-        IKernel kernel = new KernelBuilder().Build();
-     
-        var nativeSkills = kernel.ImportFunctions(new StringSkill());
+        IKernel kernel = GetKernel();
+      
+        var time = kernel.ImportFunctions(new TimePlugin());
 
-        KernelResult result = await kernel.RunAsync("  Nothing special in this prompt   ",
-                                                     nativeSkills["ToUpper"], nativeSkills["Trim"]);
+        var result = await kernel.RunAsync(time["Today"]);
 
-        result = await kernel.RunAsync("Nothing special in this prompt", nativeSkills.Values.ToArray());
+        var time2 = kernel.ImportFunctions(new MyDateTimePlugin());
 
+        result = await kernel.RunAsync(time["Now"]);
+
+        result = await kernel.RunAsync(time["UtcNow"]);
 
         Console.WriteLine(result);
     }
+
+    /// <summary>
+    /// Demonstrates the SK pipeline mechanism.
+    /// </summary>
+    /// <returns></returns>
+    private static async Task Sample_HelloPipeline()
+    {
+        IKernel kernel = new KernelBuilder().Build();
+     
+        var functions = kernel.ImportFunctions(new StringSkill());
+
+        // Execute two functions in the pipeline.
+        KernelResult result = await kernel.RunAsync("  Nothing special in this prompt   ",
+                                                     functions["ToUpper"], functions["Trim"]);
+
+        // How to execute the long list of function.
+        result = await kernel.RunAsync("Nothing special in this prompt", functions.Values.ToArray());
+
+        Console.WriteLine(result);
+    }
+
+
+    /// <summary>
+    /// Demonstrats how to import native functions from the skill and how to execute them.
+    /// </summary>
+    /// <returns></returns>
+    private static async Task Sample_NativeFunctions()
+    {
+        IKernel kernel = new KernelBuilder().Build();
+
+        SKContext ctx = kernel.CreateNewContext();
+
+        var functions = kernel.ImportFunctions(new MyDateTimePlugin());
+
+        var time = await functions["Now"].InvokeAsync(ctx);
+
+        var today = await functions["Today"].InvokeAsync(ctx);
+    }
+
 
     /// <summary>
     /// Sample method that demonstrates the use of the Azure Semantic Kernel.
@@ -106,23 +151,7 @@ internal class Program
     }
 
 
-    /// <summary>
-    /// Demonstrats how to import native functions from the skill and how to execute them.
-    /// </summary>
-    /// <returns></returns>
-    private static async Task Sample_NativeSKills()
-    {
-        IKernel kernel = new KernelBuilder().Build();
-
-        SKContext ctx = kernel.CreateNewContext();
-
-        var functions = kernel.ImportFunctions(new DateTimeSkill());
-
-        var time = await functions["Now"].InvokeAsync(ctx);
-
-        var today = await functions["Today"].InvokeAsync(ctx);
-    }
-
+ 
    
 
     /// <summary>
@@ -139,7 +168,7 @@ internal class Program
         Is date {{datetime.Today}} known for something?
         ";
 
-        kernel.ImportFunctions(new DateTimeSkill(), "datetime");
+        kernel.ImportFunctions(new MyDateTimePlugin(), "datetime");
         kernel.ImportFunctions(new SampleSkill(), "sample");
 
         var sematicFunc = kernel.CreateSemanticFunction(skPrompt, new OpenAIRequestSettings { MaxTokens = 150 });
@@ -178,6 +207,7 @@ internal class Program
         kernel.ImportFunctions(new SampleSkill(), "sample");
 
         var variables = new ContextVariables("Today is: ");
+        variables.Set("mystate", "running...");
 
         var semanticFunc = kernel.CreateSemanticFunction(skPrompt, new OpenAIRequestSettings { MaxTokens = 150 });
 
