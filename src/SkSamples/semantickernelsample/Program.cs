@@ -14,9 +14,12 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        await Sample_HelloSk();
-        await Sample_HelloPipeline();
-        await Sample_NativeFunctions();
+        //await Sample_HelloSk();
+        //await Sample_HelloPipeline();
+        //await Sample_NativeFunctionsDirectInvoke();
+
+        await Sample_HelloSemanticFunction();
+
 
         //await Sample_HelloCompletion();
         //await Sample_Completion2();
@@ -35,7 +38,7 @@ internal class Program
     private static async Task Sample_HelloSk()
     {
         IKernel kernel = GetKernel();
-      
+
         var time = kernel.ImportFunctions(new TimePlugin());
 
         var result = await kernel.RunAsync(time["Today"]);
@@ -49,6 +52,29 @@ internal class Program
         Console.WriteLine(result);
     }
 
+
+    /// <summary>
+    /// Demonstrats how to import native functions from the skill and how to execute them directly.
+    /// </summary>
+    /// <returns></returns>
+    private static async Task Sample_NativeFunctionsDirectInvoke()
+    {
+        IKernel kernel = new KernelBuilder().Build();
+
+        SKContext ctx = kernel.CreateNewContext();
+
+        var functions = kernel.ImportFunctions(new MyDateTimePlugin());
+
+        var time = await functions["Now"].InvokeAsync(ctx);
+
+        Console.WriteLine(time);
+
+        var today = await functions["Today"].InvokeAsync(ctx);
+
+        Console.WriteLine(today);
+    }
+
+
     /// <summary>
     /// Demonstrates the SK pipeline mechanism.
     /// </summary>
@@ -56,7 +82,7 @@ internal class Program
     private static async Task Sample_HelloPipeline()
     {
         IKernel kernel = new KernelBuilder().Build();
-     
+
         var functions = kernel.ImportFunctions(new StringSkill());
 
         // Execute two functions in the pipeline.
@@ -69,23 +95,34 @@ internal class Program
         Console.WriteLine(result);
     }
 
-
-    /// <summary>
-    /// Demonstrats how to import native functions from the skill and how to execute them.
-    /// </summary>
-    /// <returns></returns>
-    private static async Task Sample_NativeFunctions()
+    private static async Task Sample_HelloSemanticFunction()
     {
-        IKernel kernel = new KernelBuilder().Build();
+        OpenAIRequestSettings requestSettings = new()
+        {
+            ExtensionData = {
+                {"MaxTokens", 500},
+                {"Temperature", 0.5},
+                {"TopP", 0.0}, // Diversity coeff. https://arxiv.org/pdf/2306.13840.pdf
+                {"PresencePenalty", 0.0},
+                {"FrequencyPenalty", 0.0}
+            }
+        };
 
-        SKContext ctx = kernel.CreateNewContext();
+        var kernel = GetKernel();
 
-        var functions = kernel.ImportFunctions(new MyDateTimePlugin());
+        string prompt = @"Bot: How can I help you?
+                        User: {{$input}}
+                        ---------------------------------------------
+                        The intent of the user in 5 words or less: ";
 
-        var time = await functions["Now"].InvokeAsync(ctx);
+        var getIntentFunction = kernel.CreateSemanticFunction(prompt, requestSettings, "TheNameOfTheFunction");
 
-        var today = await functions["Today"].InvokeAsync(ctx);
+        var result = await kernel.RunAsync("I want to post a real at instagram about our research project in the last 7 months. The real should be 2 minutes long.",
+            getIntentFunction);
+
+        Console.WriteLine(result);
     }
+
 
 
     /// <summary>
@@ -151,8 +188,8 @@ internal class Program
     }
 
 
- 
-   
+
+
 
     /// <summary>
     /// Using native skill for grounding.
@@ -195,7 +232,7 @@ internal class Program
 
     private static async Task Sample_StateMachine()
     {
-        IKernel kernel = GetKernel();  
+        IKernel kernel = GetKernel();
 
         string skPrompt = @"
         {{sample.AddValue}}
@@ -254,7 +291,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         foreach (var view in functions)
         {
             Console.WriteLine("Skill: " + view.Name);
-           // foreach (FunctionView func in view.) { PrintFunction(func); }
+            // foreach (FunctionView func in view.) { PrintFunction(func); }
         }
 
         var semanticFunc = kernel.Functions.GetFunction("SummarizeSkill", "Summarize");
@@ -285,34 +322,54 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static IKernel GetKernel()
     {
-        return GetOpenAIKernel();
-        //return GetAzureKernel();
+        //return GetOpenAIKernel();
+        return GetAzureKernel();
     }
 
 
-    private static IKernel GetOpenAIKernel()
+    private static IKernel GetOpenAIKernel(string? useChatOrTextCompletionModel = "chat")
     {
-        var kernel = new KernelBuilder()
-        .WithOpenAIChatCompletionService(
-            Environment.GetEnvironmentVariable("OPENAI_DEPLOYMENT")!, // The name of your deployment (e.g., "gpt-3.5-turbo")
+        IKernel kernel;
+
+        if (useChatOrTextCompletionModel == null || useChatOrTextCompletionModel == "chat")
+        {
+            kernel = new KernelBuilder()
+             .WithOpenAIChatCompletionService(
+            Environment.GetEnvironmentVariable("OPENAI_CHATCOMPLETION_DEPLOYMENT")!, // The name of your deployment (e.g., "gpt-3.5-turbo")
             Environment.GetEnvironmentVariable("OPENAI_API_KEY")!,
-            Environment.GetEnvironmentVariable("OPENAI_ORGID")!
-        )
+            Environment.GetEnvironmentVariable("OPENAI_ORGID")!)
         .Build();
+        }
+        else
+            throw new Exception("Text Completion Models are deprected.");
 
         return kernel;
     }
 
-    private static IKernel GetAzureKernel()
+    private static IKernel GetAzureKernel(string? useChatOrTextCompletionModel = "chat")
     {
-        var kernel = new KernelBuilder()
-        .WithAzureTextCompletionService(
-            Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
-            Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
-            Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!      // The API key of your Azure OpenAI service
-        )
-        .Build();
+        IKernel kernel;
 
+        if (useChatOrTextCompletionModel == null || useChatOrTextCompletionModel == "chat")
+        {
+            kernel = new KernelBuilder()
+            .WithAzureOpenAIChatCompletionService(
+                Environment.GetEnvironmentVariable("AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
+                Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
+                Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!      // The API key of your Azure OpenAI service
+            )
+            .Build();
+        }
+        else
+        {
+            kernel = new KernelBuilder()
+            .WithAzureTextCompletionService(
+          Environment.GetEnvironmentVariable("AZURE_OPENAI_TEXTCOMPLETION_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
+          Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
+          Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!      // The API key of your Azure OpenAI service
+      )
+      .Build();
+        }
         return kernel;
     }
 }
