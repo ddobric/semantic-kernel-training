@@ -26,6 +26,12 @@
     <None Update="SemanticPlugIns\SamplePlugin\Notegen\skprompt.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstractWithParams\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstractWithParams\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstract\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

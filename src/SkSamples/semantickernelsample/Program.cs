@@ -17,12 +17,15 @@ internal class Program
         //await Sample_HelloSk();
         //await Sample_NativeFunctionsDirectInvoke();
         //await Sample_HelloPipeline();
+
+        //await Sample_HelloCompletion1();
+        //await Sample_HelloCompletion2();
+
         //await Sample_HelloInlineSemanticFunction();
 
-        await Sample_HelloSemnticFunction();
+        //await Sample_HelloSemnticFunction();
+        await Sample_HelloSemnticFunctionWithParams();
 
-        //await Sample_HelloCompletion();
-        //await Sample_Completion2();
 
 
         //await Sample_GroundingWithNativeSkill();
@@ -97,77 +100,10 @@ internal class Program
 
 
     /// <summary>
-    /// Demonstrates the inline semantic function.
-    /// </summary>
-    /// <returns></returns>
-    private static async Task Sample_HelloInlineSemanticFunction()
-    {
-        OpenAIRequestSettings requestSettings = new()
-        {
-            ExtensionData = {
-                {"MaxTokens", 500},
-                {"Temperature", 0.5},
-                {"TopP", 0.0}, // Diversity coeff. https://arxiv.org/pdf/2306.13840.pdf
-                {"PresencePenalty", 0.0},
-                {"FrequencyPenalty", 0.0}
-            }
-        };
-
-        var kernel = GetKernel();
-
-        string prompt = @"Bot: How can I help you?
-                        User: {{$input}}
-                        ---------------------------------------------
-                        The intent of the user in 5 words or less: ";
-
-        var getIntentFunction = kernel.CreateSemanticFunction(prompt, requestSettings, "MyItentPlugIn");
-
-        var result = await kernel.RunAsync("I want to post a real at instagram about our research project in the last 7 months. The real should be 2 minutes long.",
-            getIntentFunction);
-
-        Console.WriteLine(result);
-    }
-
-    public static async Task Sample_HelloSemnticFunction()
-    {
-        var kernel = GetKernel();
-
-        var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
-
-        // Import the OrchestratorPlugin from the plugins directory.
-        var orchestratorPlugin = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
-
-        // Get the GetIntent function from the OrchestratorPlugin and run it
-        var result = await kernel.RunAsync(sampleAbstract, orchestratorPlugin["SimplifyAbstract"]);
-
-        Console.WriteLine(result);
-    }
-
-  private const string sampleAbstract = @"ABSTRACT Sparse representation has attracted much attention from researchers in fields of signal
-processing, image processing, computer vision, and pattern recognition. Sparse representation also has a
-good reputation in both theoretical research and practical applications. Many different algorithms have been
-proposed for sparse representation. The main purpose of this paper is to provide a comprehensive study
-and an updated review on sparse representation and to supply guidance for researchers. The taxonomy of
-sparse representation methods can be studied from various viewpoints. For example, in terms of different
-norm minimizations used in sparsity constraints, the methods can be roughly categorized into five groups:
-1) sparse representation with l0-norm minimization; 2) sparse representation with lp-norm (0 < p < 1)
-minimization; 3) sparse representation with l1-norm minimization; 4) sparse representation with l2,1-norm
-minimization; and 5) sparse representation with l2-norm minimization. In this paper, a comprehensive
-overview of sparse representation is provided. The available sparse representation algorithms can also be
-empirically categorized into four groups: 1) greedy strategy approximation; 2) constrained optimization;
-3) proximity algorithm-based optimization; and 4) homotopy algorithm-based sparse representation. The
-rationales of different algorithms in each category are analyzed and a wide range of sparse representation
-applications are summarized, which could sufficiently reveal the potential nature of the sparse representation
-theory. In particular, an experimentally comparative study of these sparse representation algorithms was
-presented.";
-    
-
-
-    /// <summary>
     /// Sample method that demonstrates the use of the Azure Semantic Kernel.
     /// </summary>
     /// <returns></returns>
-    private static async Task Sample_HelloCompletion()
+    private static async Task Sample_HelloCompletion1()
     {
         IKernel kernel = GetKernel();
 
@@ -200,7 +136,7 @@ presented.";
     /// Demonsrates completions with Semantc Kernel.
     /// </summary>
     /// <returns></returns>
-    private static async Task Sample_Completion2()
+    private static async Task Sample_HelloCompletion2()
     {
         IKernel kernel = GetKernel();
 
@@ -224,6 +160,104 @@ presented.";
 
         Console.WriteLine(await semanticFunc.InvokeAsync(text2, kernel));
     }
+
+
+
+    /// <summary>
+    /// Demonstrates the inline semantic function.
+    /// </summary>
+    /// <returns></returns>
+    private static async Task Sample_HelloInlineSemanticFunction()
+    {
+        OpenAIRequestSettings requestSettings = new()
+        {
+            ExtensionData = {
+                {"MaxTokens", 500},
+                {"Temperature", 0.5},
+                {"TopP", 0.0}, // Diversity coeff. https://arxiv.org/pdf/2306.13840.pdf
+                {"PresencePenalty", 0.0},
+                {"FrequencyPenalty", 0.0}
+            }
+        };
+
+        var kernel = GetKernel();
+
+        string prompt = @"Bot: How can I help you?
+                        User: {{$input}}
+                        ---------------------------------------------
+                        The intent of the user in 5 words or less: ";
+
+        var getIntentFunction = kernel.CreateSemanticFunction(prompt, requestSettings, "MyItentPlugIn");
+
+        var result = await kernel.RunAsync("I want to post a real at instagram about our research project in the last 7 months. The real should be 2 minutes long.",
+            getIntentFunction);
+
+        Console.WriteLine(result);
+    }
+
+
+    public static async Task Sample_HelloSemnticFunction()
+    {
+        var kernel = GetKernel();
+
+        var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
+
+        // Import the OrchestratorPlugin from the plugins directory.
+        var orchestratorPlugin = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
+
+        // Get the GetIntent function from the OrchestratorPlugin and run it
+        var result = await kernel.RunAsync(paperAbstract, orchestratorPlugin["SimplifyAbstract"]);
+
+        Console.WriteLine(result);
+    }
+
+  private const string paperAbstract = @"ABSTRACT Sparse representation has attracted much attention from researchers in fields of signal
+processing, image processing, computer vision, and pattern recognition. Sparse representation also has a
+good reputation in both theoretical research and practical applications. Many different algorithms have been
+proposed for sparse representation. The main purpose of this paper is to provide a comprehensive study
+and an updated review on sparse representation and to supply guidance for researchers. The taxonomy of
+sparse representation methods can be studied from various viewpoints. For example, in terms of different
+norm minimizations used in sparsity constraints, the methods can be roughly categorized into five groups:
+1) sparse representation with l0-norm minimization; 2) sparse representation with lp-norm (0 < p < 1)
+minimization; 3) sparse representation with l1-norm minimization; 4) sparse representation with l2,1-norm
+minimization; and 5) sparse representation with l2-norm minimization. In this paper, a comprehensive
+overview of sparse representation is provided. The available sparse representation algorithms can also be
+empirically categorized into four groups: 1) greedy strategy approximation; 2) constrained optimization;
+3) proximity algorithm-based optimization; and 4) homotopy algorithm-based sparse representation. The
+rationales of different algorithms in each category are analyzed and a wide range of sparse representation
+applications are summarized, which could sufficiently reveal the potential nature of the sparse representation
+theory. In particular, an experimentally comparative study of these sparse representation algorithms was
+presented.";
+
+
+    /// <summary>
+    /// Demonstrates semantic functions with parameters. The bot first asks the user about his age and then
+    /// the user enters the age. The bot decribes the paper abstract in the way that is understandable for the given age.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task Sample_HelloSemnticFunctionWithParams()
+    {
+        var kernel = GetKernel();
+
+        var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
+
+        // Import the OrchestratorPlugin from the plugins directory.
+        var orchestratorPlugin = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
+
+        var variables = new ContextVariables
+        {
+            ["input"] = paperAbstract,
+            ["history"] = @"Bot: How old are you?",
+            ["age"] = "15",
+            ["options"] = "7, 10, 15, 20, 30"
+        };
+
+        // Get the GetIntent function from the OrchestratorPlugin and run it
+        var result = await kernel.RunAsync(variables, orchestratorPlugin["SimplifyAbstractWithParams"]);
+
+        Console.WriteLine(result);
+    }
+
 
 
 
