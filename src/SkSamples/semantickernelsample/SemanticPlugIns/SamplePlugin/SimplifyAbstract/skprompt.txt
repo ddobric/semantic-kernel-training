@@ -1,0 +1,5 @@
+{{$input}}
+
+==
+Summarize abstract, using a user friendly, using simple grammar. Use language of the 12 years old kid. Don't use subjects like "we" "our" "us" "your".
+==
