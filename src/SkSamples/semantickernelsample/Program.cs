@@ -1,12 +1,14 @@
 ﻿using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.AI;
 using Microsoft.SemanticKernel.AI.ChatCompletion;
 using Microsoft.SemanticKernel.AI.ImageGeneration;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.ChatCompletion;
 using Microsoft.SemanticKernel.Orchestration;
 using Microsoft.SemanticKernel.Plugins.Core;
+using Microsoft.SemanticKernel.TemplateEngine;
 using semantickernelsample.Skills;
 using System.Collections.Concurrent;
 
@@ -30,7 +32,8 @@ internal class Program
 
         //await Sample_SemanticFunctionInvokesNativeFunction();
         //await Sample_SemanticMathOperationExtractor();
-        await Sample_NativeFunctionInvokesSemanticFunction();
+        //await Sample_NativeFunctionInvokesSemanticFunction();
+        await Sample_ChainingSemanticFunction();
 
         //await Sample_GroundingWithNativeSkill();
         await Sample_StateMachine();
@@ -423,6 +426,48 @@ presented.";
 
         // Get the GetIntent function from the OrchestratorPlugin and run it
         var result = await kernel.RunAsync(variables, semanticFunctions["AbstractWordCounter"]);
+
+        Console.WriteLine(result);
+    }
+
+    /// <summary>
+    /// Execute functions in the chain.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task Sample_ChainingSemanticFunction()
+    {
+        var kernel = GetKernel();
+
+        string myJokePrompt = """
+Tell a short joke about {{$input}}.
+""";
+        string myPoemPrompt = """
+Take this "{{$input}}" and convert it to a nursery rhyme.
+""";
+        string myMenuPrompt = """
+Make this poem "{{$input}}" influence the three items in a coffee shop menu. 
+The menu reads in enumerated form:
+
+""";
+        OpenAIRequestSettings sett = new()
+        {
+            ExtensionData = {
+                {"MaxTokens", 500},
+                {"Temperature", 0.5},
+                {"TopP", 0.0}, 
+                {"PresencePenalty", 0.0},
+                {"FrequencyPenalty", 0.0}
+            }
+        };
+
+        //var settings = new new PromptTemplateConfig { ModelSettings = new  maxTokens = 500 };
+        var myJokeFunction = kernel.CreateSemanticFunction(myJokePrompt, requestSettings: sett);
+        var myPoemFunction = kernel.CreateSemanticFunction(myPoemPrompt, requestSettings: sett);
+        var myMenuFunction = kernel.CreateSemanticFunction(myMenuPrompt, requestSettings: sett);
+
+        // Get the GetIntent function from the OrchestratorPlugin and run it
+        var result = await kernel.RunAsync(new ContextVariables("Damir Dobric Microsoft Regional Director"),
+            myJokeFunction, myPoemFunction, myMenuFunction);
 
         Console.WriteLine(result);
     }
