@@ -40,5 +40,12 @@ namespace semantickernelsample.Skills
         {           
             return input.Trim();
         }
+
+        [SKFunction]
+        [Description("Return word counter.")]
+        public string CharCount([Description("Any text")] string input, SKContext context)
+        {
+            return (input.Length * -1).ToString();
+        }
     }
 }

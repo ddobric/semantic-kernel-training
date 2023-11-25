@@ -16,6 +16,7 @@ internal class Program
     {
         //await Sample_HelloSk();
         //await Sample_NativeFunctionsDirectInvoke();
+        await Sample_InvokeNativeFunctionsWithArguments();
         //await Sample_HelloPipeline();
 
         //await Sample_HelloCompletion1();
@@ -24,9 +25,10 @@ internal class Program
         //await Sample_HelloInlineSemanticFunction();
 
         //await Sample_HelloSemnticFunction();
-        await Sample_HelloSemnticFunctionWithParams();
-
-
+        //await Sample_HelloSemanticFunctionWithParams();
+        //await Sample_SemanticTextTranslation();
+        //await Sample_NestedSemanticFunction();
+        await Sample_NestedNativeFunction();
 
         //await Sample_GroundingWithNativeSkill();
         await Sample_StateMachine();
@@ -79,6 +81,33 @@ internal class Program
 
 
     /// <summary>
+    /// Demonstrates how to invoke the native function with arguments.
+    /// </summary>
+    /// <returns></returns>
+    private static async Task Sample_InvokeNativeFunctionsWithArguments()
+    {
+        IKernel kernel = new KernelBuilder().Build();
+
+        SKContext ctx = kernel.CreateNewContext();
+
+        var functions = kernel.ImportFunctions(new SamplePlugIn());    
+   
+        var variables = new ContextVariables
+        {
+            ["arg1"] = "121",
+            ["arg2"] = "234",
+        };
+
+        // Get the GetIntent function from the OrchestratorPlugin and run it
+        var result = await kernel.RunAsync(variables, functions["AddNumbersFunction"]);
+
+        Console.WriteLine(result);
+    }
+
+
+
+
+    /// <summary>
     /// Demonstrates the SK pipeline mechanism.
     /// </summary>
     /// <returns></returns>
@@ -97,7 +126,7 @@ internal class Program
 
         Console.WriteLine(result);
     }
-
+    
 
     /// <summary>
     /// Sample method that demonstrates the use of the Azure Semantic Kernel.
@@ -231,13 +260,15 @@ presented.";
 
 
     /// <summary>
-    /// Demonstrates semantic functions with parameters. The bot first asks the user about his age and then
+    /// Demonstrates semantic functions with parameters (variables). The bot first asks the user about his age and then
     /// the user enters the age. The bot decribes the paper abstract in the way that is understandable for the given age.
     /// </summary>
     /// <returns></returns>
-    public static async Task Sample_HelloSemnticFunctionWithParams()
+    public static async Task Sample_HelloSemanticFunctionWithParams()
     {
         var kernel = GetKernel();
+
+        var functions = kernel.ImportFunctions(new SamplePlugIn());
 
         var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
 
@@ -253,14 +284,91 @@ presented.";
         };
 
         // Get the GetIntent function from the OrchestratorPlugin and run it
-        var result = await kernel.RunAsync(variables, orchestratorPlugin["SimplifyAbstractWithParams"]);
+        var result = await kernel.RunAsync(variables, functions["NullFUnction"], orchestratorPlugin["SimplifyAbstractWithParams"]);
 
         Console.WriteLine(result);
     }
 
 
+    /// <summary>
+    /// Demonstrates semantic functions with output parameters (variables).
+    /// </summary>
+    /// <returns></returns>
+    public static async Task Sample_SemanticTextTranslation()
+    {
+        var kernel = GetKernel();
+
+        var functions = kernel.ImportFunctions(new SamplePlugIn());
+
+        var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
+
+        // Import the OrchestratorPlugin from the plugins directory.
+        var semanticFunctions = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
+
+        var variables = new ContextVariables
+        {
+            ["input"] = paperAbstract,
+            ["language"] = @"bosnian"
+        };
+
+        // Translates the text.
+        var result = await kernel.RunAsync(variables,  semanticFunctions["Translator"]);
+
+        Console.WriteLine(result);
+    }
+
+    /// <summary>
+    /// Demonstrates semantic function invokes another semantic function.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task Sample_NestedSemanticFunction()
+    {
+        var kernel = GetKernel();
+
+        var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
+
+        // Import the OrchestratorPlugin from the plugins directory.
+        var semanticFunctions = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
+
+        var variables = new ContextVariables
+        { 
+            ["input"] = paperAbstract,
+            ["language"] = "german"
+        };
+
+        // Get the GetIntent function from the OrchestratorPlugin and run it
+        var result = await kernel.RunAsync(variables, semanticFunctions["SimplifyAbstractWithParamsAndTranslate"]);
+
+        Console.WriteLine(result);
+    }
 
 
+    /// <summary>
+    /// Demonstrates semantic functions invokes another native function.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task Sample_NestedNativeFunction()
+    {
+        var kernel = GetKernel();
+
+        var functions = kernel.ImportFunctions(new StringSkill(), "StringPlugin");
+
+        var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
+
+        // Import the OrchestratorPlugin from the plugins directory.
+        var semanticFunctions = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
+
+        var variables = new ContextVariables
+        {
+            ["input"] = paperAbstract,
+            ["language"] = "bosnian"
+        };
+
+        // Get the GetIntent function from the OrchestratorPlugin and run it
+        var result = await kernel.RunAsync(variables, semanticFunctions["AbstractWordCounter"]);
+
+        Console.WriteLine(result);
+    }
 
 
     /// <summary>
@@ -278,7 +386,7 @@ presented.";
         ";
 
         kernel.ImportFunctions(new MyDateTimePlugin(), "datetime");
-        kernel.ImportFunctions(new SampleSkill(), "sample");
+        kernel.ImportFunctions(new SamplePlugIn(), "sample");
 
         var sematicFunc = kernel.CreateSemanticFunction(skPrompt, new OpenAIRequestSettings { MaxTokens = 150 });
 
@@ -313,7 +421,7 @@ presented.";
       {{$available_functions}}
         ";
 
-        kernel.ImportFunctions(new SampleSkill(), "sample");
+        kernel.ImportFunctions(new SamplePlugIn(), "sample");
 
         var variables = new ContextVariables("Today is: ");
         variables.Set("mystate", "running...");
@@ -394,8 +502,8 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static IKernel GetKernel()
     {
-        //return GetOpenAIKernel();
-        return GetAzureKernel();
+        return GetOpenAIKernel();
+        //return GetAzureKernel();
     }
 
 

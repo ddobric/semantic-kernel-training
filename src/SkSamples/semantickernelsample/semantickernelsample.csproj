@@ -20,10 +20,34 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SemanticPlugIns\SamplePlugin\AbstractWordCounter\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\AbstractWordCounter\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstractWithParamsAndTranslate\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstractWithParamsAndTranslate\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\Translator\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\Translator\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="SemanticPlugIns\SamplePlugin\Notegen\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="SemanticPlugIns\SamplePlugin\Notegen\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\AnomalyDetector\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\AnomalyDetector\skprompt.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstractWithParams\config.json">

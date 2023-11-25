@@ -23,12 +23,12 @@
       },
       {
         "name": "options",
-        "description": "The options to choose from.",
+        "description": "The list of allowed ages.",
         "defaultValue": ""
       },
       {
         "name": "age",
-        "description": "The age of the kid who need explenation.",
+        "description": "The age of the kid who need explanation.",
         "defaultValue": ""
       }
     ]
