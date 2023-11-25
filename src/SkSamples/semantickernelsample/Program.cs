@@ -16,19 +16,21 @@ internal class Program
     {
         //await Sample_HelloSk();
         //await Sample_NativeFunctionsDirectInvoke();
-        await Sample_InvokeNativeFunctionsWithArguments();
+        //await Sample_InvokeNativeFunctionsWithArguments();
         //await Sample_HelloPipeline();
 
         //await Sample_HelloCompletion1();
         //await Sample_HelloCompletion2();
 
         //await Sample_HelloInlineSemanticFunction();
-
         //await Sample_HelloSemnticFunction();
         //await Sample_HelloSemanticFunctionWithParams();
         //await Sample_SemanticTextTranslation();
-        //await Sample_NestedSemanticFunction();
-        await Sample_NestedNativeFunction();
+        //await Sample_NestedSemanticFunction();   
+
+        //await Sample_SemanticFunctionInvokesNativeFunction();
+        //await Sample_SemanticMathOperationExtractor();
+        await Sample_NativeFunctionInvokesSemanticFunction();
 
         //await Sample_GroundingWithNativeSkill();
         await Sample_StateMachine();
@@ -298,9 +300,7 @@ presented.";
     {
         var kernel = GetKernel();
 
-        var functions = kernel.ImportFunctions(new SamplePlugIn());
-
-        var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
+         var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
 
         // Import the OrchestratorPlugin from the plugins directory.
         var semanticFunctions = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
@@ -344,10 +344,67 @@ presented.";
 
 
     /// <summary>
-    /// Demonstrates semantic functions invokes another native function.
+    /// Invookes the semantic function that extracts the name of the mathematical operation in user intent. 
+    /// Additionally, this function also extract all specified numerical values, that should be used as the input of the function.
     /// </summary>
     /// <returns></returns>
-    public static async Task Sample_NestedNativeFunction()
+    public static async Task Sample_SemanticMathOperationExtractor()
+    {
+        var kernel = GetKernel();
+
+        var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
+
+        // Import the OrchestratorPlugin from the plugins directory.
+        var semanticFunctions = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
+
+        var functions = kernel.ImportFunctions(new SamplePlugIn());
+
+        var variables = new ContextVariables
+        {
+            ["input"] = "Execute the function exponent with following arguments 42 and 7",
+        };
+
+        // Get the GetIntent function from the OrchestratorPlugin and run it
+        var result = await kernel.RunAsync(variables, semanticFunctions["MathOperationExtractor"]);
+
+        Console.WriteLine(result);
+    }
+
+    /// <summary>
+    /// Demonstrates how native function invokes another semantic function.
+    /// The semantic function extracts the name of the mathematical operation in user intent and the list of numerical values.
+    /// Returned extracted values (name of the operation and list of numerics) are used inside native function.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task Sample_NativeFunctionInvokesSemanticFunction()
+    {
+        var kernel = GetKernel();
+
+        var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
+
+        // Import the OrchestratorPlugin from the plugins directory.
+        var semanticFunctions = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
+
+        var nativeFunctions = kernel.ImportFunctions(new SamplePlugIn(kernel));
+
+        var variables = new ContextVariables
+        {
+            ["input"] = "Execute the function exponent with following arguments 2 and 16",
+        };
+
+        // Get the GetIntent function from the OrchestratorPlugin and run it
+        var result = await kernel.RunAsync(variables, nativeFunctions["ExecuteMathOperationFunction"]);
+
+        Console.WriteLine(result);
+    }
+
+
+
+    /// <summary>
+    /// Demonstrates semantic function invokes another native function.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task Sample_SemanticFunctionInvokesNativeFunction()
     {
         var kernel = GetKernel();
 

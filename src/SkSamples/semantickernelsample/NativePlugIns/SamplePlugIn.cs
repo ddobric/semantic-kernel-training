@@ -13,6 +13,13 @@ namespace semantickernelsample.Skills
 {
     public class SamplePlugIn
     {
+        private readonly IKernel? _kernel;
+
+        public SamplePlugIn(IKernel? kernel = null)
+        {
+            _kernel = kernel;
+        }
+
         [SKFunction, Description("Adds additional information to the model. Performs grounding.")]
         public string Enrich()
         {
@@ -20,10 +27,7 @@ namespace semantickernelsample.Skills
         }
 
 
-        //[SKFunction("Describe the function")]
-        //[SKFunctionInput(Description = "DEscribes the function input")]
         [SKFunction, Description("State machine.")]
-        //[SKFunctionContextParameter(Name = "mystate", Description = "Holds the state of the state machine.")]
         public Task<SKContext> AddValue(SKContext context)
         {
             Debug.WriteLine(context.GetHashCode());
@@ -32,13 +36,12 @@ namespace semantickernelsample.Skills
                 context.Variables.Set("mystate", "0");
 
             var state = context.Variables["mystate"];
-           
+
             context.Variables.Set("mystate", "stopped!");
 
             return Task.FromResult<SKContext>(context);
         }
 
-        
 
         [SKFunction, Description("State machine.")]
         public string GetValue(SKContext context)
@@ -47,10 +50,9 @@ namespace semantickernelsample.Skills
                 context.Variables.Set("mystate", "0");
 
             var state = context.Variables["mystate"];
-           
+
             return state;
         }
-
 
 
         [SKFunction, Description("Does nothing. Demonstrates how to access the context.")]
@@ -63,6 +65,37 @@ namespace semantickernelsample.Skills
         public string AddNumbersFunction(SKContext context, int arg1, int arg2)
         {
             return (arg1 + arg2).ToString();
+        }
+
+
+        [SKFunction, Description("Executes the function semantically extracted from prompt.")]
+        public async Task<string> ExecuteMathOperationFunction(SKContext context, string prompt)
+        {
+            var mathOperatorExtractorFnc = this._kernel.Functions.GetFunction("SamplePlugin", "MathOperationExtractor");
+
+            var res = await _kernel.RunAsync(prompt, mathOperatorExtractorFnc);
+
+            var val = res.GetValue<string>();
+
+            var tokens = val.Split('|');
+
+            var mathOperator = tokens[0];
+
+            var args = tokens[1].Split(',');
+
+            var arg1 = int.Parse(args[0].Replace("\nArguments: ", String.Empty));
+            var arg2 = int.Parse(args[1]);
+
+            switch (mathOperator.Replace("Function: ", String.Empty))
+            {
+                case "+":
+                    return (arg1 + arg2).ToString();
+
+                case "exponent":
+                    return (Math.Pow(arg1, arg2)).ToString();
+                default:
+                    return "unknown operator";
+            }
         }
     }
 }

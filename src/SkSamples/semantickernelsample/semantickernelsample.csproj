@@ -32,6 +32,12 @@
     <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstractWithParamsAndTranslate\skprompt.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="SemanticPlugIns\SamplePlugin\MathOperationExtractor\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\MathOperationExtractor\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="SemanticPlugIns\SamplePlugin\Translator\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
