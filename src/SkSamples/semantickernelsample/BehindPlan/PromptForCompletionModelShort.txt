@@ -35,3 +35,20 @@ To create a plan, follow these steps:
 </plan><!-- END -->
 
 [END EXAMPLES]
+
+[AVAILABLE FUNCTIONS]
+
+email.GetEmailAddress:
+  description: Given a name, find email address
+  inputs:
+    - input: The name of the person to email.
+
+email.SendEmail:
+  description: Given an e-mail and message body, send an email
+  inputs:
+    - input: The body of the email message to send.
+  - email_address: The email address to send email to.
+
+[END AVAILABLE FUNCTIONS]
+
+<goal>Summarize an input, translate to klingon, and e-mail to Damir</goal>

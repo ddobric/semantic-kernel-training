@@ -97,5 +97,14 @@ namespace semantickernelsample.Skills
                     return "unknown operator";
             }
         }
+
+        [SKFunction, Description("Calculates the fiction function.")]
+        public Task<string> FictionFunction(SKContext context,
+            [Description("The first argument that describes some entity")] string input,
+            [Description("The second argument that describes some entity")] string arg2,
+            [Description("The the number that defines the contraction jumping of bla units between entities used to calcukate the fiction.")] int number)
+        {
+            return Task.FromResult<string>($"{input}-{arg2}-{number.ToString()}");
+        }
     }
 }

@@ -42,7 +42,8 @@ internal class Program
         //await Sample_StateMachine();
         //await Sample_SemanticSkills();
 
-        await Sample_SequencePlaner();
+        //await Sample_SequencePlaner();
+        await Sample_FictionPlaner();
     }
 
 
@@ -100,8 +101,8 @@ internal class Program
 
         SKContext ctx = kernel.CreateNewContext();
 
-        var functions = kernel.ImportFunctions(new SamplePlugIn());    
-   
+        var functions = kernel.ImportFunctions(new SamplePlugIn());
+
         var variables = new ContextVariables
         {
             ["arg1"] = "121",
@@ -136,7 +137,7 @@ internal class Program
 
         Console.WriteLine(result);
     }
-    
+
 
     /// <summary>
     /// Sample method that demonstrates the use of the Azure Semantic Kernel.
@@ -250,7 +251,7 @@ internal class Program
         Console.WriteLine(result);
     }
 
-  private const string paperAbstract = @"ABSTRACT Sparse representation has attracted much attention from researchers in fields of signal
+    private const string paperAbstract = @"ABSTRACT Sparse representation has attracted much attention from researchers in fields of signal
 processing, image processing, computer vision, and pattern recognition. Sparse representation also has a
 good reputation in both theoretical research and practical applications. Many different algorithms have been
 proposed for sparse representation. The main purpose of this paper is to provide a comprehensive study
@@ -308,7 +309,7 @@ presented.";
     {
         var kernel = GetKernel();
 
-         var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
+        var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins");
 
         // Import the OrchestratorPlugin from the plugins directory.
         var semanticFunctions = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
@@ -320,7 +321,7 @@ presented.";
         };
 
         // Translates the text.
-        var result = await kernel.RunAsync(variables,  semanticFunctions["Translator"]);
+        var result = await kernel.RunAsync(variables, semanticFunctions["Translator"]);
 
         Console.WriteLine(result);
     }
@@ -339,7 +340,7 @@ presented.";
         var semanticFunctions = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
 
         var variables = new ContextVariables
-        { 
+        {
             ["input"] = paperAbstract,
             ["language"] = "german"
         };
@@ -459,7 +460,7 @@ The menu reads in enumerated form:
             ExtensionData = {
                 {"MaxTokens", 500},
                 {"Temperature", 0.5},
-                {"TopP", 0.0}, 
+                {"TopP", 0.0},
                 {"PresencePenalty", 0.0},
                 {"FrequencyPenalty", 0.0}
             }
@@ -597,9 +598,9 @@ We offer you our profound cloud knowledge as standardized best-practice service 
     public static async Task Sample_SequencePlaner()
     {
         var kernel = GetKernel();
-  
+
         var functions = kernel.ImportFunctions(new semantickernelsample.NativePlugIns.MathPlugin(), "MathPlugin");
-        
+
         var planner = new SequentialPlanner(kernel);
 
         //var ask = "If my investment of 2130.23 dollars increased by 23%, how much would I have after I spent $5 on a latte?";
@@ -607,6 +608,33 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         //var ask = "Calculate the sum of numbers, 1,2,3,4,5,6,7 and then divide it by number of elements in the list.";
         //var ask = "Calculate the energy of the 10kg ball falling from sky at the moment of hitting the surface, if tha ball started at 10km height with the start speed of 100m/s.";
         var ask = "Calculates the quadrat of the sum of first 10 numbers.";
+
+        var plan = await planner.CreatePlanAsync(ask);
+
+        Console.WriteLine("Plan:\n");
+        Console.WriteLine(JsonSerializer.Serialize(plan, new JsonSerializerOptions { WriteIndented = true }));
+
+        // Execute the plan
+        var result = await kernel.RunAsync(plan);
+
+        Console.WriteLine("Plan results:");
+        Console.WriteLine(result.GetValue<string>()!.Trim());
+    }
+
+    /// <summary>
+    /// Demonstrates semantic function invokes another native function.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task Sample_FictionPlaner()
+    {
+        var kernel = GetKernel();
+
+        var mathFunctions = kernel.ImportFunctions(new semantickernelsample.NativePlugIns.MathPlugin(), "MathPlugin");
+        var sampleFunctions = kernel.ImportFunctions(new SamplePlugIn(), "SamplePlugin");
+
+        var planner = new SequentialPlanner(kernel);
+
+        var ask = "Calculates the fiction between the stone and alpha centauri with the contraction jumping of 150 bla.";
 
         var plan = await planner.CreatePlanAsync(ask);
 
