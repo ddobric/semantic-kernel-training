@@ -7,10 +7,13 @@ using Microsoft.SemanticKernel.AI.ImageGeneration;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI;
 using Microsoft.SemanticKernel.Connectors.AI.OpenAI.ChatCompletion;
 using Microsoft.SemanticKernel.Orchestration;
+using Microsoft.SemanticKernel.Planners;
 using Microsoft.SemanticKernel.Plugins.Core;
 using Microsoft.SemanticKernel.TemplateEngine;
+using semantickernelsample.NativePlugIns;
 using semantickernelsample.Skills;
 using System.Collections.Concurrent;
+using System.Text.Json;
 
 internal class Program
 {
@@ -33,11 +36,13 @@ internal class Program
         //await Sample_SemanticFunctionInvokesNativeFunction();
         //await Sample_SemanticMathOperationExtractor();
         //await Sample_NativeFunctionInvokesSemanticFunction();
-        await Sample_ChainingSemanticFunction();
+        //await Sample_ChainingSemanticFunction();
 
         //await Sample_GroundingWithNativeSkill();
-        await Sample_StateMachine();
+        //await Sample_StateMachine();
         //await Sample_SemanticSkills();
+
+        await Sample_SequencePlaner();
     }
 
 
@@ -473,6 +478,7 @@ The menu reads in enumerated form:
     }
 
 
+
     /// <summary>
     /// Using native skill for grounding.
     /// </summary>
@@ -584,6 +590,37 @@ We offer you our profound cloud knowledge as standardized best-practice service 
     }
 
 
+    /// <summary>
+    /// Demonstrates semantic function invokes another native function.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task Sample_SequencePlaner()
+    {
+        var kernel = GetKernel();
+  
+        var functions = kernel.ImportFunctions(new semantickernelsample.NativePlugIns.MathPlugin(), "MathPlugin");
+        
+        var planner = new SequentialPlanner(kernel);
+
+        //var ask = "If my investment of 2130.23 dollars increased by 23%, how much would I have after I spent $5 on a latte?";
+        //var ask = "Wenn meine Investition von 2130,23 Dollar um 23% gestiegen ist, wie viel hätte ich, nachdem ich 5 Dollar für einen Latte ausgegeben habe?\r\n\r\n\r\n\r\n\r\n\r\n";
+        //var ask = "Calculate the sum of numbers, 1,2,3,4,5,6,7 and then divide it by number of elements in the list.";
+        //var ask = "Calculate the energy of the 10kg ball falling from sky at the moment of hitting the surface, if tha ball started at 10km height with the start speed of 100m/s.";
+        var ask = "Calculates the quadrat of the sum of first 10 numbers.";
+
+        var plan = await planner.CreatePlanAsync(ask);
+
+        Console.WriteLine("Plan:\n");
+        Console.WriteLine(JsonSerializer.Serialize(plan, new JsonSerializerOptions { WriteIndented = true }));
+
+        // Execute the plan
+        var result = await kernel.RunAsync(plan);
+
+        Console.WriteLine("Plan results:");
+        Console.WriteLine(result.GetValue<string>()!.Trim());
+    }
+    #region Helpers
+
     private static void PrintFunction(FunctionView func)
     {
         Console.WriteLine($"   {func.Name}: {func.Description}");
@@ -654,5 +691,6 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         }
         return kernel;
     }
+    #endregion
 }
 

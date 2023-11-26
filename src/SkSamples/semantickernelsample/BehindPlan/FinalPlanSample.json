@@ -1,0 +1,61 @@
+{
+  "state": [],
+  "steps": [
+    {
+      "state": [],
+      "steps": [],
+      "parameters": [
+        {
+          "Key": "input",
+          "Value": "2130.23"
+        },
+        {
+          "Key": "number2",
+          "Value": "1.23"
+        }
+      ],
+      "outputs": [
+        "INCREASED_INVESTMENT"
+      ],
+      "next_step_index": 0,
+      "name": "Multiply",
+      "plugin_name": "MathPlugin",
+      "description": "Multiply two numbers. When increasing by a percentage, don\u0027t forget to add 1 to the percentage.",
+      "model_settings": [],
+      "RequestSettings": null
+    },
+    {
+      "state": [],
+      "steps": [],
+      "parameters": [
+        {
+          "Key": "input",
+          "Value": "$INCREASED_INVESTMENT"
+        },
+        {
+          "Key": "number2",
+          "Value": "5"
+        }
+      ],
+      "outputs": [
+        "RESULT__FINAL_AMOUNT"
+      ],
+      "next_step_index": 0,
+      "name": "Subtract",
+      "plugin_name": "MathPlugin",
+      "description": "Subtract two numbers",
+      "model_settings": [],
+      "RequestSettings": null
+    }
+  ],
+  "parameters": [],
+  "outputs": [
+    "RESULT__FINAL_AMOUNT"
+  ],
+  "next_step_index": 0,
+  "name": "plan73c27dd40e9247d9b60dc8aa8ba516fc",
+  "plugin_name": "Plan",
+  "description": "If my investment of 2130.23 dollars increased by 23%, how much would I have after I spent $5 on a latte?",
+  "model_settings": [],
+  "RequestSettings": null
+}
