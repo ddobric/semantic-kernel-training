@@ -38,17 +38,19 @@ To create a plan, follow these steps:
 
 [AVAILABLE FUNCTIONS]
 
-email.GetEmailAddress:
-  description: Given a name, find email address
+myplugin.Fiction:
+  description: Calculates the fiction function.
   inputs:
-    - input: The name of the person to email.
+    - input: The first argument that describes some entity.
+    - arg2: The second argument that describes some entity.
+    - arg3: The the number that defines the contraction jumping of bla units between entities used to calcukate the fiction."
 
-email.SendEmail:
+myplugin.SendEmail:
   description: Given an e-mail and message body, send an email
   inputs:
     - input: The body of the email message to send.
-  - email_address: The email address to send email to.
+    - email_address: The email address to send email to.
 
 [END AVAILABLE FUNCTIONS]
 
-<goal>Calculate the fiction from cat dog  and numbers 32 and 42</goal>
+<goal>Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 blas.</goal>

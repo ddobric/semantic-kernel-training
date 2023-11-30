@@ -61,7 +61,7 @@ internal class Program
 
         var time2 = kernel.ImportFunctions(new MyDateTimePlugin());
 
-        result = await kernel.RunAsync(time["Now"]);
+        result = await kernel.RunAsync(time2["Now"]);
 
         result = await kernel.RunAsync(time["UtcNow"]);
 
@@ -246,7 +246,8 @@ internal class Program
         var orchestratorPlugin = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
 
         // Get the GetIntent function from the OrchestratorPlugin and run it
-        var result = await kernel.RunAsync(paperAbstract, orchestratorPlugin["SimplifyAbstract"]);
+        var result = await kernel.RunAsync(paperAbstract, 
+            orchestratorPlugin["SimplifyAbstract"], orchestratorPlugin["Translator"]);
 
         Console.WriteLine(result);
     }
@@ -604,10 +605,10 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         var planner = new SequentialPlanner(kernel);
 
         //var ask = "If my investment of 2130.23 dollars increased by 23%, how much would I have after I spent $5 on a latte?";
-        //var ask = "Wenn meine Investition von 2130,23 Dollar um 23% gestiegen ist, wie viel hätte ich, nachdem ich 5 Dollar für einen Latte ausgegeben habe?\r\n\r\n\r\n\r\n\r\n\r\n";
+        var ask = "Wenn meine Investition von 2130,23 Dollar um 23% gestiegen ist, wie viel hätte ich, nachdem ich 5 Dollar für einen Latte ausgegeben habe?";
         //var ask = "Calculate the sum of numbers, 1,2,3,4,5,6,7 and then divide it by number of elements in the list.";
         //var ask = "Calculate the energy of the 10kg ball falling from sky at the moment of hitting the surface, if tha ball started at 10km height with the start speed of 100m/s.";
-        var ask = "Calculates the quadrat of the sum of first 10 numbers.";
+        //var ask = "Calculates the quadrat of the sum of first 10 numbers.";
 
         var plan = await planner.CreatePlanAsync(ask);
 
@@ -634,7 +635,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
         var planner = new SequentialPlanner(kernel);
 
-        var ask = "Calculates the fiction between the stone and alpha centauri with the contraction jumping of 150 bla.";
+        var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 wurstchen.";
 
         var plan = await planner.CreatePlanAsync(ask);
 
