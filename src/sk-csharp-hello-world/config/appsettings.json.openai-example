@@ -3,6 +3,6 @@
   "serviceType": "OpenAI",
   "serviceId": "text-davinci-003",
   "deploymentOrModelId": "text-davinci-003",
-  "apiKey": "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",
-  "orgId": "daenet"
+  "apiKey": "***",
+  "orgId": "**"
 }
