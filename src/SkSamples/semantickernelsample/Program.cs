@@ -635,7 +635,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
         var planner = new SequentialPlanner(kernel);
 
-        var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 wurstchen.";
+        var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 kobasica.";
 
         var plan = await planner.CreatePlanAsync(ask);
 
