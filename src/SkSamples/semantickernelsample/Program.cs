@@ -38,7 +38,7 @@ internal class Program
         //await Sample_NativeFunctionInvokesSemanticFunction();
         //await Sample_ChainingSemanticFunction();
 
-        //await Sample_GroundingWithNativeSkill();
+        await Sample_GroundingWithNativeSkill();
         //await Sample_StateMachine();
         //await Sample_SemanticSkills();
 
@@ -492,7 +492,7 @@ The menu reads in enumerated form:
         string skPrompt = @"
         You have a knowledge of international days.
 
-        Is date {{datetime.Today}} known for something?
+        Is date {{$input}} known for something?
         ";
 
         kernel.ImportFunctions(new MyDateTimePlugin(), "datetime");
@@ -500,7 +500,7 @@ The menu reads in enumerated form:
 
         var sematicFunc = kernel.CreateSemanticFunction(skPrompt, new OpenAIRequestSettings { MaxTokens = 150 });
 
-        var result = await kernel.RunAsync(sematicFunc);
+        var result = await kernel.RunAsync(new ContextVariables(DateTime.Now.ToString("MMM/dd")!), sematicFunc);
 
         Console.WriteLine(result);
 
@@ -509,13 +509,12 @@ The menu reads in enumerated form:
 
         {{sample.Enrich}}
 
-
-        Is date {{datetime.Today}} known for something? Also provide most useful historical data for at least two popular events at that day.
+        Is date {{$input}} known for something? Also provide most useful historical data for at least two popular events at that day.
         ";
 
         sematicFunc = kernel.CreateSemanticFunction(skPrompt, new OpenAIRequestSettings { MaxTokens = 150 });
 
-        result = await kernel.RunAsync(sematicFunc);
+        result = await kernel.RunAsync(new ContextVariables(DateTime.Now.ToString("MMM/dd")!), sematicFunc);
 
         Console.WriteLine(result);
     }
