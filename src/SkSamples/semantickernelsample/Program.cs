@@ -38,7 +38,7 @@ internal class Program
         //await Sample_NativeFunctionInvokesSemanticFunction();
         //await Sample_ChainingSemanticFunction();
 
-        await Sample_GroundingWithNativeSkill();
+        //await Sample_GroundingWithNativeSkill();
         //await Sample_StateMachine();
         //await Sample_SemanticSkills();
 
@@ -229,13 +229,19 @@ internal class Program
 
         var getIntentFunction = kernel.CreateSemanticFunction(prompt, requestSettings, "MyItentPlugIn");
 
-        var result = await kernel.RunAsync("I want to post a real at instagram about our research project in the last 7 months. The real should be 2 minutes long.",
-            getIntentFunction);
+        string ask = "I want to post a real at instagram about our research project in the last 7 months. The real should be 2 minutes long.";
+
+        var result = await kernel.RunAsync(ask, getIntentFunction);
 
         Console.WriteLine(result);
     }
 
 
+    /// <summary>
+    /// Demonstrates the semantic function loaded from file.
+    /// It first loads the function SimplifyAbstract and translates the simplified version.
+    /// </summary>
+    /// <returns></returns>
     public static async Task Sample_HelloSemnticFunction()
     {
         var kernel = GetKernel();
@@ -246,7 +252,7 @@ internal class Program
         var orchestratorPlugin = kernel.ImportSemanticFunctionsFromDirectory(pluginsDirectory, "SamplePlugIn");
 
         // Get the GetIntent function from the OrchestratorPlugin and run it
-        var result = await kernel.RunAsync(paperAbstract, 
+        var result = await kernel.RunAsync(paperAbstract,
             orchestratorPlugin["SimplifyAbstract"], orchestratorPlugin["Translator"]);
 
         Console.WriteLine(result);
