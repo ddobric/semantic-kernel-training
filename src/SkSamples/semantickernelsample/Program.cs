@@ -27,7 +27,7 @@ internal class Program
         //await Sample_HelloCompletion1();
         //await Sample_HelloCompletion2();
 
-        //await Sample_HelloInlineSemanticFunction();
+       // await Sample_HelloInlineSemanticFunction();
         //await Sample_HelloSemnticFunction();
         //await Sample_HelloSemanticFunctionWithParams();
         //await Sample_SemanticTextTranslation();
