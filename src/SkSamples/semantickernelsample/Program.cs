@@ -43,7 +43,9 @@ internal class Program
         //await Sample_SemanticSkills();
 
         //await Sample_SequencePlaner();
-        await Sample_FictionPlaner();
+        //await Sample_FictionPlaner();
+
+        await ES_BookHours();
     }
 
 
@@ -641,6 +643,29 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         var planner = new SequentialPlanner(kernel);
 
         var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 kobasica.";
+
+        var plan = await planner.CreatePlanAsync(ask);
+
+        Console.WriteLine("Plan:\n");
+        Console.WriteLine(JsonSerializer.Serialize(plan, new JsonSerializerOptions { WriteIndented = true }));
+
+        // Execute the plan
+        var result = await kernel.RunAsync(plan);
+
+        Console.WriteLine("Plan results:");
+        Console.WriteLine(result.GetValue<string>()!.Trim());
+    }
+
+    public static async Task ES_BookHours()
+    {
+        var kernel = GetKernel();
+
+        var mathFunctions = kernel.ImportFunctions(new semantickernelsample.NativePlugIns.MathPlugin(), "MathPlugin");
+        var sampleFunctions = kernel.ImportFunctions(new SamplePlugIn(), "SamplePlugin");
+
+        var planner = new SequentialPlanner(kernel);
+
+        var ask = "Please book 2 hours in Employee Service at on the project 'Jettainer version 2' 25.March.";
 
         var plan = await planner.CreatePlanAsync(ask);
 

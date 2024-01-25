@@ -106,5 +106,15 @@ namespace semantickernelsample.Skills
         {
             return Task.FromResult<string>($"{input}-{arg2}-{number.ToString()}");
         }
+
+
+        [SKFunction, Description("Books working hours in Employe service. User wants to commit wotking hours.")]
+        public Task<string> EmployeeServiceBookHoursFunction(SKContext context,
+        [Description("The first argument that specifies the project name for which the working hours will be booked.")] string project,
+        [Description("Number of working hours to be booked on the project")] string workingHours,
+        [Description("Number of working hours to be booked on the project")] string date)
+        {
+            return Task.FromResult<string>($"{project}-{workingHours}-{date}");
+        }
     }
 }
