@@ -42,8 +42,8 @@ internal class Program
         //await Sample_StateMachine();
         //await Sample_SemanticSkills();
 
-        //await Sample_SequencePlaner();
-        //await Sample_FictionPlaner();
+        await Sample_SequencePlaner();
+        await Sample_FictionPlaner();
 
         await ES_BookHours();
     }
