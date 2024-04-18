@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "semantickernelsample": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "qq": "ff"
+      }
+    }
+  }
+}
