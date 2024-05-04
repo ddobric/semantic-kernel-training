@@ -1,0 +1,81 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\DamirDobric\.nuget\packages\microsoft.semantickernel.connectors.ai.openai\0.13.277.1-preview\contentFiles\any\netstandard2.0\Tokenizers\Settings\encoder.json" />
+    <Content Remove="C:\Users\DamirDobric\.nuget\packages\microsoft.semantickernel.connectors.ai.openai\0.13.277.1-preview\contentFiles\any\netstandard2.0\Tokenizers\Settings\vocab.bpe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.7.1" />
+    <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.7.1" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.AI.OpenAI" Version="1.0.0-beta8" />
+    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.7.1" />
+    <PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars" Version="1.7.1-preview" />
+    <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" Version="1.7.1-preview" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="SemanticPlugIns\SamplePlugin\AbstractWordCounter\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\AbstractWordCounter\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstractWithParamsAndTranslate\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstractWithParamsAndTranslate\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\MathOperationExtractor\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\MathOperationExtractor\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\Translator\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\Translator\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\Notegen\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\Notegen\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\AnomalyDetector\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\AnomalyDetector\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstractWithParams\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstractWithParams\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstract\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\SimplifyAbstract\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\Summarize\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SemanticPlugIns\SamplePlugin\Summarize\skprompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

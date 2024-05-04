@@ -1,0 +1,5 @@
+
+Translate the text to {{$language}}
+
+[Input]
+{{$input}} 

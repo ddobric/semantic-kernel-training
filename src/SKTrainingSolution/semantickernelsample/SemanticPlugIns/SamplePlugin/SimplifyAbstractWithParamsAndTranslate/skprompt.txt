@@ -1,0 +1,10 @@
+
+{{SamplePlugin.Translator $input}}
+
+-----------------------------------------------
+
+Summarize and compress abstract to 50 words, using a user friendly language. 
+
+[Input]
+{{$input}}
+

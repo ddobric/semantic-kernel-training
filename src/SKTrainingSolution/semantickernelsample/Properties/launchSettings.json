@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "semantickernelsample": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4-turbo",
+        "OPENAI_API_KEY": "sk-proj-UzzahypbpiPaBuTaxLSiT3BlbkFJ6xMHdjFR99q9gKLfvpdm",
+        "OPENAI_ORGID": "org-XZmXJa5vIxm5kRwUgea2M2Ni",
+
+        "AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT": "obfuscation",
+        "AZURE_OPENAI_ENDPOINT": "https://damir-openai-demo.openai.azure.com/",
+        "AZURE_OPENAI_API_KEY": "1760b7980fe34c67b06d026bd7eee2f9"
+      }
+    }
+  }
+}

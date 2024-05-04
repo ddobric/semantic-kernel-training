@@ -1,0 +1,11 @@
+
+Extract the name of the mathematical function. And then extract all numerical values.  
+
+[Output]
+Function: the name of function|
+Arguments: comma separated list of numbers.
+
+[Input]
+{{$input}}
+
+[Output]

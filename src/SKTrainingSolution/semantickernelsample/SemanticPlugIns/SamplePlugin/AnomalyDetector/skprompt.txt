@@ -1,0 +1,5 @@
+{{$input}}
+
+----------------------------------------
+
+Detect anomalies in the following text. Provide a detailed explenation how to calculate and list numbers that are anomalies in the sequence.
