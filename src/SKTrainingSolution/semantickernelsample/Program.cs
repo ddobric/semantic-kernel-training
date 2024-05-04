@@ -20,11 +20,13 @@ using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Json.Schema.Generation.Intents;
+using Tiktoken;
 //using Microsoft.SemanticKernel.Planning.Handlebars;
 internal class Program
 {
     private static async Task Main(string[] args)
     {
+        WorkingWithTokens();
         //https://devblogs.microsoft.com/dotnet/demystifying-retrieval-augmented-generation-with-dotnet/
         //await Sample_Lighting();
         //await Sample_HelloSk();
@@ -39,7 +41,7 @@ internal class Program
         //await Sample_HelloSemnticFunction();
         //await Sample_HelloSemanticFunctionWithParams();
         //await Sample_SemanticTextTranslation();
-       // await Sample_NestedSemanticFunction();   
+        // await Sample_NestedSemanticFunction();   
 
         //await Sample_SemanticFunctionInvokesNativeFunction();
         //await Sample_SemanticMathOperationExtractor();
@@ -886,6 +888,27 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 #pragma warning restore SKEXP0060 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
     }
+
+    private static void WorkingWithTokens()
+    {
+        var encoding = Tiktoken.Encoding.ForModel("gpt-4");
+        var tokens = encoding.Encode("hello world"); // [15339, 1917]
+        var text = encoding.Decode(tokens); // hello world
+        var numberOfTokens = encoding.CountTokens(text); // 2
+        var stringTokens = encoding.Explore(text); // ["hello", " world"]
+
+        // Go to tokenizer and try it: https://platform.openai.com/tokenizer
+        tokens = encoding.Encode("Guten tag gute leute aus Deutschland"); // [15339, 1917]
+        text = encoding.Decode(tokens); // hello world 8
+        numberOfTokens = encoding.CountTokens(text); // 
+        stringTokens = encoding.Explore(text); 
+
+        
+        var encoding2 = Tiktoken.Encoding.Get(Encodings.P50KBase);
+        var tokens2 = encoding.Encode("hello world"); // [31373, 995]
+        var text2 = encoding.Decode(tokens); // hello world
+    }
+
     #region Helpers
 
     //private static void PrintFunction(FunctionView func)
