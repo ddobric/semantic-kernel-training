@@ -1,38 +1,25 @@
-﻿using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.AI;
-using Microsoft.SemanticKernel.AI.ChatCompletion;
+﻿using Microsoft.SemanticKernel;
 //using Microsoft.SemanticKernel.AI.ImageGeneration;
-using Microsoft.SemanticKernel.Connectors.AI.OpenAI;
-using Microsoft.SemanticKernel.Connectors.AI.OpenAI.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
-//using Microsoft.SemanticKernel.Orchestration;
-//using Microsoft.SemanticKernel.Planners;
-//using Microsoft.SemanticKernel.Plugins.Core;
-using Microsoft.SemanticKernel.TemplateEngine;
 using semantickernelsample.NativePlugIns;
 using semantickernelsample.Skills;
-using System.Collections.Concurrent;
 using System.Text.Json;
-using Microsoft.SemanticKernel.Plugins;
 using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Json.Schema.Generation.Intents;
 using Tiktoken;
 //using Microsoft.SemanticKernel.Planning.Handlebars;
 internal class Program
 {
     private static async Task Main(string[] args)
     {
-        WorkingWithTokens();
+        //WorkingWithTokens();
         //https://devblogs.microsoft.com/dotnet/demystifying-retrieval-augmented-generation-with-dotnet/
         //await Sample_Lighting();
         //await Sample_HelloSk();
         //await Sample_NativeFunctionsWithArguments();
         //await Sample_InvokeNativeFunctionsWithArguments();
-        // await Sample_HelloPipeline();
+       // await Sample_HelloPipeline();
 
         //await Sample_InlineSemanticFunc1();
         //await Sample_InlineSemanticFunc2();
@@ -41,7 +28,7 @@ internal class Program
         //await Sample_HelloSemnticFunction();
         //await Sample_HelloSemanticFunctionWithParams();
         //await Sample_SemanticTextTranslation();
-        // await Sample_NestedSemanticFunction();   
+        //await Sample_NestedSemanticFunction();
 
         //await Sample_SemanticFunctionInvokesNativeFunction();
         //await Sample_SemanticMathOperationExtractor();
@@ -56,13 +43,15 @@ internal class Program
 
         //await Sample_StepwisePlaner();
 
+        await Sample_FictionWithoutPlaner();
+
         await Sample_FictionPlaner();
 
         await ES_BookHours();
     }
 
     public static async Task Sample_Lighting()
-    { 
+    {
         var kernel = GetKernel();
 
         var lightPlugin = kernel.ImportPluginFromObject(new LightPlugin());
@@ -81,7 +70,7 @@ internal class Program
         Console.Write("User > ");
 
         string? userInput;
-        
+
         while ((userInput = Console.ReadLine()) != null)
         {
             // Add user input
@@ -108,8 +97,6 @@ internal class Program
             // Get user input again
             Console.WriteLine("User > ");
         }
-
-
     }
 
     /// <summary>
@@ -126,7 +113,7 @@ internal class Program
 
         FunctionResult res2 = await kernel?.InvokeAsync(time1["Today"])!;
 
-        DateTime utc = await kernel?.InvokeAsync<DateTime>(time1["UtcNow"]);
+        DateTime utc = await kernel!.InvokeAsync<DateTime>(time1["UtcNow"]);
 
         FunctionResult res3 = await kernel?.InvokeAsync(time1["DayOfWeek"])!;
 
@@ -333,7 +320,7 @@ presented.";
 
         var simlifiedText = await kernel.InvokeAsync(samplePlugin["SimplifyAbstract"], new() { ["input"] = paperAbstract });
 
-        var translatedAndSimplified = await kernel.InvokeAsync(samplePlugin["Translator"], new() { ["input"] = simlifiedText, ["language"] = "german"});
+        var translatedAndSimplified = await kernel.InvokeAsync(samplePlugin["Translator"], new() { ["input"] = simlifiedText, ["language"] = "german" });
 
         Console.WriteLine(translatedAndSimplified);
     }
@@ -358,10 +345,10 @@ presented.";
         {
             ["input"] = paperAbstract,
             ["history"] = @"Bot: How old are you?",
-            ["age"] = "115",
+            ["age"] = "15",
             ["options"] = "7, 10, 15, 20, 30"
         };
-        
+
         var simpleSbstract = await kernel.InvokeAsync<string>(samplePlugin["SimplifyAbstractWithParams"], variables);
 
         Console.WriteLine(simpleSbstract);
@@ -857,6 +844,39 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     }
 
+    public static async Task Sample_FictionWithoutPlaner()
+    {
+        var kernel = GetKernel();
+
+        var plugIn = kernel.ImportPluginFromObject(new SamplePlugIn(), "SamplePlugin");
+
+        // Create chat history
+        var history = new ChatHistory();
+
+        // Get chat completion service
+        var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+
+        var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 wuerstchen.";
+
+        // Add user input
+        history.AddUserMessage(ask);
+
+        // Enable auto function calling
+        OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+        {
+            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+        };
+
+        // Get the response from the AI
+        var result = await chatCompletionService.GetChatMessageContentAsync(
+            history,
+            executionSettings: openAIPromptExecutionSettings,
+            kernel: kernel);
+
+        // Print the results
+        Console.WriteLine("Assistant: " + result);
+    }
+
     public static async Task ES_BookHours()
     {
         var kernel = GetKernel();
@@ -898,12 +918,12 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         var stringTokens = encoding.Explore(text); // ["hello", " world"]
 
         // Go to tokenizer and try it: https://platform.openai.com/tokenizer
-        tokens = encoding.Encode("Guten tag gute leute aus Deutschland"); // [15339, 1917]
+        tokens = encoding.Encode("Guten Tag aus Regensburg"); // [15339, 1917]
         text = encoding.Decode(tokens); // hello world 8
         numberOfTokens = encoding.CountTokens(text); // 
-        stringTokens = encoding.Explore(text); 
+        stringTokens = encoding.Explore(text);
 
-        
+
         var encoding2 = Tiktoken.Encoding.Get(Encodings.P50KBase);
         var tokens2 = encoding.Encode("hello world"); // [31373, 995]
         var text2 = encoding.Decode(tokens); // hello world

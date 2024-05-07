@@ -4,7 +4,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4-turbo",
-        "OPENAI_API_KEY": "sk-proj-UzzahypbpiPaBuTaxLSiT3BlbkFJ6xMHdjFR99q9gKLfvpdm",
+        "OPENAI_API_KEY": "sk-proj-kOp2BPWZitYe5ROQME0XT3BlbkFJ9YqNOo2gsfZFLf2HTn6B",
         "OPENAI_ORGID": "org-XZmXJa5vIxm5kRwUgea2M2Ni",
 
         "AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT": "obfuscation",

@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace semantickernelsample.Skills
 {
-    public  class MyDateTimePlugin
+    public class MyDateTimePlugin
     {
         [KernelFunction, Description("Gets the current time.")]
         public string Now()
-        { 
+        {
             return DateTime.Now.ToString();
         }
 
@@ -42,7 +42,10 @@ namespace semantickernelsample.Skills
         [Description("Get the current day on the planet")]
         public string TodayOnPlanet(string planet)
         {
-            return DateTime.Now.ToString("MMM/dd")!;
+            if (planet.ToLower() == "earth")
+                return DateTime.Now.ToString("MMM/dd")!;
+            else
+                return DateTime.Now.AddMonths(222).ToString("MMM/dd")!;
         }
     }
 }
