@@ -102,11 +102,12 @@ namespace semantickernelsample.Skills
         public Task<string> FictionFunction(
             [Description("The first argument that describes some entity")] string input,
             [Description("The second argument that describes some entity")] string arg2,
-            [Description("The the number that defines the contraction jumping of wurstchen units between entities used to calculate the fiction.")] int number)
+            [Description("The the number that defines the contraction jumping of sausages units between entities used to calculate the fiction.")] int number)
         {
             return Task.FromResult<string>($"{input}-{arg2}-{number.ToString()}");
         }
 
+        
 
         [KernelFunction, Description("Books working hours in Employe service. User wants to commit wotking hours.")]
         public Task<string> EmployeeServiceBookHoursFunction(
@@ -116,5 +117,9 @@ namespace semantickernelsample.Skills
         {
             return Task.FromResult<string>($"{project}-{workingHours}-{date}");
         }
+
+
+
+      
     }
 }

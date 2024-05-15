@@ -14,18 +14,25 @@ internal class Program
     private static async Task Main(string[] args)
     {
         //WorkingWithTokens();
-        //https://devblogs.microsoft.com/dotnet/demystifying-retrieval-augmented-generation-with-dotnet/
-        //await Sample_Lighting();
+
+        //--------------------
+        // NATIVE FUNCTIONS
+        //--------------------
+       
+       // await Sample_Lighting();
         //await Sample_HelloSk();
         //await Sample_NativeFunctionsWithArguments();
         //await Sample_InvokeNativeFunctionsWithArguments();
-       // await Sample_HelloPipeline();
+        // await Sample_HelloPipeline();
 
+        //--------------------
+        // SEMANTIC FUNCTIONS
+        //--------------------
         //await Sample_InlineSemanticFunc1();
         //await Sample_InlineSemanticFunc2();
         //await Sample_InlineSemanticFunc3();
 
-        //await Sample_HelloSemnticFunction();
+     //  await Sample_HelloSemnticFunction();
         //await Sample_HelloSemanticFunctionWithParams();
         //await Sample_SemanticTextTranslation();
         //await Sample_NestedSemanticFunction();
@@ -43,7 +50,7 @@ internal class Program
 
         //await Sample_StepwisePlaner();
 
-        await Sample_FictionWithoutPlaner();
+        await Sample_FictionWithFunctionCall();
 
         await Sample_FictionPlaner();
 
@@ -844,7 +851,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     }
 
-    public static async Task Sample_FictionWithoutPlaner()
+    public static async Task Sample_FictionWithFunctionCall()
     {
         var kernel = GetKernel();
 
@@ -856,7 +863,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         // Get chat completion service
         var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
-        var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 wuerstchen.";
+        var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 sausages.";
 
         // Add user input
         history.AddUserMessage(ask);
@@ -951,8 +958,8 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static Kernel GetKernel()
     {
-        //return GetOpenAIKernel();
-        return GetAzureKernel();
+        return GetOpenAIKernel();
+       // return GetAzureKernel();
     }
 
 
