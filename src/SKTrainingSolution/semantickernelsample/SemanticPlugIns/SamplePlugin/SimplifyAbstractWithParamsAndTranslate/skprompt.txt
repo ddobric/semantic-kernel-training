@@ -1,5 +1,5 @@
 
-{{SamplePlugin.Translator $input}}
+{{SamplePlugin.Translator input=$input language=$language}} DOES NOT WORK!!! IT DOES NOT TRANSLATE!!
 
 -----------------------------------------------
 

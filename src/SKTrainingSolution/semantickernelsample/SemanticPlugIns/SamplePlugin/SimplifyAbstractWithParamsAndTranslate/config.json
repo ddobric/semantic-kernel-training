@@ -14,11 +14,6 @@
       {
         "name": "input",
         "description": "The user's request.",
-        "defaultValue": ""
-      },
-      {
-        "name": "language",
-        "description": "The destination language.",
         "defaultValue": "german"
       }
     ]

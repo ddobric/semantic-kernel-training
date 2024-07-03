@@ -1,5 +1,5 @@
 
-Translate the text to {{$language}}
+Translate the text to {{$language}}. If the language is german, use hard bavarian dialect.
 
 [Input]
 {{$input}} 

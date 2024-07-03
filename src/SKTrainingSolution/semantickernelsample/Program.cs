@@ -8,22 +8,29 @@ using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Tiktoken;
+using System.Diagnostics;
 //using Microsoft.SemanticKernel.Planning.Handlebars;
 internal class Program
 {
     private static async Task Main(string[] args)
     {
+        //TestPerformance();
+
         //WorkingWithTokens();
+
+        //
+        // The ultimate scenario
+        //
+        // await Sample_Lighting();
 
         //--------------------
         // NATIVE FUNCTIONS
         //--------------------
-       
-       // await Sample_Lighting();
+
         //await Sample_HelloSk();
         //await Sample_NativeFunctionsWithArguments();
         //await Sample_InvokeNativeFunctionsWithArguments();
-        // await Sample_HelloPipeline();
+        //await Sample_HelloPipeline();
 
         //--------------------
         // SEMANTIC FUNCTIONS
@@ -32,7 +39,7 @@ internal class Program
         //await Sample_InlineSemanticFunc2();
         //await Sample_InlineSemanticFunc3();
 
-     //  await Sample_HelloSemnticFunction();
+        //await Sample_SemanticFunc_SimplifyAbstract();
         //await Sample_HelloSemanticFunctionWithParams();
         //await Sample_SemanticTextTranslation();
         //await Sample_NestedSemanticFunction();
@@ -56,6 +63,32 @@ internal class Program
 
         await ES_BookHours();
     }
+
+
+    private static void TestPerformance()
+    {
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
+
+        int n = 10000;
+        for (int i = 0; i < n; i++)
+        {
+            var kernel = GetKernel();
+            var lightPlugin = kernel.ImportPluginFromObject(new LightPlugin());
+      
+            // Create chat history
+            var history = new ChatHistory();
+
+            // Get chat completion service
+            var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+        }
+
+        sw.Stop();
+
+        Console.WriteLine(sw.Elapsed);
+        Console.WriteLine($"{(double)sw.ElapsedMilliseconds/(double)n} ms per instance.");
+    }
+
 
     public static async Task Sample_Lighting()
     {
@@ -269,25 +302,33 @@ internal class Program
 
 
     /// <summary>
-    /// Demonstrates the inline semantic function.
+    /// Demonstrates the inline semantic function with settings.
     /// </summary>
     /// <returns></returns>
     private static async Task Sample_InlineSemanticFunc3()
     {
-        OpenAIPromptExecutionSettings requestSettings = new OpenAIPromptExecutionSettings() { MaxTokens = 100, Temperature = 0.4, TopP = 1 };
+        OpenAIPromptExecutionSettings requestSettings = new OpenAIPromptExecutionSettings() { MaxTokens = 1000, Temperature = 0.4, TopP = 1 };
 
         var kernel = GetKernel();
 
         string prompt = @"Bot: How can I help you?
-                        User: {{$input}}
+                        User: {{$a}}, {{$b}}, {{$c}}, {{$d}}, {{$e}}
                         ---------------------------------------------
-                        The intent of the user in 5 words or less: ";
+                        Calculate the anomally between given consumtion values. Provide very short explanation and the final result. Tell me which value is an anomaly.";
 
         var getIntentFunction = kernel.CreateFunctionFromPrompt(prompt, requestSettings, "MyItentPlugIn");
 
-        string ask = "I want to post a real at instagram about our research project in the last 7 months. The real should be 2 minutes long.";
+        string ask = "Following numbers represent the consumtion in Azure: {{$a}}, {{$b}}, {{$c}}, {{$d}}, {{$e}}";
 
-        var result = await kernel.InvokeAsync(getIntentFunction, new() { ["input"] = ask });
+        var result = await kernel.InvokeAsync(getIntentFunction, 
+            new() { 
+                //["input"]=ask,
+                ["a"] = 1200,
+                ["b"] = 1207,
+                ["c"] = 1190,
+                ["d"] = 2200,
+                ["e"] = 1199
+            });
 
         Console.WriteLine(result);
     }
@@ -316,7 +357,7 @@ presented.";
     /// It first loads the function SimplifyAbstract and translates the simplified version.
     /// </summary>
     /// <returns></returns>
-    public static async Task Sample_HelloSemnticFunction()
+    public static async Task Sample_SemanticFunc_SimplifyAbstract()
     {
         var kernel = GetKernel();
 
@@ -327,8 +368,11 @@ presented.";
 
         var simlifiedText = await kernel.InvokeAsync(samplePlugin["SimplifyAbstract"], new() { ["input"] = paperAbstract });
 
-        var translatedAndSimplified = await kernel.InvokeAsync(samplePlugin["Translator"], new() { ["input"] = simlifiedText, ["language"] = "german" });
+        Console.WriteLine($"{simlifiedText}");
+        Console.WriteLine();
 
+        var translatedAndSimplified = await kernel.InvokeAsync(samplePlugin["Translator"], new() { ["input"] = simlifiedText, ["language"] = "croatian" });
+    
         Console.WriteLine(translatedAndSimplified);
     }
 
@@ -407,7 +451,7 @@ presented.";
         var args = new KernelArguments
         {
             ["input"] = paperAbstract,
-            ["language"] = "german"
+            ["language"] = "latin"
         };
 
         // Get the GetIntent function from the OrchestratorPlugin and run it
@@ -925,7 +969,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         var stringTokens = encoding.Explore(text); // ["hello", " world"]
 
         // Go to tokenizer and try it: https://platform.openai.com/tokenizer
-        tokens = encoding.Encode("Guten Tag aus Regensburg"); // [15339, 1917]
+        tokens = encoding.Encode("Guten Tag aus Nürnberg"); // [15339, 1917]
         text = encoding.Decode(tokens); // hello world 8
         numberOfTokens = encoding.CountTokens(text); // 
         stringTokens = encoding.Explore(text);
@@ -958,8 +1002,8 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static Kernel GetKernel()
     {
-        return GetOpenAIKernel();
-       // return GetAzureKernel();
+       //return GetOpenAIKernel();
+        return GetAzureKernel();
     }
 
 

@@ -30,5 +30,15 @@ namespace semantickernelsample.NativePlugIns
 
             return state;
         }
+
+        [KernelFunction]
+        [Description("Invoked for any intent to repair the car. For the given service and the cpdm product k-type specified by user, it locates the product information inside Herth-Bush CPDM system and looksup the product information.")]
+        public Task<string> LookupProduct(
+              [Description("The name of the service, for which the user is interested.")]  string serviceName,
+              [Description("The name of the product inside CPDM. Also called k-type")] string productName,
+              [Description("The user's ask or intent")] string intent)
+        {
+            return Task.FromResult<string>("VW Bremse. https://cpdmurl.com/bremse/77");
+        }
     }
 }
