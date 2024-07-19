@@ -4,12 +4,12 @@
       "commandName": "Project",
       "environmentVariables": {
         "OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
-        "OPENAI_API_KEY": "sk-proj-AwqH38OO9v701zOGZdwHT3BlbkFJsYbsYRNKRT4ix0X1HLng",
-        "OPENAI_ORGID": "org-XZmXJa5vIxm5kRwUgea2M2Ni",
+        "OPENAI_API_KEY": "",
+        "OPENAI_ORGID": "",
 
         "AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
-        "AZURE_OPENAI_ENDPOINT": "https://damir-openai-demo.openai.azure.com/",
-        "AZURE_OPENAI_API_KEY": "1760b7980fe34c67b06d026bd7eee2f9"
+        "AZURE_OPENAI_ENDPOINT": "",
+        "AZURE_OPENAI_API_KEY": ""
       }
     }
   }
