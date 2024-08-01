@@ -962,22 +962,18 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static void WorkingWithTokens()
     {
-        var encoding = Tiktoken.Encoding.ForModel("gpt-4");
-        var tokens = encoding.Encode("hello world"); // [15339, 1917]
-        var text = encoding.Decode(tokens); // hello world
-        var numberOfTokens = encoding.CountTokens(text); // 2
-        var stringTokens = encoding.Explore(text); // ["hello", " world"]
+        var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
+        var tokens = encoder.Encode("hello world"); // [15339, 1917]
+        var text = encoder.Decode(tokens); // hello world
+        var numberOfTokens = encoder.CountTokens(text); // 2
+        var stringTokens = encoder.Explore(text); // ["hello", " world"]
 
         // Go to tokenizer and try it: https://platform.openai.com/tokenizer
-        tokens = encoding.Encode("Guten Tag aus Nürnberg"); // [15339, 1917]
-        text = encoding.Decode(tokens); // hello world 8
-        numberOfTokens = encoding.CountTokens(text); // 
-        stringTokens = encoding.Explore(text);
+        tokens = encoder.Encode("Guten Tag aus Nürnberg"); // [15339, 1917]
+        text = encoder.Decode(tokens); // hello world 8
+        numberOfTokens = encoder.CountTokens(text); // 
+        stringTokens = encoder.Explore(text);
 
-
-        var encoding2 = Tiktoken.Encoding.Get(Encodings.P50KBase);
-        var tokens2 = encoding.Encode("hello world"); // [31373, 995]
-        var text2 = encoding.Decode(tokens); // hello world
     }
 
     #region Helpers
