@@ -107,7 +107,15 @@ namespace semantickernelsample.Skills
             return Task.FromResult<string>($"{input}-{arg2}-{number.ToString()}");
         }
 
-        
+
+        [KernelFunction, Description("Berechnet Investment in die Technologie im Kontext eines Portfolios.")]
+        public Task<string> WorkshopFunction(
+            [Description("Investment Bereich, Sektor usw.")] string input,
+            [Description("The second argument that describes the name of the customer")] string customer,
+            [Description("Zeitraum")] TimeSpan timeRange)
+        {
+            return Task.FromResult<string>($"{input}-{timeRange}-{customer}");
+        }
 
         [KernelFunction, Description("Books working hours in Employe service. User wants to commit wotking hours.")]
         public Task<string> EmployeeServiceBookHoursFunction(

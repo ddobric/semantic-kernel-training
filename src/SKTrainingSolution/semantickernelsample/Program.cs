@@ -21,7 +21,7 @@ internal class Program
         //
         // The ultimate scenario
         //
-        // await Sample_Lighting();
+        await Sample_Lighting();
 
         //--------------------
         // NATIVE FUNCTIONS
@@ -36,7 +36,7 @@ internal class Program
         // SEMANTIC FUNCTIONS
         //--------------------
         //await Sample_InlineSemanticFunc1();
-        //await Sample_InlineSemanticFunc2();
+       // await Sample_InlineSemanticFunc2();
         //await Sample_InlineSemanticFunc3();
 
         //await Sample_SemanticFunc_SimplifyAbstract();
@@ -57,11 +57,13 @@ internal class Program
 
         //await Sample_StepwisePlaner();
 
+        //await Sample_WorkshopFunctionCall();
+
         await Sample_FictionWithFunctionCall();
 
-        await Sample_FictionPlaner();
+        //await Sample_FictionPlaner();
 
-        await ES_BookHours();
+        //await ES_BookHours();
     }
 
 
@@ -96,9 +98,9 @@ internal class Program
 
         var lightPlugin = kernel.ImportPluginFromObject(new LightPlugin());
 
-        var newState = lightPlugin["ChangeState"].InvokeAsync(kernel, new KernelArguments { ["newState"] = true });
+        //var newState = lightPlugin["ChangeState"].InvokeAsync(kernel, new KernelArguments { ["newState"] = true });
 
-        var state = lightPlugin["GetState"].InvokeAsync(kernel);
+        //var state = lightPlugin["GetState"].InvokeAsync(kernel);
 
         // Create chat history
         var history = new ChatHistory();
@@ -396,7 +398,7 @@ presented.";
         {
             ["input"] = paperAbstract,
             ["history"] = @"Bot: How old are you?",
-            ["age"] = "15",
+            ["age"] = "10",
             ["options"] = "7, 10, 15, 20, 30"
         };
 
@@ -907,7 +909,41 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         // Get chat completion service
         var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
-        var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 sausages.";
+        //var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 sausages.";
+        var ask = "Bitte berechne die Fiction zwiechen einen Stein und alpha centaury mit Contraction jumping von 150 Bratwuerstchen.";
+
+        // Add user input
+        history.AddUserMessage(ask);
+
+        // Enable auto function calling
+        OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+        {
+            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+        };
+
+        // Get the response from the AI
+        var result = await chatCompletionService.GetChatMessageContentAsync(
+            history,
+            executionSettings: openAIPromptExecutionSettings,
+            kernel: kernel);
+
+        // Print the results
+        Console.WriteLine("Assistant: " + result);
+    }
+
+    public static async Task Sample_WorkshopFunctionCall()
+    {
+        var kernel = GetKernel();
+
+        var plugIn = kernel.ImportPluginFromObject(new SamplePlugIn(), "SamplePlugin");
+
+        // Create chat history
+        var history = new ChatHistory();
+
+        // Get chat completion service
+        var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+
+        var ask = "Bitte gebe mir den Anteil des Porftolios von Hanns Mustermann investiert in die Baubranche in den letzten drei Monaten.";
 
         // Add user input
         history.AddUserMessage(ask);
@@ -998,8 +1034,8 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static Kernel GetKernel()
     {
-       //return GetOpenAIKernel();
-        return GetAzureKernel();
+       return GetOpenAIKernel();
+       // return GetAzureKernel();
     }
 
 
