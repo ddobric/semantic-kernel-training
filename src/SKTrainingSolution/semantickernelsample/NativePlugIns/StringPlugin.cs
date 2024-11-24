@@ -13,7 +13,7 @@ namespace semantickernelsample.Skills
     /// <summary>
     /// Implements the string manipulation functionalities.
     /// </summary>
-    public class StringSkill
+    public class StringPlugin
     {
         [KernelFunction, Description("Uppers the string.")]
         public string ToUpper([Description("some string as input")] string input)
@@ -43,9 +43,9 @@ namespace semantickernelsample.Skills
 
         [KernelFunction]
         [Description("Return word counter.")]
-        public string CharCount([Description("Any text")] string input)
+        public int CharCount([Description("Any text")] string input)
         {
-            return (input.Length * -1).ToString();
+            return (input.Length * -1);
         }
     }
 }

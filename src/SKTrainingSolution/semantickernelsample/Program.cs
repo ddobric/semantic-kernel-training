@@ -21,7 +21,7 @@ internal class Program
         //
         // The ultimate scenario
         //
-        await Sample_Lighting();
+        //await Sample_Lighting();
 
         //--------------------
         // NATIVE FUNCTIONS
@@ -30,13 +30,12 @@ internal class Program
         //await Sample_HelloSk();
         //await Sample_NativeFunctionsWithArguments();
         //await Sample_InvokeNativeFunctionsWithArguments();
-        //await Sample_HelloPipeline();
 
-        //--------------------
-        // SEMANTIC FUNCTIONS
-        //--------------------
+        //----------------------------
+        // PROMPT (SEMANTIC) FUNCTIONS
+        //----------------------------
         //await Sample_InlineSemanticFunc1();
-        // await Sample_InlineSemanticFunc2();
+        //await Sample_InlineSemanticFunc2();
         //await Sample_InlineSemanticFunc3();
 
         //await Sample_SemanticFunc_SimplifyAbstract();
@@ -534,6 +533,9 @@ presented.";
         // Import the OrchestratorPlugin from the plugins directory.
         var semanticFunctions = kernel.CreatePluginFromPromptDirectory(pluginsDirectory, "SamplePlugIn");
 
+        kernel.ImportPluginFromPromptDirectory(pluginsDirectory, "SamplePlugIn");
+        kernel.ImportPluginFromObject(new StringPlugin());
+
         var variables = new KernelArguments
         {
             ["input"] = paperAbstract,
@@ -544,7 +546,7 @@ presented.";
         var result = await kernel.InvokeAsync<string>(semanticFunctions["AbstractWordCounter"], variables);
 
         Console.WriteLine(result);
-    }
+    } 
 
     /// <summary>
     /// Execute functions in the chain.

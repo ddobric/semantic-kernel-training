@@ -19,7 +19,7 @@
       {
         "name": "language",
         "description": "The destination language.",
-        "defaultValue": ""
+        "defaultValue": "german"
       }
     ]
   }
