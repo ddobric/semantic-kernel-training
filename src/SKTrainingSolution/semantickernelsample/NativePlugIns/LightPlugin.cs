@@ -12,11 +12,11 @@ namespace semantickernelsample.NativePlugIns
     {
         public bool IsOn { get; set; } = false;
 
-#pragma warning disable CA1024 // Use properties where appropriate
+//#pragma warning disable CA1024 // Use properties where appropriate
         [KernelFunction]
         [Description("Gets the state of the light.")]
         public string GetState() => IsOn ? "on" : "off";
-#pragma warning restore CA1024 // Use properties where appropriate
+//#pragma warning restore CA1024 // Use properties where appropriate
 
         [KernelFunction]
         [Description("Changes the state of the light.'")]

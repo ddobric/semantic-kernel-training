@@ -36,7 +36,7 @@ internal class Program
         // SEMANTIC FUNCTIONS
         //--------------------
         //await Sample_InlineSemanticFunc1();
-       // await Sample_InlineSemanticFunc2();
+        // await Sample_InlineSemanticFunc2();
         //await Sample_InlineSemanticFunc3();
 
         //await Sample_SemanticFunc_SimplifyAbstract();
@@ -77,7 +77,7 @@ internal class Program
         {
             var kernel = GetKernel();
             var lightPlugin = kernel.ImportPluginFromObject(new LightPlugin());
-      
+
             // Create chat history
             var history = new ChatHistory();
 
@@ -88,7 +88,7 @@ internal class Program
         sw.Stop();
 
         Console.WriteLine(sw.Elapsed);
-        Console.WriteLine($"{(double)sw.ElapsedMilliseconds/(double)n} ms per instance.");
+        Console.WriteLine($"{(double)sw.ElapsedMilliseconds / (double)n} ms per instance.");
     }
 
 
@@ -121,6 +121,7 @@ internal class Program
             // Enable auto function calling
             OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
             {
+                Temperature = 0.0,
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
             };
 
@@ -322,8 +323,9 @@ internal class Program
 
         string ask = "Following numbers represent the consumtion in Azure: {{$a}}, {{$b}}, {{$c}}, {{$d}}, {{$e}}";
 
-        var result = await kernel.InvokeAsync(getIntentFunction, 
-            new() { 
+        var result = await kernel.InvokeAsync(getIntentFunction,
+            new()
+            {
                 //["input"]=ask,
                 ["a"] = 1200,
                 ["b"] = 1207,
@@ -374,7 +376,7 @@ presented.";
         Console.WriteLine();
 
         var translatedAndSimplified = await kernel.InvokeAsync(samplePlugin["Translator"], new() { ["input"] = simlifiedText, ["language"] = "croatian" });
-    
+
         Console.WriteLine(translatedAndSimplified);
     }
 
@@ -1034,8 +1036,8 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static Kernel GetKernel()
     {
-       return GetOpenAIKernel();
-       // return GetAzureKernel();
+        return GetOpenAIKernel();
+        // return GetAzureKernel();
     }
 
 
