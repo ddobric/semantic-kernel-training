@@ -397,3 +397,8 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /src/SkSamples/semantickernelsample/Properties/launchSettings.json
+/src/SKTrainingSolution/semantickernelsample/Properties/launchSettings - Empty.json
+/src/SKTrainingSolution/semantickernelsample/Properties/launchSettings -Prod.json
+/src/SKTrainingSolution/semantickernelsample/Properties/launchSettings - Copy.json
+/src/SKTrainingSolution/semantickernelsample/Properties/launchSettings -Empty.json
+/src/SKTrainingSolution/semantickernelsample/Properties/launchSettings - Prod.json
