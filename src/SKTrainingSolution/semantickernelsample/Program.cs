@@ -251,7 +251,8 @@ internal class Program
         Give me the TLDR in 5 words.
         ";
 
-        var semanticFunction = kernel.CreateFunctionFromPrompt(prompt, new OpenAIPromptExecutionSettings() { MaxTokens = 100, Temperature = 0.4, TopP = 1 });
+        var semanticFunction = kernel.CreateFunctionFromPrompt(prompt, 
+            new OpenAIPromptExecutionSettings()  { MaxTokens = 100, Temperature = 0.4, TopP = 1 });
 
         string systemMessage = @"
         1) A robot may not injure a human being or, through inaction,
@@ -539,14 +540,14 @@ presented.";
         var variables = new KernelArguments
         {
             ["input"] = paperAbstract,
-            ["language"] = "bosnian"
+            ["language"] = "german"
         };
 
         // Get the GetIntent function from the OrchestratorPlugin and run it
         var result = await kernel.InvokeAsync<string>(semanticFunctions["AbstractWordCounter"], variables);
 
         Console.WriteLine(result);
-    } 
+    }
 
     /// <summary>
     /// Execute functions in the chain.

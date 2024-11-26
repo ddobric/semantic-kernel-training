@@ -1,13 +1,15 @@
 
-{{SamplePlugin.Translator $input}}
 
---------------------------------------
+Write the origin language and destination language.
+Then summarize the scientific abstract using a user friendly destination language. 
 
-Summarize the scientific abstract using a user friendly language. Counter = {{StringPlugin.CharCount $input}}
+Translated Abstract: {{SamplePlugin.Translator input=$input language=$language}}
 Provide the result in following format:	
 
 [Output]
-Counter: number,
+Number of translated words: ,
+Origin language:
+Destination language:
 Text: translated text
 
 [Input]
