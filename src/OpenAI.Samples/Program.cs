@@ -18,13 +18,13 @@ namespace OpenAI.Samples
 
             //await VisionAsync();
 
-            //await CreateEmbeddingsAsync();
-
             //await ImageGenerationAsync();
 
             //await SimpleImageEditAsync();
 
-            await AssistentSample.RunRetrievalAugmentedGenerationAsync();
+            //await CreateEmbeddingsAsync();
+
+            //await AssistentSample.RunRetrievalAugmentedGenerationAsync();
 
             Console.ReadLine();
         }
@@ -146,6 +146,7 @@ namespace OpenAI.Samples
                 + " points, creating a connection with nature. Soft textiles and cushions in organic fabrics adding comfort"
                 + " and softness to a space. They can serve as accents, adding contrast and texture. Dog sitting at the table. Tiger is laying under the table.";
 
+            prompt = "Dancing forever in Tanzania with monkeys, elephants, Aaj Ki Raat  Tamannaah Bhatia  Sachin-Jigar Madhubanti  Divya  Amitabh";
             ImageGenerationOptions options = new()
             {
                 Quality = GeneratedImageQuality.High,
@@ -236,7 +237,7 @@ namespace OpenAI.Samples
                 + " to water sparingly and maintain a less-is-more approach.";
 
             input = "Guten Tag liebe Studenten aus Franfurt am Main";
-            BinaryData speech = await client.GenerateSpeechAsync(input, GeneratedSpeechVoice.Nova);
+            BinaryData speech = await client.GenerateSpeechAsync(input, GeneratedSpeechVoice.Fable);
 
             using FileStream stream = File.OpenWrite($"{Guid.NewGuid()}.mp3");
             speech.ToStream().CopyTo(stream);

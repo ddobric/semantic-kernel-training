@@ -914,9 +914,9 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         // Get chat completion service
         var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
-        //var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 sausages.";
-        var ask = "Bitte berechne die Fiction zwiechen einen Stein und alpha centaury mit Contraction jumping von 150 Bratwuerstchen.";
-        ask = "Molim te, izračunaj fikciju između kamena i Alpha Centaurija s kontrakcijskim skokom od 150 kobasica.";
+        var ask = "Please calculate the fiction between the stone and alpha centaury with the contraction jumping of 150 sausages.";
+        //var ask = "Bitte berechne die Fiction zwiechen einen Stein und alpha centaury mit Contraction jumping von 150 Bratwuerstchen.";
+        //ask = "Molim te, izračunaj fikciju između kamena i Alpha Centaurija s kontrakcijskim skokom od 150 kobasica.";
 
         // Add user input
         history.AddUserMessage(ask);
