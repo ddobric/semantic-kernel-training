@@ -404,3 +404,5 @@ FodyWeavers.xsd
 /src/SKTrainingSolution/semantickernelsample/Properties/launchSettings - Prod.json
 /src/OpenAI.Samples/Properties/launchSettings.empty.json
 /src/OpenAI.Samples/Properties/launchSettings.prod.json
+/src/Agents/GithubAgent/Properties/launchSettings.empty.json
+/src/Agents/GithubAgent/Properties/launchSettings.prod.json
