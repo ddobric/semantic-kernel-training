@@ -9,11 +9,15 @@ using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Tiktoken;
 using System.Diagnostics;
+using Microsoft.SemanticKernel.Text;
+using semantickernelsample;
 //using Microsoft.SemanticKernel.Planning.Handlebars;
 internal class Program
 {
     private static async Task Main(string[] args)
     {
+        TextSplittingSample.Split();
+
         //TestPerformance();
 
         //WorkingWithTokens();
@@ -1004,6 +1008,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static void WorkingWithTokens()
     {
+        //GPT3Tokenizer
         var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
         var tokens = encoder.Encode("hello world"); // [15339, 1917]
         var text = encoder.Decode(tokens); // hello world

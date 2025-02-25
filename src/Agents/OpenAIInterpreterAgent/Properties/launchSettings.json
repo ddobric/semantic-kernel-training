@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "GithubAgent": {
+      "commandName": "Project",
+      "environmentVariables": {
+
+        "OPENAI_API_KEY": "",
+        "OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o"
+      }
+    }
+  }
+}

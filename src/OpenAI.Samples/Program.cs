@@ -12,19 +12,19 @@ namespace OpenAI.Samples
         {
             Console.WriteLine("Hello, OpenAI Samples!");
 
-            //await ChatStreamingAsync();
+            await ChatStreamingAsync();
 
-            //await TextToSpeechAsync();
+            await TextToSpeechAsync();
 
-            //await VisionAsync();
+            await VisionAsync();
 
-            //await ImageGenerationAsync();
+            await ImageGenerationAsync();
 
-            //await SimpleImageEditAsync();
+            await SimpleImageEditAsync();
 
-            //await CreateEmbeddingsAsync();
+            await CreateEmbeddingsAsync();
 
-            //await AssistentSample.RunRetrievalAugmentedGenerationAsync();
+            await AssistentSample.RunRetrievalAugmentedGenerationAsync();
 
             Console.ReadLine();
         }

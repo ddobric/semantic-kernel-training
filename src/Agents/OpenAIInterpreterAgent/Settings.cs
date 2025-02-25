@@ -8,5 +8,10 @@ namespace OpenAIInterpreterAgent
 {
     internal class Settings
     {
+        public string Model { get; set; }
+
+        public string Key { get; set; }
+
+
     }
 }
