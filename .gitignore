@@ -406,3 +406,5 @@ FodyWeavers.xsd
 /src/OpenAI.Samples/Properties/launchSettings.prod.json
 /src/Agents/GithubAgent/Properties/launchSettings.empty.json
 /src/Agents/GithubAgent/Properties/launchSettings.prod.json
+/src/Agents/OpenAIInterpreterAgent/Properties/launchSettings.empty.json
+/src/Agents/OpenAIInterpreterAgent/Properties/launchSettings.prod.json
