@@ -408,3 +408,4 @@ FodyWeavers.xsd
 /src/Agents/GithubAgent/Properties/launchSettings.prod.json
 /src/Agents/OpenAIInterpreterAgent/Properties/launchSettings.empty.json
 /src/Agents/OpenAIInterpreterAgent/Properties/launchSettings.prod.json
+/src/SKTrainingSolution/semantickernelsample/Properties/launchSettings.DeepSeek.json
