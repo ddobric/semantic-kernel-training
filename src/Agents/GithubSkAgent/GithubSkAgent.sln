@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35506.116 d17.12
+VisualStudioVersion = 17.12.35506.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GithubAgent", "GithubAgent.csproj", "{858B25A5-2817-405E-8B75-354D23B80337}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GithubSkAgent", "GithubSkAgent.csproj", "{858B25A5-2817-405E-8B75-354D23B80337}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

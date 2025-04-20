@@ -77,10 +77,10 @@ namespace FoundryAgent
 
             //ThreadMessage message = messageResponse.Value;
 
-            var messageResponse2 = await client.CreateMessageAsync(
-                thread.Id,
-                MessageRole.User,
-                "Tell me the nick name of the city Sarajevo.");
+            //var messageResponse2 = await client.CreateMessageAsync(
+            //    thread.Id,
+            //    MessageRole.User,
+            //    "Tell me the nick name of the city Sarajevo.");
 
             Response<PageableList<ThreadMessage>> messagesListResponse = await client.GetMessagesAsync(thread.Id);
 
@@ -178,7 +178,7 @@ namespace FoundryAgent
             else if (location.ToLower().Contains("sarajevo"))
                 return "Bosnian Culture City";
             else
-                throw new NotImplementedException();
+                return "Unknown City";
         }
 
         private static FunctionToolDefinition GetCityNicknameTool = new(
