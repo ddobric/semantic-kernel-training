@@ -20,14 +20,15 @@ namespace FoundryAgent
         /// <returns></returns>
         static async Task Main(string[] args)
         {
-            //FunctionToolDefinition myFnc = new("LightSwitch", "Switch on the light.");
+            // How to create the Function definition ot the tool.
+            // This is the definition only, not a code!
+            // FunctionToolDefinition myFnc = new("LightSwitch", "Switch on the light.");
 
             RegisterTelemetry();
 
             string agentName = "Sarcastic Agent";
             string modelName = "gpt-4o";
-
-            var connectionString = Environment.GetEnvironmentVariable("AgentConnStr");
+            string connectionString = Environment.GetEnvironmentVariable("AgentConnStr")!;
 
             AgentsClient client = new AgentsClient(connectionString, new DefaultAzureCredential());
 
@@ -35,11 +36,15 @@ namespace FoundryAgent
 
             Response<PageableList<Agent>> agentListResponse = await client.GetAgentsAsync();
 
+            Console.WriteLine("Listing agents in the foundry project...");
+
             foreach (var foundyAgent in agentListResponse.Value)
             {
                 agent = foundyAgent;
                 Console.WriteLine($"Agent: {foundyAgent.Name} - {foundyAgent.Id}");
             }
+
+            Console.WriteLine("------------------------");
 
             agent = agentListResponse.Value.FirstOrDefault(a => a.Name == agentName);
 
@@ -77,41 +82,32 @@ namespace FoundryAgent
                 MessageRole.User,
                 "Tell me the nick name of the city Sarajevo.");
 
-            // Intermission: message is now correlated with thread
-            // Intermission: listing messages will retrieve the message just added
+            Response<PageableList<ThreadMessage>> messagesListResponse = await client.GetMessagesAsync(thread.Id);
 
-            Response <PageableList<ThreadMessage>> messagesListResponse = await client.GetMessagesAsync(thread.Id);
-            //Assert.That(messagesListResponse.Value.Data[0].Id == message.Id);
-
-            // Step 4: Run the agent
-            Response<ThreadRun> runResponse = await client.CreateRunAsync(
-                thread.Id,
-                agent?.Id,
-                additionalInstructions: "");
-            ThreadRun run = runResponse.Value;
-
-            do
+            while (true)
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(500));
-                runResponse = await client.GetRunAsync(thread.Id, runResponse.Value.Id);
+                Console.Write("> ");
+                string? userInput = Console.ReadLine();
+                if (String.IsNullOrEmpty(userInput) || userInput == "exit")
+                    break;
 
-                if (runResponse.Value.Status == RunStatus.RequiresAction &&
-                    runResponse.Value.RequiredAction is SubmitToolOutputsAction submitToolOutputsAction)
-                {
-                    List<ToolOutput> toolOutputs = new();
-                    foreach (RequiredToolCall toolCall in submitToolOutputsAction.ToolCalls)
-                    {
-                        toolOutputs.Add(GetResolvedToolOutput(toolCall));
-                    }
-                    runResponse = await client.SubmitToolOutputsToRunAsync(runResponse.Value, toolOutputs);
-                }
+                await client.CreateMessageAsync(thread.Id, MessageRole.User, userInput);
+
+                string runId = await RunOnThreadAndWait(client, agent, thread);
+
+                await PrintConversationResult(client, thread, runId);
             }
-            while (runResponse.Value.Status == RunStatus.Queued || runResponse.Value.Status == RunStatus.InProgress);
 
-            Response<PageableList<ThreadMessage>> afterRunMessagesResponse
-                = await client.GetMessagesAsync(thread.Id);
+            Console.ReadLine();
+        }
 
-            IReadOnlyList<ThreadMessage> messages = afterRunMessagesResponse.Value.Data;
+        private static async Task PrintConversationResult(AgentsClient client, AgentThread thread, string runId)
+        {
+            Console.WriteLine("============================================================");
+
+            Response<PageableList<ThreadMessage>> afterRunMessagesResponse = await client.GetMessagesAsync(thread.Id, runId);
+
+            IReadOnlyList<ThreadMessage> messages = afterRunMessagesResponse.Value.Data.Where(m=>m.RunId == runId).ToArray();
 
             // Note: messages iterate from newest to oldest, with the messages[0] being the most recent
             foreach (ThreadMessage threadMessage in messages)
@@ -132,9 +128,38 @@ namespace FoundryAgent
                 }
             }
 
-            //await client.CancelRunAsync(runResponse.Value.ThreadId, runResponse.Value.Id);
+            Console.WriteLine("============================================================");
+        }
 
-            Console.ReadLine();
+        private static async Task<string> RunOnThreadAndWait(AgentsClient client, Agent? agent, AgentThread thread)
+        {
+            // Run the agent
+            Response<ThreadRun> runResponse = await client.CreateRunAsync(
+                thread.Id,
+                agent?.Id,
+                additionalInstructions: "");
+            ThreadRun run = runResponse.Value;
+
+            do
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
+                
+                runResponse = await client.GetRunAsync(thread.Id, runResponse.Value.Id);
+
+                if (runResponse.Value.Status == RunStatus.RequiresAction &&
+                    runResponse.Value.RequiredAction is SubmitToolOutputsAction submitToolOutputsAction)
+                {
+                    List<ToolOutput> toolOutputs = new();
+                    foreach (RequiredToolCall toolCall in submitToolOutputsAction.ToolCalls)
+                    {
+                        toolOutputs.Add(GetResolvedToolOutput(toolCall));
+                    }
+                    runResponse = await client.SubmitToolOutputsToRunAsync(runResponse.Value, toolOutputs);
+                }
+            }
+            while (runResponse.Value.Status == RunStatus.Queued || runResponse.Value.Status == RunStatus.InProgress);
+
+            return runResponse.Value.Id;
         }
 
         /// <summary>
@@ -146,12 +171,15 @@ namespace FoundryAgent
         private static FunctionToolDefinition GetUserFavoriteCityTool = new("GetUserFavoriteCity", "Gets the user's favorite city.");
 
         // Example of a function with a single required parameter
-        protected static string GetCityNickname(string location) => location switch
+        protected static string GetCityNickname(string location)
         {
-            "Seattle, WA" => "The Emerald City",
-            "Sarajavo" => "Bosnian Culture City",
-            _ => throw new NotImplementedException(),
-        };
+            if (location.ToLower().Contains("seattle"))
+                return "The Emerald City";
+            else if (location.ToLower().Contains("sarajevo"))
+                return "Bosnian Culture City";
+            else
+                throw new NotImplementedException();
+        }
 
         private static FunctionToolDefinition GetCityNicknameTool = new(
             name: "GetCityNickname",
