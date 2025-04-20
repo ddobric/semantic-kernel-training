@@ -412,3 +412,5 @@ FodyWeavers.xsd
 /src/Agents/FoundryAgent/Properties/launchSettings.json
 /src/Agents/FoundryAgent/Properties/launchSettings.prod.json
 /src/Agents/FoundryAgent/Properties/launchSettings.empty.json
+/src/Agents/GithubSkAgent/Properties/launchSettings.empty.json
+/src/Agents/GithubSkAgent/Properties/launchSettings.prod.json
