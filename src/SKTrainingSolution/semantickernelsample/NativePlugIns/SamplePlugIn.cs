@@ -73,7 +73,9 @@ namespace semantickernelsample.Skills
         [KernelFunction, Description("Executes the function semantically extracted from prompt.")]
         public async Task<string> ExecuteMathOperationFunction(string prompt)
         {
-            var plugIn = this._kernel?.ImportPluginFromPromptDirectory("SamplePlugin");
+            var pluginsDirectory = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SemanticPlugins/SamplePlugin");
+
+            var plugIn = this._kernel?.ImportPluginFromPromptDirectory(pluginsDirectory, "SamplePlugin");
 
             var res = await _kernel.InvokeAsync<string>(plugIn["MathOperationExtractor"], new() { ["input"] = prompt });
 
@@ -86,7 +88,7 @@ namespace semantickernelsample.Skills
             var arg1 = int.Parse(args[0].Replace("\nArguments: ", String.Empty));
             var arg2 = int.Parse(args[1]);
 
-            switch (mathOperator.Replace("Function: ", String.Empty))
+            switch (mathOperator.Replace("\r\nFunction: ", String.Empty).Trim())
             {
                 case "+":
                     return (arg1 + arg2).ToString();

@@ -11,21 +11,28 @@ using Tiktoken;
 using System.Diagnostics;
 using Microsoft.SemanticKernel.Text;
 using semantickernelsample;
+using OpenTelemetry.Resources;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+using Microsoft.Extensions.Logging;
+using OpenTelemetry.Logs;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.ML.Tokenizers;
 //using Microsoft.SemanticKernel.Planning.Handlebars;
 internal class Program
 {
     private static async Task Main(string[] args)
     {
-        TextSplittingSample.Split();
+        //TextSplittingSample.Split();
 
         //TestPerformance();
 
-        //WorkingWithTokens();
+        WorkingWithTokens();
 
         //
         // The ultimate scenario
         //
-        //await Sample_Lighting();
+        await Sample_Lighting();
 
         //--------------------
         // NATIVE FUNCTIONS
@@ -47,9 +54,9 @@ internal class Program
         //await Sample_SemanticTextTranslation();
         //await Sample_NestedSemanticFunction();
 
-        //await Sample_SemanticFunctionInvokesNativeFunction(); //*
+        // await Sample_SemanticFunctionInvokesNativeFunction(); //*
         //await Sample_SemanticMathOperationExtractor();
-        //await Sample_NativeFunctionInvokesSemanticFunction();
+        // await Sample_NativeFunctionInvokesSemanticFunction();
         //await Sample_ChainingSemanticFunction();
 
         //await Sample_GroundingWithNativeSkill();
@@ -255,8 +262,8 @@ internal class Program
         Give me the TLDR in 5 words.
         ";
 
-        var semanticFunction = kernel.CreateFunctionFromPrompt(prompt, 
-            new OpenAIPromptExecutionSettings()  { MaxTokens = 100, Temperature = 0.4, TopP = 1 });
+        var semanticFunction = kernel.CreateFunctionFromPrompt(prompt,
+            new OpenAIPromptExecutionSettings() { MaxTokens = 100, Temperature = 0.4, TopP = 1 });
 
         string systemMessage = @"
         1) A robot may not injure a human being or, through inaction,
@@ -379,7 +386,7 @@ presented.";
         Console.WriteLine($"{simlifiedText}");
         Console.WriteLine();
 
-        var translatedAndSimplified = await kernel.InvokeAsync(samplePlugin["Translator"], new() { ["input"] = simlifiedText, ["language"] = "croatian" });
+        var translatedAndSimplified = await kernel.InvokeAsync(samplePlugin["Translator"], new() { ["input"] = simlifiedText, ["language"] = "german" });
 
         Console.WriteLine(translatedAndSimplified);
     }
@@ -512,7 +519,7 @@ presented.";
 
         var variables = new KernelArguments
         {
-            ["input"] = "Execute the function exponent with following arguments 2 and 16",
+            ["prompt"] = "Execute the function exponent with following arguments 2 and 16",
         };
 
         // Get the GetIntent function from the OrchestratorPlugin and run it
@@ -544,7 +551,7 @@ presented.";
         var variables = new KernelArguments
         {
             ["input"] = paperAbstract,
-            ["language"] = "german"
+            ["language"] = "croatian"
         };
 
         // Get the GetIntent function from the OrchestratorPlugin and run it
@@ -1006,7 +1013,28 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     }
 
-    private static void WorkingWithTokens()
+    protected static void WorkingWithTokens()
+    {
+        var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4o");
+        string normalizedText;
+        var  tokens = tokenizer.EncodeToTokens("hello world", out normalizedText); // [15339, 1917]   
+
+        ////GPT3Tokenizer
+        //var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
+        //var tokens = encoder.Encode("hello world"); // [15339, 1917]
+        //var text = encoder.Decode(tokens); // hello world
+        //var numberOfTokens = encoder.CountTokens(text); // 2
+        //var stringTokens = encoder.Explore(text); // ["hello", " world"]
+
+        //// Go to tokenizer and try it: https://platform.openai.com/tokenizer
+        //tokens = encoder.Encode("Guten Tag aus Nürnberg"); // [15339, 1917]
+        //text = encoder.Decode(tokens); // hello world 8
+        //numberOfTokens = encoder.CountTokens(text); // 
+        //stringTokens = encoder.Explore(text);
+
+    }
+
+    private static void WorkingWithOpenSpourceTokens()
     {
         //GPT3Tokenizer
         var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
@@ -1045,8 +1073,8 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static Kernel GetKernel()
     {
-        return GetOpenAIKernel();
-        // return GetAzureKernel();
+        //return GetOpenAIKernel();
+        return GetAzureKernel();
     }
 
 
@@ -1054,17 +1082,20 @@ We offer you our profound cloud knowledge as standardized best-practice service 
     {
         Kernel kernel;
 
+        IKernelBuilder builder;
+
         if (useChatOrTextCompletionModel == null || useChatOrTextCompletionModel == "chat")
         {
-            kernel = Kernel.CreateBuilder()
+            builder = Kernel.CreateBuilder()
              .AddOpenAIChatCompletion(
             Environment.GetEnvironmentVariable("OPENAI_CHATCOMPLETION_DEPLOYMENT")!, // The name of your deployment (e.g., "gpt-3.5-turbo")
             Environment.GetEnvironmentVariable("OPENAI_API_KEY")!,
-            Environment.GetEnvironmentVariable("OPENAI_ORGID")!)
-        .Build();
+            Environment.GetEnvironmentVariable("OPENAI_ORGID")!);
         }
         else
             throw new Exception("Text Completion Models are deprected.");
+
+        kernel = builder.Build();
 
         return kernel;
     }
@@ -1073,27 +1104,66 @@ We offer you our profound cloud knowledge as standardized best-practice service 
     {
         Kernel kernel;
 
+        IKernelBuilder builder;
+
         if (useChatOrTextCompletionModel == null || useChatOrTextCompletionModel == "chat")
         {
-            kernel = Kernel.CreateBuilder()
+            builder = Kernel.CreateBuilder()
             .AddAzureOpenAIChatCompletion(
                 Environment.GetEnvironmentVariable("AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
                 Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
                 Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!      // The API key of your Azure OpenAI service
-            )
-            .Build();
+            );
         }
         else
         {
-            kernel = Kernel.CreateBuilder()
+            builder = Kernel.CreateBuilder()
             .AddOpenAIChatCompletion(
-          Environment.GetEnvironmentVariable("AZURE_OPENAI_TEXTCOMPLETION_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
-          Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
-          Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!      // The API key of your Azure OpenAI service
-      )
-      .Build();
+                  Environment.GetEnvironmentVariable("AZURE_OPENAI_TEXTCOMPLETION_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
+                  Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
+                  Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!      // The API key of your Azure OpenAI service
+              );
         }
+
+        //builder.Services.AddSingleton(AddTelemetry());
+
+        kernel = builder.Build();
+
         return kernel;
+    }
+
+    private static ILoggerFactory _logFactory;
+    protected static ILoggerFactory AddTelemetry()
+    {
+        var resourceBuilder = ResourceBuilder
+        .CreateDefault()
+        .AddService("TelemetryConsoleQuickstart");
+
+        // Enable model diagnostics with sensitive data.
+        AppContext.SetSwitch("Microsoft.SemanticKernel.Experimental.GenAI.EnableOTelDiagnosticsSensitive", true);
+
+        var traceProvider = Sdk.CreateTracerProviderBuilder()
+            .SetResourceBuilder(resourceBuilder)
+            .AddSource("Microsoft.SemanticKernel*")
+            .AddConsoleExporter()
+            .Build();
+
+        
+        _logFactory = LoggerFactory.Create(builder =>
+        {
+            // Add OpenTelemetry as a logging provider
+            builder.AddOpenTelemetry(options =>
+            {
+                options.SetResourceBuilder(resourceBuilder);
+                options.AddConsoleExporter();
+                // Format log messages. This is default to false.
+                options.IncludeFormattedMessage = true;
+                options.IncludeScopes = true;
+            });
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+
+        return _logFactory;
     }
     #endregion
 }

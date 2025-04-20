@@ -4,8 +4,9 @@
       "commandName": "Project",
       "environmentVariables": {
         "OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
-        "OPENAI_API_KEY": "",
-        "OPENAI_ORGID": ""
+        "OPENAI_API_KEY": "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",
+        "OPENAI_ORGID": "org-XZmXJa5vIxm5kRwUgea2M2Ni"
+
       }
     }
   }

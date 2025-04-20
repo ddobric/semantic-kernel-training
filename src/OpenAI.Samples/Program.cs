@@ -3,6 +3,7 @@ using OpenAI.Chat;
 using OpenAI.Embeddings;
 using OpenAI.Images;
 using System.ClientModel;
+using System.Text;
 
 namespace OpenAI.Samples
 {
@@ -12,17 +13,17 @@ namespace OpenAI.Samples
         {
             Console.WriteLine("Hello, OpenAI Samples!");
 
-            await ChatStreamingAsync();
+            //await ChatStreamingAsync();
 
-            await TextToSpeechAsync();
+            //await TextToSpeechAsync();
 
-            await VisionAsync();
+           // await VisionAsync();
 
-            await ImageGenerationAsync();
+           // await ImageGenerationAsync();
 
-            await SimpleImageEditAsync();
+            //await SimpleImageEditAsync();
 
-            await CreateEmbeddingsAsync();
+           // await CreateEmbeddingsAsync();
 
             await AssistentSample.RunRetrievalAugmentedGenerationAsync();
 
@@ -57,14 +58,18 @@ namespace OpenAI.Samples
 
                 Console.Write($"[Agent]: ");
 
+                StringBuilder sb = new StringBuilder();
+
                 await foreach (StreamingChatCompletionUpdate completionUpdate in completionUpdates)
                 {
                     if (completionUpdate.ContentUpdate.Count > 0)
                     {
-                        history.Add(ChatMessage.CreateAssistantMessage(completionUpdate.ContentUpdate[0].Text));
+                        sb.Append(ChatMessage.CreateAssistantMessage(completionUpdate.ContentUpdate[0].Text));
                         Console.Write(completionUpdate.ContentUpdate[0].Text);
                     }
                 }
+
+                history.Add(ChatMessage.CreateAssistantMessage(sb.ToString()));
 
                 Console.WriteLine();
             }
@@ -144,9 +149,9 @@ namespace OpenAI.Samples
                 + " sense of harmony. Featuring sleek wood furniture with clean lines and subtle curves to add warmth and"
                 + " elegance. Plants and flowers in ceramic pots adding color and life to a space. They can serve as focal"
                 + " points, creating a connection with nature. Soft textiles and cushions in organic fabrics adding comfort"
-                + " and softness to a space. They can serve as accents, adding contrast and texture. Dog sitting at the table. Tiger is laying under the table.";
+                + " and softness to a space. They can serve as accents, adding contrast and texture. Dog sitting at the table. Tiger is laying under the table. One women is wrking on laptop and eating the chocolate.";
 
-            prompt = "Dancing forever in Tanzania with monkeys, elephants, Aaj Ki Raat  Tamannaah Bhatia  Sachin-Jigar Madhubanti  Divya  Amitabh";
+            prompt = "Dancing forever in Tanzania with monkeys, elephants, Aaj Ki Raat  Tamannaah Bhatia  Sachin-Jigar Madhubanti  Divya  Amitabh. One women is working on laptop and eating the chocolate.";
             ImageGenerationOptions options = new()
             {
                 Quality = GeneratedImageQuality.High,
@@ -237,6 +242,8 @@ namespace OpenAI.Samples
                 + " to water sparingly and maintain a less-is-more approach.";
 
             input = "Guten Tag liebe Studenten aus Franfurt am Main";
+
+            input = "Stell dir Ferrero als ein magisches Schokoladenland vor, in dem die Haselnüsse wie Könige behandelt werden und die Schokolade in Strömen fließt. In den geheimen Labors von Ferrero debattieren die Chocolatiers darüber, ob sie noch eine weitere Schicht Haselnusscreme hinzufügen sollten, während Kinder Überraschungseier wie kleine Schätze öffnen. Ferrero ist wie das italienische Hogwarts der Süßigkeitenwelt, wo der Zauberstab aus Schokolade besteht und der Zauberspruch „Nutella“ heißt. Ein Ort, an dem jeder Tag wie der Welt-Schokoladen-Tag gefeiert wird!\r\n\r\nWenn du mehr über Ferrero wissen möchtest oder spezifische Fragen hast, lass es mich wissen!";
             BinaryData speech = await client.GenerateSpeechAsync(input, GeneratedSpeechVoice.Fable);
 
             using FileStream stream = File.OpenWrite($"{Guid.NewGuid()}.mp3");
