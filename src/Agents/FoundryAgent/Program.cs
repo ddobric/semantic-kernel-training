@@ -40,7 +40,11 @@ namespace FoundryAgent
 
             foreach (var foundyAgent in agentListResponse.Value)
             {
-                agent = foundyAgent;
+                if (foundyAgent.Name == agentName)
+                {
+                    agent = foundyAgent;
+                    break;
+                };
                 Console.WriteLine($"Agent: {foundyAgent.Name} - {foundyAgent.Id}");
             }
 
@@ -166,7 +170,7 @@ namespace FoundryAgent
         /// Example of the function with no arguments.
         /// </summary>
         /// <returns></returns>
-        protected static string GetUserFavoriteCity() => "Seattle, WA";
+        protected static string GetUserFavoriteCity() => "Frankfurt am Main, Germany";
 
         private static FunctionToolDefinition GetUserFavoriteCityTool = new("GetUserFavoriteCity", "Gets the user's favorite city.");
 

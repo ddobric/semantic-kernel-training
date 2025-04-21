@@ -68,7 +68,7 @@ namespace GithubAgent
                 {
                     continue;
                 }
-                if (input.Trim().Equals("EXIT", StringComparison.OrdinalIgnoreCase))
+                else if (input.Trim().ToLower().Equals("exit", StringComparison.OrdinalIgnoreCase))
                 {
                     isComplete = true;
                     break;
@@ -79,11 +79,13 @@ namespace GithubAgent
                 Console.WriteLine();
 
                 DateTime now = DateTime.Now;
+
                 KernelArguments arguments =
                     new()
                     {
                     { "now", $"{now.ToShortDateString()} {now.ToShortTimeString()}" }
                     };
+
                 await foreach (ChatMessageContent response in agent.InvokeAsync(history, arguments))
                 {
                     // Display response.
