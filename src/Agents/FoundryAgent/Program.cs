@@ -26,7 +26,7 @@ namespace FoundryAgent
 
             RegisterTelemetry();
 
-            string agentName = "Sarcastic Agent";
+            string agentName = "DemoAgent";
             string modelName = "gpt-4o";
             string connectionString = Environment.GetEnvironmentVariable("AgentConnStr")!;
 
@@ -59,11 +59,13 @@ namespace FoundryAgent
                     model: modelName,
                     name: agentName,
                     instructions: "You are a helpful agent who helps answering Math and city related questions in a sarcastic way.",
+                    
                     tools: new List<ToolDefinition>
                     {
                         new CodeInterpreterToolDefinition() ,
                         GetUserFavoriteCityTool,
-                        GetCityNicknameTool
+                        GetCityNicknameTool,
+                        MyQueueFunctionTool
                     });
 
                 agent = agentResponse.Value;
@@ -148,6 +150,7 @@ namespace FoundryAgent
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(500));
                 
+                // Update the status of the run.
                 runResponse = await client.GetRunAsync(thread.Id, runResponse.Value.Id);
 
                 if (runResponse.Value.Status == RunStatus.RequiresAction &&
@@ -180,10 +183,12 @@ namespace FoundryAgent
             if (location.ToLower().Contains("seattle"))
                 return "The Emerald City";
             else if (location.ToLower().Contains("sarajevo"))
-                return "Bosnian Culture City";
+                return "SA, Bosnian Culture City";
             else
                 return "Unknown City";
         }
+
+        
 
         private static FunctionToolDefinition GetCityNicknameTool = new(
             name: "GetCityNickname",
@@ -204,6 +209,66 @@ namespace FoundryAgent
                 },
                 new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
             );
+
+
+        static string _connStr = "UseDevelopmentStorage=true";
+
+        /// <summary>
+        /// https://github.com/Azure/azure-docs-sdk-dotnet/blob/main/api/overview/azure/preview/ai.projects-readme.md
+        /// </summary>
+        protected static AzureFunctionToolDefinition MyQueueFunctionTool =
+            new AzureFunctionToolDefinition("Function2",
+                "Gets the information related to invoices.",
+                new AzureFunctionBinding(new AzureFunctionStorageQueue(_connStr, "input-queue")),
+                new AzureFunctionBinding(new AzureFunctionStorageQueue(_connStr, "output-queue")),
+                  parameters: BinaryData.FromObjectAsJson(
+            new
+            {
+                Type = "object",
+                Properties = new
+                {
+                    query = new
+                    {
+                        Type = "string",
+                        Description = "The question to ask.",
+                    },
+                    outputqueueuri = new
+                    {
+                        Type = "string",
+                        Description = "The full output queue uri."
+                    }
+                },
+            },
+        new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+    )
+                );
+
+            
+
+
+
+
+            //new(
+            //name: "Function1",
+            //description: "Gets the information related to invoices.",
+          
+            //parameters: BinaryData.FromObjectAsJson(
+            //    new
+            //    {
+            //        Type = "object",
+            //        Parameters = new
+            //        {
+            //            Location = new
+            //            {
+            //                Type = "string",
+            //                Description = "The city and state, e.g. San Francisco, CA",
+            //            },
+            //        },
+            //        Required = new[] { "location" },
+                    
+            //    },
+            //    new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+            //);
 
         private static ToolOutput GetResolvedToolOutput(RequiredToolCall toolCall)
         {
