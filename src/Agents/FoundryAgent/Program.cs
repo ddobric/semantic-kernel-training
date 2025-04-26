@@ -8,6 +8,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Metrics;
 using System.Text.Json;
+using System.Text;
 
 namespace FoundryAgent
 {
@@ -62,9 +63,9 @@ namespace FoundryAgent
                     
                     tools: new List<ToolDefinition>
                     {
-                        new CodeInterpreterToolDefinition() ,
-                        GetUserFavoriteCityTool,
-                        GetCityNicknameTool,
+                        //new CodeInterpreterToolDefinition() ,
+                        //GetUserFavoriteCityTool,
+                        //GetCityNicknameTool,
                         MyQueueFunctionTool
                     });
 
@@ -87,8 +88,8 @@ namespace FoundryAgent
             //    thread.Id,
             //    MessageRole.User,
             //    "Tell me the nick name of the city Sarajevo.");
-
-            Response<PageableList<ThreadMessage>> messagesListResponse = await client.GetMessagesAsync(thread.Id);
+                        
+            await PrintThreadMessages(client, thread.Id);
 
             while (true)
             {
@@ -105,6 +106,29 @@ namespace FoundryAgent
             }
 
             Console.ReadLine();
+        }
+
+        protected static async Task PrintThreadMessages(AgentsClient client, string threadId)
+        {
+            Response<PageableList<ThreadMessage>> threadMessages = await client.GetMessagesAsync(threadId);
+
+            foreach (var msg in threadMessages.Value)
+            {
+                Console.WriteLine($"Thread: {msg.ThreadId}, Run:{msg.RunId},  {msg.Role}, {ToContent(msg.ContentItems)}");
+            }
+
+            Console.WriteLine();
+        }
+
+        private static string ToContent(IReadOnlyList<MessageContent> contentItems)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in contentItems)
+            {
+                sb.AppendLine(item.ToString());
+            }
+
+            return sb.ToString();
         }
 
         private static async Task PrintConversationResult(AgentsClient client, AgentThread thread, string runId)

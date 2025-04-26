@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SimpleProcess": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "das": "das"
+      }
+    }
+  }
+}
