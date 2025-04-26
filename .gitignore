@@ -416,3 +416,5 @@ FodyWeavers.xsd
 /src/Agents/GithubSkAgent/Properties/launchSettings.prod.json
 /src/Agents/AzureFoundrySkAgent/Properties/launchSettings.empty.json
 /src/Agents/AzureFoundrySkAgent/Properties/launchSettings.prod.json
+/src/Processes/SimpleProcess/Properties/launchSettings.empty.json
+/src/Processes/SimpleProcess/Properties/launchSettings.prod.json
