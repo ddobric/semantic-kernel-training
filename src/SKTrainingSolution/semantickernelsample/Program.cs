@@ -27,7 +27,7 @@ internal class Program
 
         //TestPerformance();
 
-        WorkingWithTokens();
+        //WorkingWithTokens();
 
         //
         // The ultimate scenario
@@ -40,17 +40,17 @@ internal class Program
 
         //await Sample_HelloSk();
         //await Sample_NativeFunctionsWithArguments();
-        //await Sample_InvokeNativeFunctionsWithArguments();
+        //await Sample_InvokeNativeFunctionsWithArguments();////
 
         //----------------------------
         // PROMPT (SEMANTIC) FUNCTIONS
         //----------------------------
         //await Sample_InlineSemanticFunc1();
         //await Sample_InlineSemanticFunc2();
-        //await Sample_InlineSemanticFunc3();
+        //await Sample_InlineSemanticFunc3(); ////////
 
         //await Sample_SemanticFunc_SimplifyAbstract();
-        //await Sample_HelloSemanticFunctionWithParams();
+        //await Sample_HelloSemanticFunctionWithParams();///////
         //await Sample_SemanticTextTranslation();
         //await Sample_NestedSemanticFunction();
 
@@ -69,7 +69,7 @@ internal class Program
 
         //await Sample_WorkshopFunctionCall();
 
-        await Sample_FictionWithFunctionCall();
+        await Sample_FictionWithFunctionCall(); /////
 
         //await Sample_FictionPlaner();
 
@@ -1015,16 +1015,17 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     protected static void WorkingWithTokens()
     {
+        // Microsoft ML Tokenizer
         var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4o");
         string normalizedText;
         var  tokens = tokenizer.EncodeToTokens("hello world", out normalizedText); // [15339, 1917]   
 
         ////GPT3Tokenizer
-        //var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
-        //var tokens = encoder.Encode("hello world"); // [15339, 1917]
-        //var text = encoder.Decode(tokens); // hello world
-        //var numberOfTokens = encoder.CountTokens(text); // 2
-        //var stringTokens = encoder.Explore(text); // ["hello", " world"]
+        var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
+        var tokens2 = encoder.Encode("hello world"); // [15339, 1917]
+        var text = encoder.Decode(tokens2); // hello world
+        var numberOfTokens = encoder.CountTokens(text); // 2
+        var stringTokens = encoder.Explore(text); // ["hello", " world"]
 
         //// Go to tokenizer and try it: https://platform.openai.com/tokenizer
         //tokens = encoder.Encode("Guten Tag aus Nürnberg"); // [15339, 1917]

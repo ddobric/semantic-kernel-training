@@ -4,6 +4,7 @@ using Azure.Identity;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents.AzureAI;
 using Microsoft.SemanticKernel.ChatCompletion;
+using System.Text.Json;
 
 #pragma warning disable SKEXP0110 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
@@ -21,15 +22,15 @@ namespace AzureFoundrySkAgent
 
             AIProjectClient client = AzureAIAgent.CreateAzureAIClient(connectionString, new AzureCliCredential());
 
-            AgentsClient agentsClient = client.GetAgentsClient();
+            //AgentsClient agentsClient = client.GetAgentsClient(); 
+            AgentsClient agentsClient = new AgentsClient(connectionString, new DefaultAzureCredential());
 
             Response<PageableList<Agent>> agentListResponse = await agentsClient.GetAgentsAsync();
 
             Console.WriteLine("Listing agents in the foundry project...");
 
             Azure.AI.Projects.Agent? foundryAgentDefinition = null;
-            AzureAIAgent agent;
-
+            
             foreach (var foundyAgent in agentListResponse.Value)
             {
                 if(foundyAgent.Name == agentName)
@@ -43,16 +44,24 @@ namespace AzureFoundrySkAgent
 
             Console.WriteLine("------------------------");
 
+
             if (foundryAgentDefinition == null)
             {
-                foundryAgentDefinition = await agentsClient.CreateAgentAsync(
+               foundryAgentDefinition = await agentsClient.CreateAgentAsync(
                modelName,
-                name: agentName,
-                description: "Sample Agent Created by Semantic Kernel Agent Framework.",
-                instructions: "You are the agent who helps answering IT related questions only.");
+               name: agentName,
+               description: "Sample Agent Created by Semantic Kernel Agent Framework.",
+               instructions: "You are the agent who helps answering any question.",
+               tools: new List<ToolDefinition>
+                    {
+                        new CodeInterpreterToolDefinition() ,
+                        GetUserFavoriteCityTool,
+                        GetCityNicknameTool,
+                        //MyQueueFunctionTool
+                    });                
             }
 
-            agent = new(foundryAgentDefinition, agentsClient);
+            AzureAIAgent agent = new(foundryAgentDefinition, agentsClient);
 
             Microsoft.SemanticKernel.Agents.AgentThread agentThread = new AzureAIAgentThread(agent.Client);
 
@@ -84,6 +93,46 @@ namespace AzureFoundrySkAgent
             //await agentThread.DeleteAsync();
             //await agent.Client.DeleteAgentAsync(agent.Id);
         }
+
+        /// <summary>
+        /// Example of the function with no arguments.
+        /// </summary>
+        /// <returns></returns>
+        protected static string GetUserFavoriteCity() => "Frankfurt am Main, Germany";
+
+        private static FunctionToolDefinition GetUserFavoriteCityTool = new("GetUserFavoriteCity", "Gets the user's favorite city.");
+
+        // Example of a function with a single required parameter
+        protected static string GetCityNickname(string location)
+        {
+            if (location.ToLower().Contains("seattle"))
+                return "The Emerald City";
+            else if (location.ToLower().Contains("sarajevo"))
+                return "SA, Bosnian Culture City";
+            else
+                return "Unknown City";
+        }
+
+        private static FunctionToolDefinition GetCityNicknameTool = new(
+            name: "GetCityNickname",
+            description: "Gets the nickname of a city, e.g. 'LA' for 'Los Angeles, CA'.",
+            parameters: BinaryData.FromObjectAsJson(
+                new
+                {
+                    Type = "object",
+                    Properties = new
+                    {
+                        Location = new
+                        {
+                            Type = "string",
+                            Description = "The city and state, e.g. San Francisco, CA",
+                        },
+                    },
+                    Required = new[] { "location" },
+                },
+                new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+            );
+
     }
 }
 #pragma warning restore SKEXP0110 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

@@ -11,6 +11,10 @@ using Plugins;
 namespace GithubAgent
 {
 
+    /// <summary>
+    /// This examples demonstrates how to use SK to consume the GitHub agent.
+    /// </summary>
+
     public static class Program
     {
         public static async Task Main()

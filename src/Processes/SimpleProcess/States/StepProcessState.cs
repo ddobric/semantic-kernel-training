@@ -10,6 +10,8 @@ namespace SimpleProcess.States
     {
         public string? State { get; set; }
 
+        public string? Content { get; set; }
+
         public DateTime StartedAt { get; set; }
     }
 }

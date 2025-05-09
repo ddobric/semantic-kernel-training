@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 #pragma warning disable SKEXP0080 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
-namespace SimpleProcess.Steps
+namespace ProzessFrameworkSamples.Steps.StepProcess
 {
     public sealed class StatelessStep2 : KernelProcessStep
     {
@@ -15,13 +15,13 @@ namespace SimpleProcess.Steps
         {
             return base.ActivateAsync(state);
         }
-        
+
         [KernelFunction]
         public Task<string> ExecuteAsync(KernelProcessStepContext context, string previousStepResult)
-        {         
-            Console.WriteLine("Step 2 - Start\n");
+        {
+            Console.WriteLine("Stateless Step  2 - Start\n");
             Console.WriteLine($"Result from Previous step {previousStepResult}");
-            return Task.FromResult<string>("Step 2 Result");
+            return Task.FromResult("Step 2 Result");
         }
     }
 }

@@ -63,10 +63,10 @@ namespace FoundryAgent
                     
                     tools: new List<ToolDefinition>
                     {
-                        //new CodeInterpreterToolDefinition() ,
-                        //GetUserFavoriteCityTool,
-                        //GetCityNicknameTool,
-                        MyQueueFunctionTool
+                        new CodeInterpreterToolDefinition() ,
+                        GetUserFavoriteCityTool,
+                        GetCityNicknameTool,
+                        //MyQueueFunctionTool
                     });
 
                 agent = agentResponse.Value;

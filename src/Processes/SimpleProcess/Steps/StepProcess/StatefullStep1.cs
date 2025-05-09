@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 #pragma warning disable SKEXP0080 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
-namespace SimpleProcess.Steps
+namespace ProzessFrameworkSamples.Steps.StepProcess
 {
     public sealed class StatefullStep1 : KernelProcessStep<StepProcessState>
     {
@@ -16,9 +16,9 @@ namespace SimpleProcess.Steps
 
         public override ValueTask ActivateAsync(KernelProcessStepState<StepProcessState> state)
         {
-            if(state.State == null)
+            if (state.State == null)
             {
-              
+
             }
 
             _state = state.State;
@@ -27,19 +27,18 @@ namespace SimpleProcess.Steps
         }
 
         [KernelFunction]
-        public async ValueTask ExecuteAsync(Kernel kernel, KernelProcessStepContext context, string previousStepResult)
+        public async Task<string> ExecuteAsync(Kernel kernel, KernelProcessStepContext context, string previousStepResult)
         {
             Console.WriteLine("Statefull Step 1 - Start\n");
-
             Console.WriteLine($"Result from Previous step {previousStepResult}");
-
             _state.StartedAt = DateTime.UtcNow;
             _state.State = "Statefull Step 1 entered";
 
-            await Task.Delay(5000);
+            await Task.Delay(1000);
 
             _state.State = "Statefull Step 1 exit";
-            //return "Statefull Step 1 end";
+           
+            return "From 2";
         }
     }
 }

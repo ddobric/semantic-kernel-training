@@ -13,23 +13,93 @@ namespace OpenAI.Samples
         {
             Console.WriteLine("Hello, OpenAI Samples!");
 
+            await ChatChatCompletionsAsync();
+
             //await ChatStreamingAsync();
 
             //await TextToSpeechAsync();
 
-           // await VisionAsync();
+            // await VisionAsync();
 
-           // await ImageGenerationAsync();
+            //await ImageGenerationAsync();
 
             //await SimpleImageEditAsync();
 
-           // await CreateEmbeddingsAsync();
+            //await CreateEmbeddingsAsync();
 
-            await AssistentSample.RunRetrievalAugmentedGenerationAsync();
+            //await AssistentSample.RunRetrievalAugmentedGenerationAsync();
 
             Console.ReadLine();
         }
 
+        public static async Task ChatChatCompletionsAsync()
+        {
+            ChatCompletionOptions options = new ChatCompletionOptions()
+            {
+                Temperature = 0.1f,
+                MaxOutputTokenCount = 60,
+                IncludeLogProbabilities = true,
+                TopLogProbabilityCount = 5,
+            };
+
+            ChatClient client = new(model: Environment.GetEnvironmentVariable("OPENAI_CHATCOMPLETION_DEPLOYMENT"),
+               apiKey: Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
+
+            List<ChatMessage> history = new List<ChatMessage>();
+
+            history.Add(ChatMessage.CreateSystemMessage("Your only task is to complete the given prompt."));
+
+            while (true)
+            {
+                var sb = new StringBuilder();
+
+                Console.ForegroundColor = ConsoleColor.White;
+
+                Console.Write($"[User]: ");
+
+                string? userIntent = Console.ReadLine();
+
+                history.Add(ChatMessage.CreateUserMessage(userIntent));
+
+                var result = await client.CompleteChatAsync(history, options);
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+
+                foreach (var item in result.Value.Content)
+                {
+                    Console.WriteLine(item.Text);
+                    sb.AppendLine(item.Text);
+                }
+
+                Console.WriteLine();
+
+                foreach (var item in result.Value.ContentTokenLogProbabilities)
+                {
+                    bool isFirst = true;
+
+                    foreach (var logProb in item.TopLogProbabilities)
+                    {
+                        if (isFirst)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            isFirst = false;
+                        }
+                        else
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+
+                        Console.WriteLine($"{logProb.Token} \t\t {logProb.LogProbability}");
+                    }
+
+                    Console.WriteLine();
+                }
+
+                Console.WriteLine();
+
+                history.Add(ChatMessage.CreateAssistantMessage(sb.ToString()));
+
+                Console.WriteLine();
+            }
+        }
 
         public static async Task ChatStreamingAsync()
         {
@@ -101,7 +171,7 @@ namespace OpenAI.Samples
 
         public static async Task CreateEmbeddingsAsync()
         {
-            EmbeddingClient client = new("text-embedding-3-large"/*"text -embedding-3-small"*/, 
+            EmbeddingClient client = new("text-embedding-3-large"/*"text -embedding-3-small"*/,
                 Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
 
 
@@ -235,7 +305,7 @@ namespace OpenAI.Samples
         {
             AudioClient client = new("tts-1", Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
 
-            string input = text != null? text : "Overwatering is a common issue for those taking care of houseplants. To prevent it, it is"
+            string input = text != null ? text : "Overwatering is a common issue for those taking care of houseplants. To prevent it, it is"
                 + " crucial to allow the soil to dry out between waterings. Instead of watering on a fixed schedule,"
                 + " consider using a moisture meter to accurately gauge the soil’s wetness. Should the soil retain"
                 + " moisture, it is wise to postpone watering for a couple more days. When in doubt, it is often safer"

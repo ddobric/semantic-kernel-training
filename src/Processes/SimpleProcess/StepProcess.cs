@@ -1,5 +1,5 @@
 ﻿using Microsoft.SemanticKernel;
-using SimpleProcess.Steps;
+using ProzessFrameworkSamples.Steps.StepProcess;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,24 +31,24 @@ namespace SimpleProcess
             // Create a process that will interact with the chat completion service
             ProcessBuilder process = new(nameof(StepProcesses));
 
-            var step1 = process.AddStepFromType<StatelessStep1>();
-            var step2 = process.AddStepFromType<StatelessStep2>();
-            var step3 = process.AddStepFromType<StatefullStep1>();
+            var statelessStep1 = process.AddStepFromType<StatelessStep1>();          
+            var statefullStep1 = process.AddStepFromType<StatefullStep1>();
+            var statelessStep2 = process.AddStepFromType<StatelessStep2>();
 
             // Define the process flow
             process
                 .OnInputEvent(ProcessEvents.StartProcess)
-                .SendEventTo(new ProcessFunctionTargetBuilder(step1));
+                .SendEventTo(new ProcessFunctionTargetBuilder(statelessStep1));
 
-            step1
+            statelessStep1
                 .OnFunctionResult()
-                .SendEventTo(new ProcessFunctionTargetBuilder(step2));
+                .SendEventTo(new ProcessFunctionTargetBuilder(statefullStep1));
 
-            step2
+            statefullStep1
              .OnFunctionResult()
-              .SendEventTo(new ProcessFunctionTargetBuilder(step3));
+              .SendEventTo(new ProcessFunctionTargetBuilder(statelessStep2));
 
-            step3
+            statelessStep2
                 .OnFunctionResult()
                 .StopProcess();
 
