@@ -13,33 +13,34 @@ namespace ProzessFrameworkSamples.Plugins
     /// 
     /// execute the step1 with input "A", then the step2 with input "B" and then step3 with input of the result of step 2.
     /// 
-    /// THIS DOES NOT WORK CORRECTLLY!
+    /// execute the step1 with input "A", then the step2 with input "B" and then pass to step3 the result of step 2.
+    ///
     /// execute the step1 with input "A", then the step2 with input "B" and then step3 with input of the result of step 2 if the result of step1 is 1.
     /// </summary>
-    internal class StepPlugin
+    internal class StepPlugin2
     {
         [KernelFunction(nameof(Step1))]
         [Description("Executes the step 1.")]
-        public Task<int> Step1([Description("Input of step.")] string input)
+        public Task<string> Step1([Description("Input of step.")] string input)
         {
             Console.WriteLine($"\nStep 1 - input='{input}'\n");
-            return Task.FromResult<int>(1);
+            return Task.FromResult<string>($"Result of step 1 is 1.");
         }
 
         [KernelFunction(nameof(Step2))]
         [Description("Executes the step 2.")]
-        public Task<int> Step2([Description("The input for the step.")]string  input)
+        public Task<string> Step2([Description("The input for the step.")]string  input)
         {
             Console.WriteLine($"\nStep 2 - input='{input}'\n");
-            return Task.FromResult<int>(1);
+            return Task.FromResult<string>($"Result of step 2 is 2.");
         }
 
         [KernelFunction(nameof(Step3))]
         [Description("Executes the step 3.")]
-        public Task<int> Step3([Description("The input for the step.")] string input)
+        public Task<string> Step3([Description("The input for the step.")] string input)
         {
             Console.WriteLine($"\nStep 3 - input='{input}'\n");
-            return Task.FromResult<int>(1);
+            return Task.FromResult<string>($"Result of step 3 is 3.");
         }
     }
 }

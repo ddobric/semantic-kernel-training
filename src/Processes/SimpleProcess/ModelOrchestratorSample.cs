@@ -19,7 +19,8 @@ namespace ProzessFrameworkSamples
             var history = new ChatHistory();
 
            // kernel.ImportPluginFromObject(new SkPlugIn(), "SkPlugin");
-            kernel.ImportPluginFromObject(new StepPlugin(), "StepPlugin");
+            kernel.ImportPluginFromObject(new StepPlugin1(), "StepPlugin");
+            //kernel.ImportPluginFromObject(new StepPlugin2(), "StepPlugin");
 
             var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
