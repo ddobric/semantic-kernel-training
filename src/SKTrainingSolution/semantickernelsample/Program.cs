@@ -1,38 +1,45 @@
-﻿using Microsoft.SemanticKernel;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.ML.Tokenizers;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.Ollama;
 //using Microsoft.SemanticKernel.AI.ImageGeneration;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
-using semantickernelsample.NativePlugIns;
-using semantickernelsample.Skills;
-using System.Text.Json;
+using Microsoft.SemanticKernel.Embeddings;
 using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Tiktoken;
-using System.Diagnostics;
 using Microsoft.SemanticKernel.Text;
-using semantickernelsample;
-using OpenTelemetry.Resources;
 using OpenTelemetry;
-using OpenTelemetry.Trace;
-using Microsoft.Extensions.Logging;
 using OpenTelemetry.Logs;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.ML.Tokenizers;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using semantickernelsample;
+using semantickernelsample.NativePlugIns;
+using semantickernelsample.Skills;
+using System.Diagnostics;
+using System.Text.Json;
+using Tiktoken;
+using static System.Net.Mime.MediaTypeNames;
 //using Microsoft.SemanticKernel.Planning.Handlebars;
 internal class Program
 {
     private static async Task Main(string[] args)
     {
-        //TextSplittingSample.Split();
-
         //TestPerformance();
 
         //WorkingWithTokens();
 
+        //new RagSample(GetKernel()).SplitTextToChunks();       
+        
+        //await WorkingWithEmbeddings();
+
+        //await new RagSample(GetKernel()).RunRAG();
+
         //
         // The ultimate scenario
         //
-        await Sample_Lighting();
+        //await Sample_Lighting();
 
         //--------------------
         // NATIVE FUNCTIONS
@@ -50,9 +57,9 @@ internal class Program
         //await Sample_InlineSemanticFunc3(); ////////
 
         //await Sample_SemanticFunc_SimplifyAbstract();
-        //await Sample_HelloSemanticFunctionWithParams();///////
+        await Sample_HelloSemanticFunctionWithParams();///////
         //await Sample_SemanticTextTranslation();
-        //await Sample_NestedSemanticFunction();
+        //await Sample_NestedSemanticFunction(); ///////
 
         // await Sample_SemanticFunctionInvokesNativeFunction(); //*
         //await Sample_SemanticMathOperationExtractor();
@@ -69,7 +76,7 @@ internal class Program
 
         //await Sample_WorkshopFunctionCall();
 
-        await Sample_FictionWithFunctionCall(); /////
+        //await Sample_FictionWithFunctionCall(); /////
 
         //await Sample_FictionPlaner();
 
@@ -101,6 +108,33 @@ internal class Program
         Console.WriteLine($"{(double)sw.ElapsedMilliseconds / (double)n} ms per instance.");
     }
 
+#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+    /// <summary>
+    /// Demonstrates how to create embeddings.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task WorkingWithEmbeddings()
+    {
+        var kernel = GetKernel();
+        ITextEmbeddingGenerationService embeddingService = kernel.GetRequiredService<ITextEmbeddingGenerationService>();
+        var embedding = await embeddingService.GenerateEmbeddingAsync("Please do not sleep while I'm talking :)");
+
+        float[] vector = embedding.ToArray();
+    }
+
+    /// <summary>
+    /// Demonstrates how to create embeddings.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task WorkingWithRAG()
+    {
+        var kernel = GetKernel();
+        ITextEmbeddingGenerationService embeddingService = kernel.GetRequiredService<ITextEmbeddingGenerationService>();
+        var embedding = await embeddingService.GenerateEmbeddingAsync("Please do not sleep while I'm talking :)");
+
+    }
+#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
     public static async Task Sample_Lighting()
     {
@@ -123,6 +157,8 @@ internal class Program
 
         string? userInput;
 
+        //history.AddSystemMessage("You are assistent who can provide the common communication with the user. Do not provide any examples if not asked. Be concise and short in answers.");
+
         while ((userInput = Console.ReadLine()) != null)
         {
             // Add user input
@@ -135,10 +171,18 @@ internal class Program
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
             };
 
+#pragma warning disable SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            var ollamaSettings = new OllamaPromptExecutionSettings { 
+                Temperature =0.1f,
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
+            };
+#pragma warning restore SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
             // Get the response from the AI
             var result = await chatCompletionService.GetChatMessageContentAsync(
                 history,
-                executionSettings: openAIPromptExecutionSettings,
+                executionSettings: ollamaSettings,//openAIPromptExecutionSettings,
+                //executionSettings: openAIPromptExecutionSettings,
                 kernel: kernel);
 
             // Print the results
@@ -148,7 +192,7 @@ internal class Program
             history.AddMessage(result.Role, result.Content ?? string.Empty);
 
             // Get user input again
-            Console.WriteLine("User > ");
+            Console.Write("User > ");
         }
     }
 
@@ -1013,14 +1057,18 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     }
 
+    /// <summary>
+    /// Demonstrates how to work with tokens.
+    /// </summary>
     protected static void WorkingWithTokens()
     {
         // Microsoft ML Tokenizer
         var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4o");
         string normalizedText;
         var  tokens = tokenizer.EncodeToTokens("hello world", out normalizedText); // [15339, 1917]   
+        var tokenCount = tokenizer.CountTokens("Hello world");
 
-        ////GPT3Tokenizer
+        //Tiktoken
         var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
         var tokens2 = encoder.Encode("hello world"); // [15339, 1917]
         var text = encoder.Decode(tokens2); // hello world
@@ -1074,6 +1122,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
     private static Kernel GetKernel()
     {
+        //return GetOllamaKernel();
         //return GetOpenAIKernel();
         return GetAzureKernel();
     }
@@ -1101,6 +1150,8 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         return kernel;
     }
 
+#pragma warning disable SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
     private static Kernel GetAzureKernel(string? useChatOrTextCompletionModel = "chat")
     {
         Kernel kernel;
@@ -1110,6 +1161,9 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         if (useChatOrTextCompletionModel == null || useChatOrTextCompletionModel == "chat")
         {
             builder = Kernel.CreateBuilder()
+                .AddAzureOpenAITextEmbeddingGeneration(Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
+                  Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDINGMODELURL")!,    // The endpoint of your Azure OpenAI service
+                  Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDINGMODELKEY")!)
             .AddAzureOpenAIChatCompletion(
                 Environment.GetEnvironmentVariable("AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
                 Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
@@ -1132,6 +1186,42 @@ We offer you our profound cloud knowledge as standardized best-practice service 
 
         return kernel;
     }
+#pragma warning restore SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+    private static Kernel GetOllamaKernel(string? useChatOrTextCompletionModel = "chat")
+    {
+        Kernel kernel;
+
+        IKernelBuilder builder;
+
+        if (useChatOrTextCompletionModel == null || useChatOrTextCompletionModel == "chat")
+        {
+#pragma warning disable SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            builder = Kernel.CreateBuilder()
+            .AddOllamaChatCompletion(
+                Environment.GetEnvironmentVariable("OLLAMA_CHATCOMPLETION_MODEL")!,  // The name of your deployment (e.g., "text-davinci-003")
+                new Uri(Environment.GetEnvironmentVariable("OLLAMA_ENDPOINT"!)!)    // The endpoint of your Azure OpenAI service
+            );
+#pragma warning restore SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        }
+        else
+        {
+            builder = Kernel.CreateBuilder()
+            .AddOpenAIChatCompletion(
+                  Environment.GetEnvironmentVariable("AZURE_OPENAI_TEXTCOMPLETION_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
+                  Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
+                  Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!      // The API key of your Azure OpenAI service
+              );
+        }
+
+        //builder.Services.AddSingleton(AddTelemetry());
+
+        kernel = builder.Build();
+
+        return kernel;
+    }
+
+
 
     private static ILoggerFactory _logFactory;
     protected static ILoggerFactory AddTelemetry()

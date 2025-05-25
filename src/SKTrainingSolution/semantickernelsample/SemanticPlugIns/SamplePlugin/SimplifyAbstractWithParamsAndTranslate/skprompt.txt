@@ -1,9 +1,10 @@
 
-{{SamplePlugin.Translator input=$input language=$language}} DOES NOT WORK!!! IT DOES NOT TRANSLATE!!
+Summarize and compress abstract to 50 words, using a user friendly language.
+Then invoke :{{SamplePlugin.Translator input=$input language=$language}} and store the result of plugin as PLUGINRESULT.
 
------------------------------------------------
-
-Summarize and compress abstract to 50 words, using a user friendly language. 
+Provide result in following form:
+Summarization RESULT: summarized text
+Final Result: PLUGINRESULT
 
 [Input]
 {{$input}}

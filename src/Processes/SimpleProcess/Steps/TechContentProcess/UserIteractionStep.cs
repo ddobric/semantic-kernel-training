@@ -161,7 +161,9 @@ namespace ProzessFrameworkSamples.Steps.TechContentProcess
                         result = await kernel.InvokeAsync<string>(nameof(SkPlugIn), nameof(SkPlugIn.LoadWebContentAsync),
                            new KernelArguments { ["url"] = intent, });
 
-                        Console.WriteLine($"Reading from web is not supported.");
+                        _state.State = result;
+
+                        //Console.WriteLine($"Reading from web is not supported.");
                     }
                     else
                     {

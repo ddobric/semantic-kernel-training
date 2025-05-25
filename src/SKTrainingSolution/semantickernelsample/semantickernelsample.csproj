@@ -14,8 +14,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.ML.Tokenizers.Data.O200kBase" Version="1.0.2" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.31.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.49.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.AI.OpenAI" Version="1.0.0-beta8" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.49.0-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars" Version="1.7.1-preview" />
     <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" Version="1.7.1-preview" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.11.2" />

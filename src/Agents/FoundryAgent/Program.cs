@@ -1,14 +1,16 @@
-﻿using Azure.AI.OpenAI;
-using Azure;
-using OpenAI.Chat;
+﻿using Azure;
+using Azure.AI.Agents.Persistent;
+using Azure.AI.OpenAI;
 using Azure.AI.Projects;
 using Azure.Identity;
+using OpenAI.Chat;
 using OpenTelemetry;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using OpenTelemetry.Metrics;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
+using static System.Net.WebRequestMethods;
 
 namespace FoundryAgent
 {
@@ -27,19 +29,21 @@ namespace FoundryAgent
 
             RegisterTelemetry();
 
-            string agentName = "DemoAgent";
+            string agentName = "DemoAgent2";
             string modelName = "gpt-4o";
             string connectionString = Environment.GetEnvironmentVariable("AgentConnStr")!;
+            connectionString = "https://ddobric-agents.resource.services.ai.azure.com/api/project/ddobric-agents";
+            connectionString = "https://ddobric-agents-samples-resource.services.ai.azure.com/api/projects/ddobric-agents-samples";
+            connectionString = "https://ddobric-agent-samples-resource.services.ai.azure.com/api/projects/ddobric-agent-samples";
+            PersistentAgentsClient client = new PersistentAgentsClient(connectionString, new AzureCliCredential());
 
-            AgentsClient client = new AgentsClient(connectionString, new DefaultAzureCredential());
+            PersistentAgent? agent = null;
 
-            Agent? agent = null;
-
-            Response<PageableList<Agent>> agentListResponse = await client.GetAgentsAsync();
+            Pageable<PersistentAgent> agentListResponse = client.Administration.GetAgents();
 
             Console.WriteLine("Listing agents in the foundry project...");
 
-            foreach (var foundyAgent in agentListResponse.Value)
+            foreach (var foundyAgent in agentListResponse)
             {
                 if (foundyAgent.Name == agentName)
                 {
@@ -51,12 +55,12 @@ namespace FoundryAgent
 
             Console.WriteLine("------------------------");
 
-            agent = agentListResponse.Value.FirstOrDefault(a => a.Name == agentName);
+            agent = agentListResponse.FirstOrDefault(a => a.Name == agentName);
 
             if (agent == null)
             {
                 // Create an agent
-                Response<Agent> agentResponse = await client.CreateAgentAsync(
+                Response<PersistentAgent> agentResponse = await client.Administration.CreateAgentAsync(
                     model: modelName,
                     name: agentName,
                     instructions: "You are a helpful agent who helps answering Math and city related questions in a sarcastic way.",
@@ -73,8 +77,8 @@ namespace FoundryAgent
             }
 
             //  Create a thread
-            Response<AgentThread> threadResponse = await client.CreateThreadAsync();
-            AgentThread thread = threadResponse.Value;
+            Response<PersistentAgentThread> threadResponse = await client.Threads.CreateThreadAsync();
+            PersistentAgentThread thread = threadResponse.Value;
 
             // Add a message to a thread
             //Response<ThreadMessage> messageResponse = await client.CreateMessageAsync(
@@ -89,7 +93,7 @@ namespace FoundryAgent
             //    MessageRole.User,
             //    "Tell me the nick name of the city Sarajevo.");
                         
-            await PrintThreadMessages(client, thread.Id);
+            PrintThreadMessages(client, thread.Id);
 
             while (true)
             {
@@ -98,21 +102,21 @@ namespace FoundryAgent
                 if (String.IsNullOrEmpty(userInput) || userInput == "exit")
                     break;
 
-                await client.CreateMessageAsync(thread.Id, MessageRole.User, userInput);
+                await client.Messages.CreateMessageAsync(thread.Id, MessageRole.User, userInput);
 
                 string runId = await RunOnThreadAndWait(client, agent, thread);
 
-                await PrintConversationResult(client, thread, runId);
+                PrintConversationResult(client, thread, runId);
             }
 
             Console.ReadLine();
         }
 
-        protected static async Task PrintThreadMessages(AgentsClient client, string threadId)
+        protected static void PrintThreadMessages(PersistentAgentsClient client, string threadId)
         {
-            Response<PageableList<ThreadMessage>> threadMessages = await client.GetMessagesAsync(threadId);
+            Pageable<PersistentThreadMessage> threadMessages = client.Messages.GetMessages(threadId);
 
-            foreach (var msg in threadMessages.Value)
+            foreach (var msg in threadMessages)
             {
                 Console.WriteLine($"Thread: {msg.ThreadId}, Run:{msg.RunId},  {msg.Role}, {ToContent(msg.ContentItems)}");
             }
@@ -131,16 +135,16 @@ namespace FoundryAgent
             return sb.ToString();
         }
 
-        private static async Task PrintConversationResult(AgentsClient client, AgentThread thread, string runId)
+        private static void PrintConversationResult(PersistentAgentsClient client, PersistentAgentThread thread, string runId)
         {
             Console.WriteLine("============================================================");
 
-            Response<PageableList<ThreadMessage>> afterRunMessagesResponse = await client.GetMessagesAsync(thread.Id, runId);
+            Pageable<PersistentThreadMessage> afterRunMessagesResponse = client.Messages.GetMessages(thread.Id, runId);
 
-            IReadOnlyList<ThreadMessage> messages = afterRunMessagesResponse.Value.Data.Where(m=>m.RunId == runId).ToArray();
+            IReadOnlyList<PersistentThreadMessage> messages = afterRunMessagesResponse.Where(m=>m.RunId == runId).ToArray();
 
             // Note: messages iterate from newest to oldest, with the messages[0] being the most recent
-            foreach (ThreadMessage threadMessage in messages)
+            foreach (PersistentThreadMessage threadMessage in messages)
             {
                 Console.WriteLine("----------------------------");
                 Console.Write($"{threadMessage.CreatedAt:yyyy-MM-dd HH:mm:ss} - {threadMessage.Role,10}: ");
@@ -161,10 +165,10 @@ namespace FoundryAgent
             Console.WriteLine("============================================================");
         }
 
-        private static async Task<string> RunOnThreadAndWait(AgentsClient client, Agent? agent, AgentThread thread)
+        private static async Task<string> RunOnThreadAndWait(PersistentAgentsClient client, PersistentAgent? agent, PersistentAgentThread thread)
         {
             // Run the agent
-            Response<ThreadRun> runResponse = await client.CreateRunAsync(
+            Response<ThreadRun> runResponse = await client.Runs.CreateRunAsync(
                 thread.Id,
                 agent?.Id,
                 additionalInstructions: "");
@@ -175,7 +179,7 @@ namespace FoundryAgent
                 await Task.Delay(TimeSpan.FromMilliseconds(500));
                 
                 // Update the status of the run.
-                runResponse = await client.GetRunAsync(thread.Id, runResponse.Value.Id);
+                runResponse = await client.Runs.GetRunAsync(thread.Id, runResponse.Value.Id);
 
                 if (runResponse.Value.Status == RunStatus.RequiresAction &&
                     runResponse.Value.RequiredAction is SubmitToolOutputsAction submitToolOutputsAction)
@@ -185,7 +189,7 @@ namespace FoundryAgent
                     {
                         toolOutputs.Add(GetResolvedToolOutput(toolCall));
                     }
-                    runResponse = await client.SubmitToolOutputsToRunAsync(runResponse.Value, toolOutputs);
+                    runResponse = await client.Runs.SubmitToolOutputsToRunAsync(runResponse.Value, toolOutputs);
                 }
             }
             while (runResponse.Value.Status == RunStatus.Queued || runResponse.Value.Status == RunStatus.InProgress);
@@ -338,6 +342,8 @@ namespace FoundryAgent
                 .AddOtlpExporter()
                 .Build();
         }
+
+        /*
         static void Main2(string[] args)
         {
             AIProjectClient projectClient = new AIProjectClient("connectionString");
@@ -368,6 +374,6 @@ namespace FoundryAgent
                 ]);
 
             Console.WriteLine($"{completion.Role}: {completion.Content[0].Text}");
-        }
+        }*/
     }
 }

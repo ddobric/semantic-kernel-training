@@ -13,12 +13,12 @@ namespace SimpleProcess
             // Configure the kernel with your LLM connection details
             Kernel kernel = GetKernel();
             
-            // Build and run the process
+            // DEmonstrates how model internally orchstrates tasks.
             await new ModelOrchestratorSample().RunAsync(kernel);
 
             //await new StepProcesses().RunAsync();
 
-           //await new TechContentProcess().RunAsync(kernel);
+            await new TechContentProcess().RunAsync(kernel);
 
             Console.ReadLine();
         }

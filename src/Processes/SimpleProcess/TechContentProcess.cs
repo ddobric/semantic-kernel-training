@@ -9,6 +9,8 @@ using static SimpleProcess.StepProcesses;
 using ProzessFrameworkSamples.Steps.StepProcess;
 using ProzessFrameworkSamples.Steps.TechContentProcess;
 using ProzessFrameworkSamples.Plugins;
+using Microsoft.Extensions.DependencyInjection;
+using SimpleProcess.States;
 
 namespace ProzessFrameworkSamples
 {
@@ -29,7 +31,11 @@ namespace ProzessFrameworkSamples
         {
             // Create a simple kernel 
             if (kernel == null)
-                kernel = Kernel.CreateBuilder().Build();
+            {
+                var builder = Kernel.CreateBuilder();
+                builder.Services.AddSingleton<StepProcessState>();
+                kernel = builder.Build();
+            }
 
             kernel.ImportPluginFromObject(new SkPlugIn(), "SkPlugin");
 

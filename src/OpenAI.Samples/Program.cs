@@ -15,19 +15,19 @@ namespace OpenAI.Samples
 
             await ChatChatCompletionsAsync();
 
-            //await ChatStreamingAsync();
+            await ChatStreamingAsync();
 
-            //await TextToSpeechAsync();
+            await TextToSpeechAsync();
 
-            // await VisionAsync();
+             await VisionAsync();
 
-            //await ImageGenerationAsync();
+            await ImageGenerationAsync();
 
-            //await SimpleImageEditAsync();
+            await SimpleImageEditAsync();
 
-            //await CreateEmbeddingsAsync();
+            await CreateEmbeddingsAsync();
 
-            //await AssistentSample.RunRetrievalAugmentedGenerationAsync();
+            await AssistentSample.RunRetrievalAugmentedGenerationAsync();
 
             Console.ReadLine();
         }
@@ -305,16 +305,9 @@ namespace OpenAI.Samples
         {
             AudioClient client = new("tts-1", Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
 
-            string input = text != null ? text : "Overwatering is a common issue for those taking care of houseplants. To prevent it, it is"
-                + " crucial to allow the soil to dry out between waterings. Instead of watering on a fixed schedule,"
-                + " consider using a moisture meter to accurately gauge the soil’s wetness. Should the soil retain"
-                + " moisture, it is wise to postpone watering for a couple more days. When in doubt, it is often safer"
-                + " to water sparingly and maintain a less-is-more approach.";
+            string input = text != null ? text : "Alright everyone, please keep your hands inside the code at all times. If you see any unexpected errors, don't worry—those are just features in disguise. And remember, if the demo works perfectly on the first try, it's probably witchcraft. Sit back, relax, and let’s enjoy the magic (and maybe some debugging) together!";
 
-            input = "Guten Tag liebe Studenten aus Franfurt am Main";
-
-            input = "Stell dir Ferrero als ein magisches Schokoladenland vor, in dem die Haselnüsse wie Könige behandelt werden und die Schokolade in Strömen fließt. In den geheimen Labors von Ferrero debattieren die Chocolatiers darüber, ob sie noch eine weitere Schicht Haselnusscreme hinzufügen sollten, während Kinder Überraschungseier wie kleine Schätze öffnen. Ferrero ist wie das italienische Hogwarts der Süßigkeitenwelt, wo der Zauberstab aus Schokolade besteht und der Zauberspruch „Nutella“ heißt. Ein Ort, an dem jeder Tag wie der Welt-Schokoladen-Tag gefeiert wird!\r\n\r\nWenn du mehr über Ferrero wissen möchtest oder spezifische Fragen hast, lass es mich wissen!";
-            BinaryData speech = await client.GenerateSpeechAsync(input, GeneratedSpeechVoice.Fable);
+              BinaryData speech = await client.GenerateSpeechAsync(input, GeneratedSpeechVoice.Fable);
 
             using FileStream stream = File.OpenWrite($"{Guid.NewGuid()}.mp3");
             speech.ToStream().CopyTo(stream);

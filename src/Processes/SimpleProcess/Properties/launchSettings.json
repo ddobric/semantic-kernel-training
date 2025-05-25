@@ -1,9 +1,17 @@
 {
   "profiles": {
-    "SimpleProcess": {
+    "Daenet.PluginTestConsole.App": {
       "commandName": "Project",
       "environmentVariables": {
-        "das": "das"
+        "OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
+        "OPENAI_EMBEDDING_DEPLOYMENT": "***",
+        "OPENAI_API_KEY": "***",
+        "OPENAI_ORGID": "***",
+
+        "AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
+        "AZURE_OPENAI_EMBEDDING_DEPLOYMENT": "***",
+        "AZURE_OPENAI_ENDPOINT": "***",
+        "AZURE_OPENAI_API_KEY": "***"
       }
     }
   }
