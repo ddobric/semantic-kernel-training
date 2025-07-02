@@ -11,6 +11,7 @@
 		<PackageReference Include="Anthropic.SDK" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" />
 		<PackageReference Include="Microsoft.Extensions.AI" />
+		<PackageReference Include="Azure.AI.Inference" Version="1.0.0-beta.4" />
 		<PackageReference Include="ModelContextProtocol" Version="0.2.0-preview.1" />
 	</ItemGroup>
 	

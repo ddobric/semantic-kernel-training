@@ -1,0 +1,24 @@
+{
+  "profiles": {
+    "semantickernelsample": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
+        "OPENAI_API_KEY": "",
+        "OPENAI_ORGID": "org-",
+
+        "AZURE_OPENAI_EMBEDDING_DEPLOYMENT": "",
+        "AZURE_OPENAI_EMBEDDINGMODELURL": "https://gpt-4o.openai.azure.com/",
+        "AZURE_OPENAI_EMBEDDINGMODELKEY": "",
+        "AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
+         "AZURE_OPENAI_ENDPOINT": "https://***.eastus.inference.ai.azure.com",
+
+        "AZURE_OPENAI_API_KEY": "",
+
+        "OLLAMA_CHATCOMPLETION_MODEL": "mistral:7b", //nemotron-mini:latest", //"phi4-mini:latest", //"mistral-small3.1:latest", //"llama2", //"mistral-small3.1\",",
+        "OLLAMA_ENDPOINT": "http://localhost:11434"
+
+      }
+    }
+  }
+}
