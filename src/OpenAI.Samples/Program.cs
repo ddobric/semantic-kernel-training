@@ -13,19 +13,21 @@ namespace OpenAI.Samples
         {
             Console.WriteLine("Hello, OpenAI Samples!");
 
+            //await CreateEmbeddingsAsync();
+
+            //await ClassifyAsync();
+           
             await ChatChatCompletionsAsync();
 
-            await ChatStreamingAsync();
+            //await ChatStreamingAsync();
 
-            await TextToSpeechAsync();
+            //await TextToSpeechAsync();
 
-             await VisionAsync();
+            await VisionAsync();
 
             await ImageGenerationAsync();
 
             await SimpleImageEditAsync();
-
-            await CreateEmbeddingsAsync();
 
             await AssistentSample.RunRetrievalAugmentedGenerationAsync();
 
@@ -209,6 +211,62 @@ namespace OpenAI.Samples
             }
         }
 
+        class Entry
+        {
+            public string DocName { get; set; }
+            public float[] EmbeddingLarge { get; set; }
+            public float[] EmbeddingSmall { get; set; }
+        }
+
+        public static async Task ClassifyAsync()
+        {
+            List<Entry> entries = new List<Entry>();
+
+            EmbeddingClient clientLarge = new("text-embedding-3-large"/*"text -embedding-3-small"*/,
+                Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
+
+            EmbeddingClient clientSmall = new("text-embedding-3-small",
+                Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
+
+            foreach (var file in Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Docs")))
+            {
+                Entry entry = new Entry();
+                var txt = File.ReadAllText(file);
+                entry.DocName = file;
+
+                OpenAIEmbeddingCollection eL = await clientLarge.GenerateEmbeddingsAsync(new List<string> { txt });
+                entry.EmbeddingLarge = eL[0].ToFloats().ToArray();
+
+                OpenAIEmbeddingCollection eS = await clientSmall.GenerateEmbeddingsAsync(new List<string> { txt });
+                entry.EmbeddingSmall = eS[0].ToFloats().ToArray();
+
+                entries.Add(entry);
+            }
+
+            while (true)
+            {
+                Console.WriteLine("Enter text for classification: ");
+
+                var inp1 = Console.ReadLine();
+
+                List<string> inputs = [inp1];
+
+                OpenAIEmbeddingCollection eL = await clientLarge.GenerateEmbeddingsAsync(inputs);
+                OpenAIEmbeddingCollection eS = await clientSmall.GenerateEmbeddingsAsync(inputs);
+
+                foreach (var entry in entries)
+                {
+                    var similarityL = CalculateSimilarity(eL[0].ToFloats().ToArray(), entry.EmbeddingLarge);
+                    var similarityS = CalculateSimilarity(eS[0].ToFloats().ToArray(), entry.EmbeddingSmall);
+
+                    Console.WriteLine($"Document: {new FileInfo(entry.DocName).Name}\t SimilarityL: {similarityL}, SimilarityS: {similarityS}");
+                }
+
+                Console.WriteLine();
+                Console.WriteLine();
+            }
+        }
+
         public static async Task ImageGenerationAsync()
         {
             ImageClient client = new("dall-e-3", Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
@@ -221,12 +279,12 @@ namespace OpenAI.Samples
                 + " points, creating a connection with nature. Soft textiles and cushions in organic fabrics adding comfort"
                 + " and softness to a space. They can serve as accents, adding contrast and texture. Dog sitting at the table. Tiger is laying under the table. One women is wrking on laptop and eating the chocolate.";
 
-            prompt = "Dancing forever in Tanzania with monkeys, elephants, Aaj Ki Raat  Tamannaah Bhatia  Sachin-Jigar Madhubanti  Divya  Amitabh. One women is working on laptop and eating the chocolate.";
+            prompt = "Julia Roberts is dancing in Tanzania with monkeys, elephants and Cristiano Ronaldo is working on laptop and eating the chocolate. Show the clock with the time 16:22";
             ImageGenerationOptions options = new()
             {
                 Quality = GeneratedImageQuality.High,
                 Size = GeneratedImageSize.W1792xH1024,
-                Style = GeneratedImageStyle.Vivid,
+                Style = GeneratedImageStyle.Natural,
                 ResponseFormat = GeneratedImageFormat.Bytes
             };
 
@@ -307,7 +365,7 @@ namespace OpenAI.Samples
 
             string input = text != null ? text : "Alright everyone, please keep your hands inside the code at all times. If you see any unexpected errors, don't worry—those are just features in disguise. And remember, if the demo works perfectly on the first try, it's probably witchcraft. Sit back, relax, and let’s enjoy the magic (and maybe some debugging) together!";
 
-              BinaryData speech = await client.GenerateSpeechAsync(input, GeneratedSpeechVoice.Fable);
+            BinaryData speech = await client.GenerateSpeechAsync(input, GeneratedSpeechVoice.Nova);
 
             using FileStream stream = File.OpenWrite($"{Guid.NewGuid()}.mp3");
             speech.ToStream().CopyTo(stream);
