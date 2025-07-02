@@ -36,7 +36,7 @@ namespace semantickernelsample
             _kernel = kernel;
         }
 
-        private const string Text = """
+        private const string _text = """
         The city of Venice, located in the northeastern part of Italy,
         is renowned for its unique geographical features. Built on more than 100 small islands in a lagoon in the
         Adriatic Sea, it has no roads, just canals including the Grand Canal thoroughfare lined with Renaissance and
@@ -55,7 +55,7 @@ namespace semantickernelsample
         biggest single structure made by living organisms. This reef structure is composed of and built by billions of tiny organisms,
         known as coral polyps.
 
-        Damir DObric is a dancing teacher from frankfurt am main. Regularly dancing on tech-stages.
+        Damir Dobric is a dancing teacher from frankfurt am main. Regularly dancing on tech-stages.
         """;
     
         
@@ -64,12 +64,14 @@ namespace semantickernelsample
             Console.WriteLine("=== Text chunking with chunk header ===");
 
 #pragma warning disable SKEXP0050 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-            var lines = TextChunker.SplitPlainTextLines(Text, 40);
-            var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 150, chunkHeader: "DOCUMENT NAME: test.txt\n\n");
+            var lines = TextChunker.SplitPlainTextLines(_text, 40);
+            var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 150, chunkHeader: "DocRef: test.txt\n\n");
 #pragma warning restore SKEXP0050 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
-            var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
+            var encoder = ModelToEncoder.For("gpt-4o"   ); // or explicitly using new Encoder(new O200KBase())
 
+            //
+            // Create lines of texts.
             foreach (var line in lines)
             {
                 var cnt = encoder.CountTokens(line);
@@ -77,6 +79,9 @@ namespace semantickernelsample
             }
 
             Console.WriteLine();
+
+            //
+            // Create paragraphs from lines of text.
             Console.WriteLine("=== Paragraphs ===");
 
             foreach (var paragraph in paragraphs)
@@ -88,14 +93,14 @@ namespace semantickernelsample
 
         private List<MyInMemoryVector> _memory = new List<MyInMemoryVector>();
 
+#pragma warning disable SKEXP0050 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
         public async Task  RunRAG()
         {
             Console.WriteLine("------------- (1) Chanking -----------");
 
-#pragma warning disable SKEXP0050 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-            var lines = TextChunker.SplitPlainTextLines(Text, 40);
-            var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 150, chunkHeader: "DOCUMENT NAME: test.txt\n\n");
-#pragma warning restore SKEXP0050 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            var lines = TextChunker.SplitPlainTextLines(_text, 40);
+            var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 150, chunkHeader: "DOCUMENT Ref: test.txt\n\n");
 
             var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
 
@@ -103,7 +108,10 @@ namespace semantickernelsample
 
             foreach (var paragraph in paragraphs)
             {
+                // Use this if you want to know haw many tokens you have.
                 var cnt = encoder.CountTokens(paragraph);
+
+                // Create embedding vector for the text.
                 var vector = await GetEmbedding(paragraph);
                 _memory.Add(new MyInMemoryVector
                 {
@@ -115,6 +123,7 @@ namespace semantickernelsample
 
             await RunConversationLoopAsync();
         }
+#pragma warning restore SKEXP0050 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 

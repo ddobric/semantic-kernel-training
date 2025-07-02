@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.ML.Tokenizers;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -9,18 +8,15 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Embeddings;
 using Microsoft.SemanticKernel.Planning;
 using Microsoft.SemanticKernel.PromptTemplates.Handlebars;
-using Microsoft.SemanticKernel.Text;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using semantickernelsample;
 using semantickernelsample.NativePlugIns;
 using semantickernelsample.Skills;
 using System.Diagnostics;
 using System.Text.Json;
 using Tiktoken;
-using static System.Net.Mime.MediaTypeNames;
 //using Microsoft.SemanticKernel.Planning.Handlebars;
 internal class Program
 {
@@ -28,18 +24,18 @@ internal class Program
     {
         //TestPerformance();
 
-        //WorkingWithTokens();
+       WorkingWithTokens();
 
-        //new RagSample(GetKernel()).SplitTextToChunks();       
-        
-        //await WorkingWithEmbeddings();
+       // await WorkingWithEmbeddings();
 
-        //await new RagSample(GetKernel()).RunRAG();
+       // new RagSample(GetKernel()).SplitTextToChunks();       
+
+       //await new RagSample(GetKernel()).RunRAG();
 
         //
         // The ultimate scenario
         //
-        //await Sample_Lighting();
+        await Sample_Lighting();
 
         //--------------------
         // NATIVE FUNCTIONS
@@ -57,7 +53,7 @@ internal class Program
         //await Sample_InlineSemanticFunc3(); ////////
 
         //await Sample_SemanticFunc_SimplifyAbstract();
-        await Sample_HelloSemanticFunctionWithParams();///////
+        //await Sample_HelloSemanticFunctionWithParams();///////
         //await Sample_SemanticTextTranslation();
         //await Sample_NestedSemanticFunction(); ///////
 
@@ -76,7 +72,7 @@ internal class Program
 
         //await Sample_WorkshopFunctionCall();
 
-        //await Sample_FictionWithFunctionCall(); /////
+        await Sample_FictionWithFunctionCall(); /////
 
         //await Sample_FictionPlaner();
 
@@ -182,7 +178,7 @@ internal class Program
             var result = await chatCompletionService.GetChatMessageContentAsync(
                 history,
                 executionSettings: ollamaSettings,//openAIPromptExecutionSettings,
-                //executionSettings: openAIPromptExecutionSettings,
+               // executionSettings: openAIPromptExecutionSettings,
                 kernel: kernel);
 
             // Print the results
@@ -1064,14 +1060,17 @@ We offer you our profound cloud knowledge as standardized best-practice service 
     {
         // Microsoft ML Tokenizer
         var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4o");
-        string normalizedText;
-        var  tokens = tokenizer.EncodeToTokens("hello world", out normalizedText); // [15339, 1917]   
-        var tokenCount = tokenizer.CountTokens("Hello world");
+        string? normalizedText;
+        var  tokens1 = tokenizer.EncodeToTokens("Today is a hot day!", out normalizedText); // [15339, 1917]   
+       
+        var tokens2 = tokenizer.EncodeToTokens("world hello", out normalizedText); // [15339, 1917]   
 
-        //Tiktoken
+        var tokenCount = tokenizer.CountTokens("Today is a hot day!");
+
+        // Tiktoken
         var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
-        var tokens2 = encoder.Encode("hello world"); // [15339, 1917]
-        var text = encoder.Decode(tokens2); // hello world
+        var tokens3 = encoder.Encode("hello world"); // [15339, 1917]
+        var text = encoder.Decode(tokens3); // hello world
         var numberOfTokens = encoder.CountTokens(text); // 2
         var stringTokens = encoder.Explore(text); // ["hello", " world"]
 
