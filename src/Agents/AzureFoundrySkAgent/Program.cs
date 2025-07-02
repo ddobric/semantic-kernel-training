@@ -4,6 +4,7 @@ using Azure.Identity;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Agents.AzureAI;
+using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System.Text.Json;
 
@@ -15,7 +16,7 @@ namespace AzureFoundrySkAgent
     {
         public static async Task Main(string[] args)
         {
-            PersistentAgentsClient client = AzureAIAgent.CreateAgentsClient("https://ddobric-agents-samples-resource.services.ai.azure.com/api/projects/ddobric-agents-samples", new AzureCliCredential());
+            PersistentAgentsClient client = AzureAIAgent.CreateAgentsClient(Environment.GetEnvironmentVariable("AgentEndpointurl")!, new AzureCliCredential());
 
             // 1. Define an agent on the Azure AI agent service
             PersistentAgent definition = await client.Administration.CreateAgentAsync(
@@ -24,165 +25,226 @@ namespace AzureFoundrySkAgent
                 description: "Sample Agent",
                 instructions: "Helper");
 
-            // 2. Create a Semantic Kernel agent based on the agent definition
-            AzureAIAgent agent = new(definition, client);
+            IKernelBuilder builder = Kernel.CreateBuilder();
+
+            // Initialize multiple chat - completion services.
+            builder.AddAzureOpenAIChatCompletion(
+               deploymentName: Environment.GetEnvironmentVariable("AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT")!,
+               endpoint: Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,
+               apiKey: Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!);
+
+            builder.Plugins.AddFromObject(new MyPlugin());
+            // Import plug-in from type
+            //kernel.ImportPluginFromType<MyPlugin>();
+
+            Kernel kernel = builder.Build();      
+
+            var agent = new ChatCompletionAgent()
+            {
+                Name = "MySKAgent",
+                Instructions = "You are answering only scientific questions.",
+                Kernel = kernel,
+                Arguments = new KernelArguments(
+                      new OpenAIPromptExecutionSettings()
+                      {
+                          FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+                      })
+            };
+
+            await RunConversationLoopAsync(agent);
         }
 
+        private static async Task RunConversationLoopAsync(ChatHistoryAgent agent)
+        {
+            ChatHistoryAgentThread agentThread = new();
+
+            while (true)
+            {
+                Console.WriteLine();
+                Console.Write("> ");
+
+                string? userInput = Console.ReadLine();
+                if (String.IsNullOrEmpty(userInput) || userInput == "exit")
+                    break;
+
+                try
+                {
+                    ChatMessageContent message = new(AuthorRole.User, userInput);
+              
+                    await foreach (StreamingChatMessageContent response in agent.InvokeStreamingAsync(message, agentThread))
+                    {
+                        Console.Write(response.Content);
+                    }
+                }
+                finally
+                {
+
+                }
+            }
+        }
+
+        private static async Task RunChatCompletionAgentSampleAsync()
+        {
+        }
+
+
+            // 2. Create an agent instance
+       //     PersistentAgent agent = await client.CreateAgentAsync(def
      //   static async Task Main(string[] args)
      //   {
 
-     //       IKernelBuilder builder = Kernel.CreateBuilder();
+            //       IKernelBuilder builder = Kernel.CreateBuilder();
 
-     //       Initialize multiple chat - completion services.
-     //      builder.AddAzureOpenAIChatCompletion(
-     //         deploymentName: Environment.GetEnvironmentVariable("AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT")!,
-     //         endpoint: Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,
-     //         apiKey: Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!);
+            //       // Initialize multiple chat - completion services.
+            //       builder.AddAzureOpenAIChatCompletion(
+            //          deploymentName: Environment.GetEnvironmentVariable("AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT")!,
+            //          endpoint: Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,
+            //          apiKey: Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!);
 
-     //       builder.Plugins.AddFromObject(new MyPlugin());
+            //       builder.Plugins.AddFromObject(new MyPlugin());
 
-     //       Kernel kernel = builder.Build();
+            //       Kernel kernel = builder.Build();
 
-     //       ChatCompletionAgent agent =
-     //new()
-     //{
-     //    Name = "aaaa",
-     //    Instructions = "your are summarizer",
-     //    Kernel = kernel,
-     //    Arguments = // Specify the service-identifier via the KernelArguments
-     //      new KernelArguments(
-     //        new OpenAIPromptExecutionSettings()
-     //        {
-     //            ServiceId = "service-2" // The target service-identifier.
-     //        })
-     //};
+            //       ChatCompletionAgent agent =
+            //new()
+            //{
+            //    Name = "aaaa",
+            //    Instructions = "your are summarizer",
+            //    Kernel = kernel,
+            //    Arguments = // Specify the service-identifier via the KernelArguments
+            //      new KernelArguments(
+            //        new OpenAIPromptExecutionSettings()
+            //        {
+            //            ServiceId = "service-2" // The target service-identifier.
+            //        })
+            //};
 
-      //  }
-        
-        //static async Task Main(string[] args)
-        //{
-        //    Console.WriteLine("Hello Foundy Agent by Semantic Kernel!");
+            //   }
 
-        //    string agentName = "Semantic Kernel Agent Sample";
-        //    string modelName = "gpt-4o";
-        //    string connectionString = Environment.GetEnvironmentVariable("AgentConnStr")!;
-        //    Azure.AI.Projects.Agent? foundryAgentDefinition = null;
+            //static async Task Main(string[] args)
+            //{
+            //    Console.WriteLine("Hello Foundy Agent by Semantic Kernel!");
 
-        //    //AIProjectClient client = AzureAIAgent.CreateAzureAIClient(connectionString, new AzureCliCredential());
+            //    string agentName = "Semantic Kernel Agent Sample";
+            //    string modelName = "gpt-4o";
+            //    string connectionString = Environment.GetEnvironmentVariable("AgentConnStr")!;
+            //    Azure.AI.Projects.Agent? foundryAgentDefinition = null;
 
-        //    ////AgentsClient agentsClient = client.GetAgentsClient(); 
-        //    //AgentsClient agentsClient = new AgentsClient(connectionString, new DefaultAzureCredential());
+            //    //AIProjectClient client = AzureAIAgent.CreateAzureAIClient(connectionString, new AzureCliCredential());
 
-        //    //Response<PageableList<Agent>> agentListResponse = await agentsClient.GetAgentsAsync();
+            //    ////AgentsClient agentsClient = client.GetAgentsClient(); 
+            //    //AgentsClient agentsClient = new AgentsClient(connectionString, new DefaultAzureCredential());
 
-        //    //Console.WriteLine("Listing agents in the foundry project...");
+            //    //Response<PageableList<Agent>> agentListResponse = await agentsClient.GetAgentsAsync();
 
-
-        //    //foreach (var foundyAgent in agentListResponse.Value)
-        //    //{
-        //    //    if(foundyAgent.Name == agentName)
-        //    //    {
-        //    //        foundryAgentDefinition = foundyAgent;
-        //    //        break;
-        //    //    }
-
-        //    //    Console.WriteLine($"Agent: {foundyAgent.Name} - {foundyAgent.Id}");
-        //    //}
-
-        //    Console.WriteLine("------------------------");
-
-        //    KernelPlugin plugin = KernelPluginFactory.CreateFromType<object>();
-        //    var tools = plugin.Select(f => f.ToToolDefinition(plugin.Name));
+            //    //Console.WriteLine("Listing agents in the foundry project...");
 
 
-        //    if (foundryAgentDefinition == null)
-        //    {
-        //       foundryAgentDefinition = await agentsClient.CreateAgentAsync(
-        //       modelName,
-        //       name: agentName,
-        //       description: "Sample Agent Created by Semantic Kernel Agent Framework.",
-        //       instructions: "You are the agent who helps answering any question.",
-        //       tools: new List<ToolDefinition>
-        //            {
-        //                new CodeInterpreterToolDefinition() ,
-        //                GetUserFavoriteCityTool,
-        //                GetCityNicknameTool,
-        //                //MyQueueFunctionTool
-        //            });                
-        //    }
+            //    //foreach (var foundyAgent in agentListResponse.Value)
+            //    //{
+            //    //    if(foundyAgent.Name == agentName)
+            //    //    {
+            //    //        foundryAgentDefinition = foundyAgent;
+            //    //        break;
+            //    //    }
 
-        //    AzureAIAgent agent = new(foundryAgentDefinition, agentsClient);
-            
-        //    Microsoft.SemanticKernel.Agents.AgentThread agentThread = new AzureAIAgentThread(agent.Client);
+            //    //    Console.WriteLine($"Agent: {foundyAgent.Name} - {foundyAgent.Id}");
+            //    //}
 
-        //    while (true)
-        //    {
-        //        Console.WriteLine();
-        //        Console.Write("> ");
+            //    Console.WriteLine("------------------------");
 
-        //        string? userInput = Console.ReadLine();
-        //        if (String.IsNullOrEmpty(userInput) || userInput == "exit")
-        //            break;
+            //    KernelPlugin plugin = KernelPluginFactory.CreateFromType<object>();
+            //    var tools = plugin.Select(f => f.ToToolDefinition(plugin.Name));
 
-        //        try
-        //        {
-        //            ChatMessageContent message = new(AuthorRole.User, userInput);
-        //            //await foreach (ChatMessageContent response in agent.InvokeAsync(message, agentThread))
 
-        //            await foreach (StreamingChatMessageContent response in agent.InvokeStreamingAsync(message, agentThread))
-        //            {
-        //                Console.Write(response.Content);
-        //            }
-        //        }
-        //        finally
-        //        {
-                   
-        //        }
-        //    }
+            //    if (foundryAgentDefinition == null)
+            //    {
+            //       foundryAgentDefinition = await agentsClient.CreateAgentAsync(
+            //       modelName,
+            //       name: agentName,
+            //       description: "Sample Agent Created by Semantic Kernel Agent Framework.",
+            //       instructions: "You are the agent who helps answering any question.",
+            //       tools: new List<ToolDefinition>
+            //            {
+            //                new CodeInterpreterToolDefinition() ,
+            //                GetUserFavoriteCityTool,
+            //                GetCityNicknameTool,
+            //                //MyQueueFunctionTool
+            //            });                
+            //    }
 
-        //    //await agentThread.DeleteAsync();
-        //    //await agent.Client.DeleteAgentAsync(agent.Id);
-        //}
+            //    AzureAIAgent agent = new(foundryAgentDefinition, agentsClient);
 
-        ///// <summary>
-        ///// Example of the function with no arguments.
-        ///// </summary>
-        ///// <returns></returns>
-        //protected static string GetUserFavoriteCity() => "Frankfurt am Main, Germany";
+            //    Microsoft.SemanticKernel.Agents.AgentThread agentThread = new AzureAIAgentThread(agent.Client);
 
-        //private static FunctionToolDefinition GetUserFavoriteCityTool = new("GetUserFavoriteCity", "Gets the user's favorite city.");
+            //    while (true)
+            //    {
+            //        Console.WriteLine();
+            //        Console.Write("> ");
 
-        //// Example of a function with a single required parameter
-        //protected static string GetCityNickname(string location)
-        //{
-        //    if (location.ToLower().Contains("seattle"))
-        //        return "The Emerald City";
-        //    else if (location.ToLower().Contains("sarajevo"))
-        //        return "SA, Bosnian Culture City";
-        //    else
-        //        return "Unknown City";
-        //}
+            //        string? userInput = Console.ReadLine();
+            //        if (String.IsNullOrEmpty(userInput) || userInput == "exit")
+            //            break;
 
-        //private static FunctionToolDefinition GetCityNicknameTool = new(
-        //    name: "GetCityNickname",
-        //    description: "Gets the nickname of a city, e.g. 'LA' for 'Los Angeles, CA'.",
-        //    parameters: BinaryData.FromObjectAsJson(
-        //        new
-        //        {
-        //            Type = "object",
-        //            Properties = new
-        //            {
-        //                Location = new
-        //                {
-        //                    Type = "string",
-        //                    Description = "The city and state, e.g. San Francisco, CA",
-        //                },
-        //            },
-        //            Required = new[] { "location" },
-        //        },
-        //        new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
-        //    );
-        
+            //        try
+            //        {
+            //            ChatMessageContent message = new(AuthorRole.User, userInput);
+            //            //await foreach (ChatMessageContent response in agent.InvokeAsync(message, agentThread))
+
+            //            await foreach (StreamingChatMessageContent response in agent.InvokeStreamingAsync(message, agentThread))
+            //            {
+            //                Console.Write(response.Content);
+            //            }
+            //        }
+            //        finally
+            //        {
+
+            //        }
+            //    }
+
+            //    //await agentThread.DeleteAsync();
+            //    //await agent.Client.DeleteAgentAsync(agent.Id);
+            //}
+
+            ///// <summary>
+            ///// Example of the function with no arguments.
+            ///// </summary>
+            ///// <returns></returns>
+            //protected static string GetUserFavoriteCity() => "Frankfurt am Main, Germany";
+
+            //private static FunctionToolDefinition GetUserFavoriteCityTool = new("GetUserFavoriteCity", "Gets the user's favorite city.");
+
+            //// Example of a function with a single required parameter
+            //protected static string GetCityNickname(string location)
+            //{
+            //    if (location.ToLower().Contains("seattle"))
+            //        return "The Emerald City";
+            //    else if (location.ToLower().Contains("sarajevo"))
+            //        return "SA, Bosnian Culture City";
+            //    else
+            //        return "Unknown City";
+            //}
+
+            //private static FunctionToolDefinition GetCityNicknameTool = new(
+            //    name: "GetCityNickname",
+            //    description: "Gets the nickname of a city, e.g. 'LA' for 'Los Angeles, CA'.",
+            //    parameters: BinaryData.FromObjectAsJson(
+            //        new
+            //        {
+            //            Type = "object",
+            //            Properties = new
+            //            {
+            //                Location = new
+            //                {
+            //                    Type = "string",
+            //                    Description = "The city and state, e.g. San Francisco, CA",
+            //                },
+            //            },
+            //            Required = new[] { "location" },
+            //        },
+            //        new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+            //    );
+
 
     }
 }
