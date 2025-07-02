@@ -3,7 +3,7 @@
     "FoundryAgent": {
       "commandName": "Project",
       "environmentVariables": {
-        "AgentConnStr": "***.api.azureml.ms;**ID**;*RG*;**project**",
+        "AgentEndpointUrl": "https:/NAME-resource.services.ai.azure.com/api/projects/NAME",
         "AZURE_EXPERIMENTAL_ENABLE_ACTIVITY_SOURCE": "true"
       }
     }

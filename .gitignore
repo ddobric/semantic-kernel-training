@@ -418,3 +418,6 @@ FodyWeavers.xsd
 /src/Agents/AzureFoundrySkAgent/Properties/launchSettings.prod.json
 /src/Processes/SimpleProcess/Properties/launchSettings.empty.json
 /src/Processes/SimpleProcess/Properties/launchSettings.prod.json
+/src/Agents/FoundryAgent-hackathon/Properties/launchSettings.prod.json
+/src/Agents/FoundryAgent-hackathon/Properties/launchSettings.empty.json
+/src/Mcp/McpClient/Properties/launchSettings.prod.json

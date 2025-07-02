@@ -31,11 +31,10 @@ namespace FoundryAgent
 
             string agentName = "DemoAgent2";
             string modelName = "gpt-4o";
-            string connectionString = Environment.GetEnvironmentVariable("AgentConnStr")!;
-            connectionString = "https://ddobric-agents.resource.services.ai.azure.com/api/project/ddobric-agents";
-            connectionString = "https://ddobric-agents-samples-resource.services.ai.azure.com/api/projects/ddobric-agents-samples";
-            connectionString = "https://ddobric-agent-samples-resource.services.ai.azure.com/api/projects/ddobric-agent-samples";
+            string connectionString = Environment.GetEnvironmentVariable("AgentEndpointUrl")!;
+         
             PersistentAgentsClient client = new PersistentAgentsClient(connectionString, new AzureCliCredential());
+            //PersistentAgentsClient client = new PersistentAgentsClient(connectionString, new AzureKeyCredential(""));
 
             PersistentAgent? agent = null;
 
@@ -187,6 +186,7 @@ namespace FoundryAgent
                     List<ToolOutput> toolOutputs = new();
                     foreach (RequiredToolCall toolCall in submitToolOutputsAction.ToolCalls)
                     {
+                        // Invoke sthe tool
                         toolOutputs.Add(GetResolvedToolOutput(toolCall));
                     }
                     runResponse = await client.Runs.SubmitToolOutputsToRunAsync(runResponse.Value, toolOutputs);
