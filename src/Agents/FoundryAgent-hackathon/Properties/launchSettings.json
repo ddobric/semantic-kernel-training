@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "FoundryAgent": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "AgentEndpointUrl": "https://NAME-resource.services.ai.azure.com/api/projects/NAME",
+        "AZURE_EXPERIMENTAL_ENABLE_ACTIVITY_SOURCE": "true"
+      }
+    }
+  }
+}
