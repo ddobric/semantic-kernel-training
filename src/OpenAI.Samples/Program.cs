@@ -13,7 +13,7 @@ namespace OpenAI.Samples
         {
             Console.WriteLine("Hello, OpenAI Samples!");
 
-            //await CreateEmbeddingsAsync();
+           await CreateEmbeddingsAsync();
 
             //await ClassifyAsync();
            
@@ -173,9 +173,8 @@ namespace OpenAI.Samples
 
         public static async Task CreateEmbeddingsAsync()
         {
-            EmbeddingClient client = new("text-embedding-3-large"/*"text -embedding-3-small"*/,
+            EmbeddingClient client = new("text-embedding-3-small",//*text-embedding-3-large"
                 Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
-
 
             while (true)
             {

@@ -8,8 +8,8 @@
   </PropertyGroup>
 
     <ItemGroup>
-    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.1.0-preview.14" />
-    <PackageReference Include="System.Text.Json" Version="9.0.5" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.3" />
+    <PackageReference Include="System.Text.Json" Version="10.0.0-preview.6.25358.103" />
   </ItemGroup>
 
 </Project>

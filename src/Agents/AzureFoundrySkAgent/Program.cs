@@ -25,6 +25,8 @@ namespace AzureFoundrySkAgent
                 description: "Sample Agent",
                 instructions: "Helper");
 
+            AzureAIAgent foundryAgent = new(definition, client);
+
             IKernelBuilder builder = Kernel.CreateBuilder();
 
             // Initialize multiple chat - completion services.
@@ -54,7 +56,7 @@ namespace AzureFoundrySkAgent
             await RunConversationLoopAsync(agent);
         }
 
-        private static async Task RunConversationLoopAsync(ChatHistoryAgent agent)
+        private static async Task RunConversationLoopAsync(Agent agent)
         {
             ChatHistoryAgentThread agentThread = new();
 

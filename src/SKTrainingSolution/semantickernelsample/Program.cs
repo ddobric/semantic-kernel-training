@@ -12,6 +12,7 @@ using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using semantickernelsample;
 using semantickernelsample.NativePlugIns;
 using semantickernelsample.Skills;
 using System.Diagnostics;
@@ -24,18 +25,20 @@ internal class Program
     {
         //TestPerformance();
 
-       WorkingWithTokens();
+        //WorkingWithTokens();
 
-       // await WorkingWithEmbeddings();
+        // await WorkingWithEmbeddings();
 
-       // new RagSample(GetKernel()).SplitTextToChunks();       
+        //new RagSample(GetKernel()).SplitTextToChunks();       
 
-       //await new RagSample(GetKernel()).RunRAG();
+        //await new RagSample(GetKernel()).RunRAG();
+
+        await new RagSample(GetKernel()).RunExperimentLoopAsync();
 
         //
         // The ultimate scenario
         //
-        await Sample_Lighting();
+        //await Sample_Lighting();
 
         //--------------------
         // NATIVE FUNCTIONS
@@ -72,8 +75,9 @@ internal class Program
 
         //await Sample_WorkshopFunctionCall();
 
-        await Sample_FictionWithFunctionCall(); /////
+        //await Sample_FictionWithFunctionCall(); /////
 
+        //await new Sample_SemanticUseCaseSelector(GetKernel()).RunAsync();
         //await Sample_FictionPlaner();
 
         //await ES_BookHours();
@@ -168,8 +172,9 @@ internal class Program
             };
 
 #pragma warning disable SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-            var ollamaSettings = new OllamaPromptExecutionSettings { 
-                Temperature =0.1f,
+            var ollamaSettings = new OllamaPromptExecutionSettings
+            {
+                Temperature = 0.1f,
                 FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
             };
 #pragma warning restore SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
@@ -178,7 +183,7 @@ internal class Program
             var result = await chatCompletionService.GetChatMessageContentAsync(
                 history,
                 executionSettings: ollamaSettings,//openAIPromptExecutionSettings,
-               // executionSettings: openAIPromptExecutionSettings,
+                                                  // executionSettings: openAIPromptExecutionSettings,
                 kernel: kernel);
 
             // Print the results
@@ -1061,8 +1066,8 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         // Microsoft ML Tokenizer
         var tokenizer = TiktokenTokenizer.CreateForModel("gpt-4o");
         string? normalizedText;
-        var  tokens1 = tokenizer.EncodeToTokens("Today is a hot day!", out normalizedText); // [15339, 1917]   
-       
+        var tokens1 = tokenizer.EncodeToTokens("Today is a hot day!", out normalizedText); // [15339, 1917]   
+
         var tokens2 = tokenizer.EncodeToTokens("world hello", out normalizedText); // [15339, 1917]   
 
         var tokenCount = tokenizer.CountTokens("Today is a hot day!");
@@ -1122,20 +1127,24 @@ We offer you our profound cloud knowledge as standardized best-practice service 
     private static Kernel GetKernel()
     {
         //return GetOllamaKernel();
-        //return GetOpenAIKernel();
-        return GetAzureKernel();
+        return GetOpenAIKernel();
+        //return GetAzureKernel();
     }
 
 
     private static Kernel GetOpenAIKernel(string? useChatOrTextCompletionModel = "chat")
     {
         Kernel kernel;
+#pragma warning disable SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
         IKernelBuilder builder;
 
         if (useChatOrTextCompletionModel == null || useChatOrTextCompletionModel == "chat")
         {
             builder = Kernel.CreateBuilder()
+                 .AddAzureOpenAITextEmbeddingGeneration(Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
+                  Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDINGMODELURL")!,    // The endpoint of your Azure OpenAI service
+                  Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDINGMODELKEY")!)
              .AddOpenAIChatCompletion(
             Environment.GetEnvironmentVariable("OPENAI_CHATCOMPLETION_DEPLOYMENT")!, // The name of your deployment (e.g., "gpt-3.5-turbo")
             Environment.GetEnvironmentVariable("OPENAI_API_KEY")!,
@@ -1143,6 +1152,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         }
         else
             throw new Exception("Text Completion Models are deprected.");
+#pragma warning restore SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
         kernel = builder.Build();
 
@@ -1238,7 +1248,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
             .AddConsoleExporter()
             .Build();
 
-        
+
         _logFactory = LoggerFactory.Create(builder =>
         {
             // Add OpenTelemetry as a logging provider
