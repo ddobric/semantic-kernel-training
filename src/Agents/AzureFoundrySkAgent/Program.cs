@@ -17,6 +17,16 @@ namespace AzureFoundrySkAgent
 {
     internal class Program
     {
+        public static async Task Main(string[] args)
+        {
+            //await AgentFrameworkBasicAgent.RunBasicAsync();
+            //await AgentFrameworkBasicAgent.RunBasicStreamedAsync();
+            //await AgentFrameworkBasicAgent.RunWithStateAsync();
+            await AgentFrameworkPersistedAgentSamples.RunPersistentAgents();
+        }
+
+        // Following functions are related to SK Agents
+
         public static async Task Main0(string[] args)
         {
             PersistentAgentsClient client = AzureAIAgent.CreateAgentsClient(Environment.GetEnvironmentVariable("AgentEndpointurl")!, new AzureCliCredential());
@@ -59,7 +69,9 @@ namespace AzureFoundrySkAgent
             await RunConversationLoopAsync(agent);
         }
 
-        public static async Task Main(string[] args)
+      
+
+        public static async Task MainOcrSample(string[] args)
         {
             AIProjectClient projectClient =
                 new(new Uri(Environment.GetEnvironmentVariable("AgentEndpointUrl")!),

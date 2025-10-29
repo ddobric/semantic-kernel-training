@@ -15,7 +15,10 @@
         "AZURE_OPENAI_API_KEY": "***",
 
         "OLLAMA_CHATCOMPLETION_MODEL": "mistral:7b", //nemotron-mini:latest", //"phi4-mini:latest", //"mistral-small3.1:latest", //"llama2", //"mistral-small3.1\",",
-        "OLLAMA_ENDPOINT": "http://localhost:11434"
+        "OLLAMA_ENDPOINT": "http://localhost:11434",
+
+        // Used by Agent Framework
+        "AgentFrameworkOpenAIEndpointUrl": "https://YOURRESOURCENAME.openai.azure.com/"
 
       }
     }

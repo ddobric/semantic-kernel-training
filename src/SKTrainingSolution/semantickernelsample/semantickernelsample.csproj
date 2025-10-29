@@ -8,8 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="SpeechtToTextSamples.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="C:\Users\DamirDobric\.nuget\packages\microsoft.semantickernel.connectors.ai.openai\0.13.277.1-preview\contentFiles\any\netstandard2.0\Tokenizers\Settings\encoder.json" />
     <Content Remove="C:\Users\DamirDobric\.nuget\packages\microsoft.semantickernel.connectors.ai.openai\0.13.277.1-preview\contentFiles\any\netstandard2.0\Tokenizers\Settings\vocab.bpe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="SpeechtToTextSamples.cs" />
   </ItemGroup>
 
   <ItemGroup>
