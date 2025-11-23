@@ -13,7 +13,7 @@ namespace OpenAI.Samples
         {
             Console.WriteLine("Hello, OpenAI Samples!");
 
-           await CreateEmbeddingsAsync();
+           // await CreateEmbeddingsAsync();
 
             //await ClassifyAsync();
            

@@ -8,11 +8,11 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Anthropic.SDK" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" />
-		<PackageReference Include="Microsoft.Extensions.AI" />
-		<PackageReference Include="Azure.AI.Inference" Version="1.0.0-beta.4" />
-		<PackageReference Include="ModelContextProtocol" Version="0.2.0-preview.1" />
+		<PackageReference Include="Anthropic.SDK" Version="5.8.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0-rc.2.25502.107" />
+		<PackageReference Include="Microsoft.Extensions.AI" Version="9.10.2" />
+		<PackageReference Include="Azure.AI.Inference" Version="1.0.0-beta.5" />
+		<PackageReference Include="ModelContextProtocol" Version="0.4.0-preview.3" />
 	</ItemGroup>
 	
 </Project>

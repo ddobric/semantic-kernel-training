@@ -5,6 +5,12 @@ using ModelContextProtocol.Server;
 using System.ComponentModel;
 
 var builder = Host.CreateEmptyApplicationBuilder(settings: null);
+
+//builder.Services
+//       .AddMcpServer()
+//       .WithHttpTransport(o => o.Stateless = true)
+//       .WithTools<Tools>();
+
 builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()

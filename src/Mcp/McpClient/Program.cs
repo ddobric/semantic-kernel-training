@@ -7,10 +7,12 @@ using Microsoft.Extensions.Hosting;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 using System;
+using System.Linq;
 using System.Net;
+using System.Text;
 using System.Text.Json;
 
-namespace McpClient
+namespace McpClientSample
 {
     internal class Program
     {
@@ -21,13 +23,15 @@ namespace McpClient
         /// <returns></returns>
         static async Task Main(string[] args)
         {
-            SseClientTransportOptions opts = new SseClientTransportOptions
+            //await UseServerEverything();
+
+            HttpClientTransportOptions opts = new HttpClientTransportOptions
             {
-                //Endpoint = new Uri("http://localhost:3001/sse"),
-               
-                Endpoint = new Uri("https://localhost:7133/sse"),
+                //Endpoint = new Uri("http://localhost:7133/sse"),
+                TransportMode = HttpTransportMode.StreamableHttp,
+                Endpoint = new Uri("https://localhost:7133"),
                 AdditionalHeaders = new Dictionary<string, string>()
-                {              
+                {
                     {"ApiKey","123" }
                 }
             };
@@ -35,7 +39,8 @@ namespace McpClient
 
             IClientTransport transport;
 
-            transport = new SseClientTransport(opts);
+
+            transport = new HttpClientTransport(opts);
 
             //transport = new StdioClientTransport(new StdioClientTransportOptions
             //{
@@ -44,7 +49,38 @@ namespace McpClient
             //    Arguments = ["-y", "@modelcontextprotocol/server-everything"],
             //});
 
-            var mcpClient = await McpClientFactory.CreateAsync(transport);
+            var mcpClient = await McpClient.CreateAsync(transport);
+
+            // Print the list of tools available from the server.
+            foreach (var tool in await mcpClient.ListToolsAsync())
+            {
+                Console.WriteLine($"{tool.Name} ({tool.Description})");
+            }
+
+            // Execute a tool (this would normally be driven by LLM tool invocations).
+            var result = await mcpClient.CallToolAsync(
+                "echo",
+                new Dictionary<string, object?>() { ["message"] = "Hello MCP!" },
+                cancellationToken: CancellationToken.None);
+
+            // echo always returns one and only one text content object
+            // Console.WriteLine(result.Content.First(c => c.Type == "text").Text);
+
+            await RunConversationLoop(await mcpClient.ListToolsAsync(), mcpClient);
+        }
+
+        static async Task UseServerEverything()
+        {
+            IClientTransport transport;
+
+            transport = new StdioClientTransport(new StdioClientTransportOptions
+            {
+                Name = "Everything",
+                Command = "npx",
+                Arguments = ["-y", "@modelcontextprotocol/server-everything"],
+            });
+
+            var mcpClient = await McpClient.CreateAsync(transport);
 
 
             // Print the list of tools available from the server.
@@ -52,20 +88,22 @@ namespace McpClient
             {
                 Console.WriteLine($"{tool.Name} ({tool.Description})");
             }
-            
-            // Execute a tool (this would normally be driven by LLM tool invocations).
-            //CallToolResponse result = await mcpClient.CallToolAsync(
-            //    "Echo",
-            //    new Dictionary<string, object?>() { ["message"] = "Hello MCP!" },
-            //    cancellationToken: CancellationToken.None);
 
-            // echo always returns one and only one text content object
-           // Console.WriteLine(result.Content.First(c => c.Type == "text").Text);
+
+            ////Execute a tool(this would normally be driven by LLM tool invocations).
+            CallToolResult result = await mcpClient.CallToolAsync(
+                "echo",
+                new Dictionary<string, object?>() { ["message"] = "Hello MCP!" },
+                cancellationToken: CancellationToken.None);
+
+            //echo always returns one and only one text content object
+            Console.WriteLine(result.Content.First(c => c.Type == "text").ToString());
 
             await RunConversationLoop(await mcpClient.ListToolsAsync(), mcpClient);
         }
 
-        protected static async Task RunConversationLoop(IList<McpClientTool> tools, IMcpClient mcpClient)
+
+        protected static async Task RunConversationLoop(IList<McpClientTool> tools, McpClient mcpClient)
         {
             //var client = new ChatCompletionsClient(
             //    new Uri(Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!),
@@ -97,43 +135,65 @@ namespace McpClient
 
                 chatHistory.Add(new ChatRequestUserMessage(prompt));
 
-                var options = new ChatCompletionsOptions(chatHistory)
+                while (true)
                 {
-                    Model = "gpt-4.1",
-                };
-
-                mcpToolDefs.ForEach((tool) => options.Tools.Add(tool));
-
-                ChatCompletions? response = await client.CompleteAsync(options);
-
-                var content = response.Content;
-
-                if (content != null)
-                    chatHistory.Add(new ChatRequestAssistantMessage(content));
-
-                if (response.ToolCalls?.Count() > 0)
-                {
-                    // 5. Check if the response contains a function call
-                    ChatCompletionsToolCall? calls = response.ToolCalls.FirstOrDefault();
-                    for (int i = 0; i < response.ToolCalls.Count; i++)
+                    var options = new ChatCompletionsOptions(chatHistory)
                     {
-                        var call = response.ToolCalls[i];
-                        Console.WriteLine($"Tool call {i}: {call.Name} with arguments {call.Arguments}");
-                        //Tool call 0: add with arguments {"a":2,"b":4}
+                        Model = "gpt-4.1",
+                    };
 
-                        var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(call.Arguments);
-                        var result = await mcpClient.CallToolAsync(
-                            call.Name,
-                            dict!,
-                            cancellationToken: CancellationToken.None
-                        );
+                    mcpToolDefs.ForEach((tool) => options.Tools.Add(tool));
 
-                        Console.WriteLine(result.Content.First(c => c.Type == "text").Text);
+                    ChatCompletions? response = await client.CompleteAsync(options);
+
+                    if (response.Content != null)
+                        chatHistory.Add(new ChatRequestAssistantMessage(response.Content));
+
+                    if (response.ToolCalls?.Count() > 0)
+                    {
+                        StringBuilder sb = new StringBuilder();
+
+                        // 5. Check if the response contains a function call
+                        ChatCompletionsToolCall? calls = response.ToolCalls.FirstOrDefault();
+                        for (int i = 0; i < response.ToolCalls.Count; i++)
+                        {
+                            var call = response.ToolCalls[i];
+                            Console.WriteLine($"Tool call {i}: {call.Name} with arguments {call.Arguments}");
+                            //Tool call 0: add with arguments {"a":2,"b":4}
+
+                            var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(call.Arguments);
+
+                            var result = await mcpClient.CallToolAsync(
+                                call.Name,
+                                dict!,
+                                cancellationToken: CancellationToken.None
+                            );
+
+                            var res = result.Content.First(c => c.Type == "text");
+                            sb.AppendLine(((TextContentBlock)res).Text);
+                            Console.WriteLine(((TextContentBlock)res).Text);
+
+                            Console.WriteLine("----------------------------------");
+
+                            chatHistory.Add(new ChatRequestAssistantMessage(((TextContentBlock)res).Text));
+
+                            //response = await client.CompleteAsync(new ChatCompletionsOptions(chatHistory)
+                            //{
+                            //    Model = "gpt-4.1",
+                            //});
+
+                            //if (response.Content != null)
+                            //{
+                            //    chatHistory.Add(new ChatRequestAssistantMessage(response.Content));
+                            //    Console.WriteLine(((TextContentBlock)res).Text);
+                            //}
+                        }
                     }
-                }
-                else
-                {
-                    Console.WriteLine(content);
+                    else
+                    {
+                        Console.WriteLine(response.Content);
+                        break;
+                    }
                 }
             }
         }

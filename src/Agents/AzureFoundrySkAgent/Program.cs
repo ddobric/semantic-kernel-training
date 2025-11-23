@@ -19,55 +19,22 @@ namespace AzureFoundrySkAgent
     {
         public static async Task Main(string[] args)
         {
-            //await AgentFrameworkBasicAgent.RunBasicAsync();
-            //await AgentFrameworkBasicAgent.RunBasicStreamedAsync();
-            //await AgentFrameworkBasicAgent.RunWithStateAsync();
-            await AgentFrameworkPersistedAgentSamples.RunPersistentAgents();
+            await AgentFramework_TalkToSqlSample.RunAsync();
+            await AgentFramework_LightingSample.RunAsync();
+
+            //await SemanticKernelAgent.RunAsync(args);
+            //await SemanticKernelFoundryAgentSample.RunAsync(); DEPRECTED.USE AgentFrameworkPersistedAgentSamples
+
+
+            await AgentFramework_AzOpenAISamples.RunOpenAIBasicAsync();
+            await AgentFramework_AzOpenAISamples.RunOpenAIAgentStreamedAsync();
+            await AgentFramework_AzOpenAISamples.RunWithToolsFuncAsync();
+
+            //await AgentFrameworkPersistedAgentSamples.RunPersistentAgents();
+            //await AgentFramework_FoundryChatAgent.RunAsync();
         }
 
         // Following functions are related to SK Agents
-
-        public static async Task Main0(string[] args)
-        {
-            PersistentAgentsClient client = AzureAIAgent.CreateAgentsClient(Environment.GetEnvironmentVariable("AgentEndpointurl")!, new AzureCliCredential());
-
-            // 1. Define an agent on the Azure AI agent service
-            PersistentAgent definition = await client.Administration.CreateAgentAsync(
-                "gpt-4o",
-                name: "SkAgent01",
-                description: "Sample Agent",
-                instructions: "Helper");
-
-            AzureAIAgent foundryAgent = new(definition, client);
-
-            IKernelBuilder builder = Kernel.CreateBuilder();
-
-            // Initialize multiple chat - completion services.
-            builder.AddAzureOpenAIChatCompletion(
-               deploymentName: Environment.GetEnvironmentVariable("AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT")!,
-               endpoint: Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,
-               apiKey: Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!);
-
-            builder.Plugins.AddFromObject(new MyPlugin());
-            // Import plug-in from type
-            //kernel.ImportPluginFromType<MyPlugin>();
-
-            Kernel kernel = builder.Build();
-
-            var agent = new ChatCompletionAgent()
-            {
-                Name = "MySKAgent",
-                Instructions = "You are answering only scientific questions.",
-                Kernel = kernel,
-                Arguments = new KernelArguments(
-                      new OpenAIPromptExecutionSettings()
-                      {
-                          FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
-                      })
-            };
-
-            await RunConversationLoopAsync(agent);
-        }
 
       
 
@@ -166,38 +133,7 @@ namespace AzureFoundrySkAgent
             }
         }
 
-        private static async Task RunConversationLoopAsync(Agent skAgent)
-        {
-            ChatHistoryAgentThread agentThread = new();
-
-            while (true)
-            {
-                Console.WriteLine();
-                Console.Write("> ");
-
-                string? userInput = Console.ReadLine();
-                if (String.IsNullOrEmpty(userInput) || userInput == "exit")
-                    break;
-                try
-                {
-                    ChatMessageContent message = new(AuthorRole.User, userInput);
-
-                    //new ImageContent()
-                    await foreach (StreamingChatMessageContent response in skAgent.InvokeStreamingAsync(message, agentThread))
-                    {
-                        Console.Write(response.Content);
-                    }
-                }
-                finally
-                {
-
-                }
-            }
-        }
-
-        private static async Task RunChatCompletionAgentSampleAsync()
-        {
-        }
+      
 
 
         // 2. Create an agent instance

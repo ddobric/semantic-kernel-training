@@ -33,12 +33,12 @@ internal class Program
 
         //await new RagSample(GetKernel()).RunRAG();
 
-        await new RagSample(GetKernel()).RunExperimentLoopAsync();
+        //await new RagSample(GetKernel()).RunExperimentLoopAsync();
 
         //
         // The ultimate scenario
         //
-        //await Sample_Lighting();
+        await Sample_Lighting();
 
         //--------------------
         // NATIVE FUNCTIONS
@@ -1071,6 +1071,8 @@ We offer you our profound cloud knowledge as standardized best-practice service 
         var tokens2 = tokenizer.EncodeToTokens("world hello", out normalizedText); // [15339, 1917]   
 
         var tokenCount = tokenizer.CountTokens("Today is a hot day!");
+
+        var decodedText = tokenizer.Decode(tokens1.Select((t)=>t.Id));
 
         // Tiktoken
         var encoder = ModelToEncoder.For("gpt-4o"); // or explicitly using new Encoder(new O200KBase())
