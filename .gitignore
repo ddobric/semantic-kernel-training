@@ -421,3 +421,5 @@ FodyWeavers.xsd
 /src/Agents/FoundryAgent-hackathon/Properties/launchSettings.prod.json
 /src/Agents/FoundryAgent-hackathon/Properties/launchSettings.empty.json
 /src/Mcp/McpClient/Properties/launchSettings.prod.json
+/src/Agents/AgentFrameworkSamples/Properties/launchSettings.prod.json
+/src/Agents/AgentFrameworkSamples/Properties/launchSettings.empty.json
