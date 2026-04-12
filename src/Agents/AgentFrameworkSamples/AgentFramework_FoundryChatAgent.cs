@@ -14,7 +14,8 @@ namespace AzureFoundrySkAgent
 
         public static async Task RunAsync()
         {
-            string? agentId = null;
+            string agentName = "JettwareMessageReaderAgent";
+            string? agentId = $"{agentName}:1";
 
             //var persistentAgentsClient = new Azure.AI.Agents.Persistent.PersistentAgentsClient(
             //    Environment.GetEnvironmentVariable("AgentFrameworkFoundryAgentEndpointUrl")!,
@@ -31,22 +32,14 @@ namespace AzureFoundrySkAgent
 
 
             if (agentId != null)
-                agent = await aiProjectClient.GetProjectOpenAIClient(agentId);
-
+            {
+                agent = await aiProjectClient.GetAIAgentAsync(agentName);
+                var agentPrj = await aiProjectClient.Agents.GetAgentAsync(agentName);
+            }
+            
             if (agent == null)
             {
-                var newAgent = await aiProjectClient.CreateAIAgentAsync(name: "", model: "", 
-                    instructions: "", tools: [tool]);
-
-                // Create a persistent agent
-                var agentMetadata = await aiProjectClient.Agents.CreateAgentVersionAsync(
-                    model: _cModelDeploymentName,
-                    name: nameof(AgentFramework_FoundryChatAgent),
-                    instructions: "You are the agent answering questions.", 
-                    tools: [tool]);
-
-                // Retrieve the agent that was just created as an AIAgent using its ID
-                agent = await persistentAgentsClient.GetAIAgentAsync(agentMetadata.Value.Id);
+                agent = aiProjectClient.CreateAIAgent(name: "aaaaa", model: _cModelDeploymentName, instructions: "JokerInstructionsV2dsadadad", tools: [tool]);
             }
 
             await RunConversationLoopAsync(agent);            

@@ -13,13 +13,17 @@ namespace OpenAI.Samples
         {
             Console.WriteLine("Hello, OpenAI Samples!");
 
-           // await CreateEmbeddingsAsync();
+            // Demonstrates how to create embeddings and calculate similarity.
+            //await CreateEmbeddingsAsync();
 
-            //await ClassifyAsync();
-           
-            await ChatChatCompletionsAsync();
+            // Demonstrates how to classify documents.
+            //await ClassificationSample.RunAsync();
 
+            // Chatting with the model.
             //await ChatStreamingAsync();
+
+            // Deep Dive in completions with log probabilities.
+            await ChatChatCompletionsAsync();
 
             //await TextToSpeechAsync();
 
@@ -175,7 +179,7 @@ namespace OpenAI.Samples
         {
             EmbeddingClient client = new("text-embedding-3-large",//*text-embedding-3-large"
                 Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
-
+          
             while (true)
             {
                 Console.WriteLine("Enter text 1: ");
@@ -210,61 +214,9 @@ namespace OpenAI.Samples
             }
         }
 
-        class Entry
-        {
-            public string DocName { get; set; }
-            public float[] EmbeddingLarge { get; set; }
-            public float[] EmbeddingSmall { get; set; }
-        }
+      
 
-        public static async Task ClassifyAsync()
-        {
-            List<Entry> entries = new List<Entry>();
-
-            EmbeddingClient clientLarge = new("text-embedding-3-large"/*"text -embedding-3-small"*/,
-                Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
-
-            EmbeddingClient clientSmall = new("text-embedding-3-small",
-                Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
-
-            foreach (var file in Directory.GetFiles(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Docs")))
-            {
-                Entry entry = new Entry();
-                var txt = File.ReadAllText(file);
-                entry.DocName = file;
-
-                OpenAIEmbeddingCollection eL = await clientLarge.GenerateEmbeddingsAsync(new List<string> { txt });
-                entry.EmbeddingLarge = eL[0].ToFloats().ToArray();
-
-                OpenAIEmbeddingCollection eS = await clientSmall.GenerateEmbeddingsAsync(new List<string> { txt });
-                entry.EmbeddingSmall = eS[0].ToFloats().ToArray();
-
-                entries.Add(entry);
-            }
-
-            while (true)
-            {
-                Console.WriteLine("Enter text for classification: ");
-
-                var inp1 = Console.ReadLine();
-
-                List<string> inputs = [inp1];
-
-                OpenAIEmbeddingCollection eL = await clientLarge.GenerateEmbeddingsAsync(inputs);
-                OpenAIEmbeddingCollection eS = await clientSmall.GenerateEmbeddingsAsync(inputs);
-
-                foreach (var entry in entries)
-                {
-                    var similarityL = CalculateSimilarity(eL[0].ToFloats().ToArray(), entry.EmbeddingLarge);
-                    var similarityS = CalculateSimilarity(eS[0].ToFloats().ToArray(), entry.EmbeddingSmall);
-
-                    Console.WriteLine($"Document: {new FileInfo(entry.DocName).Name}\t SimilarityL: {similarityL}, SimilarityS: {similarityS}");
-                }
-
-                Console.WriteLine();
-                Console.WriteLine();
-            }
-        }
+      
 
         public static async Task ImageGenerationAsync()
         {
@@ -326,7 +278,7 @@ namespace OpenAI.Samples
         /// <param name="embedding2"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        private static double CalculateSimilarity(float[] embedding1, float[] embedding2)
+        public static double CalculateSimilarity(float[] embedding1, float[] embedding2)
         {
             if (embedding1.Length != embedding2.Length)
             {

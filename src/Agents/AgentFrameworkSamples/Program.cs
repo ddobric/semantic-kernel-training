@@ -19,6 +19,8 @@ namespace AzureFoundrySkAgent
     {
         public static async Task Main(string[] args)
         {
+            await AgentFramework_FoundryChatAgent.RunAsync();
+
             //await AgentFramework_WorkflowSample.RunAsync();
             await AgentFramework_TalkToSqlSample.RunAsync();
             //await AgentFramework_LightingSample.RunAsync();
@@ -26,13 +28,17 @@ namespace AzureFoundrySkAgent
             //await SemanticKernelAgent.RunAsync(args);
             //await SemanticKernelFoundryAgentSample.RunAsync(); DEPRECTED.USE AgentFrameworkPersistedAgentSamples
 
+            // OpenAI
+            //await AgentFramework_OpenAISamples.RunOpenAIBasicAsync();
+            //await AgentFramework_OpenAISamples.RunWithToolsFuncAsync();
+            await AgentFramework_AzOpenAISamples.RunRAGAsync();
 
             //await AgentFramework_AzOpenAISamples.RunOpenAIBasicAsync();
             //await AgentFramework_AzOpenAISamples.RunOpenAIAgentStreamedAsync();
             //await AgentFramework_AzOpenAISamples.RunWithToolsFuncAsync();
 
             //await AgentFrameworkPersistedAgentSamples.RunPersistentAgents();
-            //await AgentFramework_FoundryChatAgent.RunAsync();
+
         }
 
         // Following functions are related to SK Agents

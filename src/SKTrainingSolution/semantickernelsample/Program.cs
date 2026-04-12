@@ -167,7 +167,7 @@ internal class Program
             // Enable auto function calling
             OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
             {
-                Temperature = 0.0,
+                //Temperature = 0.1,
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
             };
 
@@ -182,7 +182,7 @@ internal class Program
             // Get the response from the AI
             var result = await chatCompletionService.GetChatMessageContentAsync(
                 history,
-                executionSettings: ollamaSettings,//openAIPromptExecutionSettings,
+                executionSettings: /*ollamaSettings*/openAIPromptExecutionSettings,
                                                   // executionSettings: openAIPromptExecutionSettings,
                 kernel: kernel);
 
@@ -1129,8 +1129,8 @@ We offer you our profound cloud knowledge as standardized best-practice service 
     private static Kernel GetKernel()
     {
         //return GetOllamaKernel();
-        return GetOpenAIKernel();
-        //return GetAzureKernel();
+        //return GetOpenAIKernel();
+        return GetAzureKernel();
     }
 
 

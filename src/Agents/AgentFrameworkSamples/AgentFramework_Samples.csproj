@@ -9,20 +9,19 @@
 
   <ItemGroup>
     <Compile Remove="AgentFrameworkPersistedAgentSamples.cs" />
-    <Compile Remove="AgentFramework_FoundryChatAgent.cs" />
     <Compile Remove="SemanticKernelFoundryAgentSample.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.AI.Agents.Persistent" Version="1.2.0-beta.7" />
+    <PackageReference Include="Azure.AI.Agents.Persistent" Version="1.2.0-beta.8" />
     <PackageReference Include="Azure.AI.Projects" Version="1.2.0-beta.4" />
     <PackageReference Include="Azure.Identity" Version="1.18.0-beta.2" />
-    <PackageReference Include="Microsoft.Agents.AI.AzureAI" Version="1.0.0-preview.251114.1" />
-    <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-preview.251114.1" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
-    <PackageReference Include="Microsoft.SemanticKernel.Agents.AzureAI" Version="1.67.1-preview" />
-    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.67.1" />
-    <PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" Version="1.67.1" />
+    <PackageReference Include="Microsoft.Agents.AI.AzureAI" Version="1.0.0-preview.251125.1" />
+    <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.0.0-preview.251125.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0-preview2.25289.6" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.AzureAI" Version="1.68.0-preview" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.68.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" Version="1.68.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,7 +30,6 @@
 
   <ItemGroup>
     <None Include="AgentFrameworkPersistedAgentSamples.cs" />
-    <None Include="AgentFramework_FoundryChatAgent.cs" />
     <None Include="SemanticKernelFoundryAgentSample.cs" />
   </ItemGroup>
 

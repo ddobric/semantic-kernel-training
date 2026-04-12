@@ -18,7 +18,7 @@ namespace AzureFoundrySkAgent
             var client = new AzureOpenAIClient(new Uri(Environment.GetEnvironmentVariable("AgentFrameworkOpenAIEndpointUrl")!),
                new DefaultAzureCredential());
 
-            var chatClient = client.GetChatClient(_cModelDeploymentName);             
+            var chatClient = client.GetChatClient(_cModelDeploymentName);
 
             var agent = chatClient.CreateAIAgent(instructions: "You are good at telling jokes.", name: "JokerOld");
             ChatMessage systemMessage = new(
@@ -54,6 +54,26 @@ namespace AzureFoundrySkAgent
             Console.WriteLine(await agent.RunAsync([systemMessage, userMessage]));
         }
 
+        public static async Task RunRAGAsync()
+        {
+            var client = new AzureOpenAIClient(new Uri(Environment.GetEnvironmentVariable("AgentFrameworkOpenAIEndpointUrl")!),
+               new DefaultAzureCredential());
+
+            var chatClient = client.GetChatClient(_cModelDeploymentName);
+
+            var agent = chatClient.CreateAIAgent(instructions: "You are good at telling jokes.", name: "Joker",
+                 tools: [AIFunctionFactory.Create(DoRAG)]);
+
+            ChatMessage systemMessage = new(
+                ChatRole.System,
+                """
+                    You are agent who provides informaiton about corporate internals.
+                    """);
+
+            await RunConversationLoopAsync(agent);
+        }
+
+
 
         protected static async Task RunConversationLoopAsync(AIAgent agent)
         {
@@ -70,7 +90,7 @@ namespace AzureFoundrySkAgent
 
                 try
                 {
-                    await foreach (var update in agent.RunStreamingAsync(userInput))
+                    await foreach (var update in agent.RunStreamingAsync(userInput, thread))
                     {
                         Console.Write(update);
                     }
@@ -84,7 +104,7 @@ namespace AzureFoundrySkAgent
 
         public static async Task RunOpenAIAgentStreamedAsync()
         {
-            var client = new AzureOpenAIClient(new Uri(Environment.GetEnvironmentVariable("AgentFrameworkOpenAIEndpointUrl")!), 
+            var client = new AzureOpenAIClient(new Uri(Environment.GetEnvironmentVariable("AgentFrameworkOpenAIEndpointUrl")!),
                 new DefaultAzureCredential());
 
             var chatClient = client.GetChatClient(_cModelDeploymentName);
@@ -116,6 +136,15 @@ namespace AzureFoundrySkAgent
                 return "hot";
             else
                 return "35";
+        }
+
+        [Description("Return internal information related to usre's quetion.")]
+        public static string DoRAG([Description("Summarized concise user information intent")] string? intent)
+        {
+            if (intent!.ToLower().Contains("technical contact"))
+                return $"Damir Dobric.";
+            else
+                return String.Empty;
         }
 
         // Moved to AgentFrameworkPersistedAgentSamples
