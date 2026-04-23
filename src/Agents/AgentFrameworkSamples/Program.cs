@@ -1,4 +1,5 @@
-﻿using Azure;
+﻿using AgentFramework_Samples.OpenAIAgents;
+using Azure;
 using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -15,14 +16,25 @@ using System.Text.Json;
 
 namespace AzureFoundrySkAgent
 {
+    /// <summary>
+    /// Entry point that selects which Agent Framework sample(s) to run.
+    /// Un/comment calls in Main() to switch between demos.
+    /// </summary>
     internal class Program
     {
         public static async Task Main(string[] args)
         {
-            await AgentFramework_FoundryChatAgent.RunAsync();
+            //await OpenAISamples.RunResponsesClientAsync();
+            //await OpenAISamples.RunChatClientAsync();
+            //await OpenAISamples.RunConversationAsync();
+
+            await OpenAIReasoningSamples.RunReasoningAsync();
+            await OpenAIReasoningSamples.RunReasoningWithStreamingAsync();
+
+            //await AgentFramework_FoundryChatAgent.RunAsync();
 
             //await AgentFramework_WorkflowSample.RunAsync();
-            await AgentFramework_TalkToSqlSample.RunAsync();
+            // await AgentFramework_TalkToSqlSample.RunAsync();
             //await AgentFramework_LightingSample.RunAsync();
 
             //await SemanticKernelAgent.RunAsync(args);
@@ -31,7 +43,7 @@ namespace AzureFoundrySkAgent
             // OpenAI
             //await AgentFramework_OpenAISamples.RunOpenAIBasicAsync();
             //await AgentFramework_OpenAISamples.RunWithToolsFuncAsync();
-            await AgentFramework_AzOpenAISamples.RunRAGAsync();
+            //await AgentFramework_AzOpenAISamples.RunRAGAsync();
 
             //await AgentFramework_AzOpenAISamples.RunOpenAIBasicAsync();
             //await AgentFramework_AzOpenAISamples.RunOpenAIAgentStreamedAsync();

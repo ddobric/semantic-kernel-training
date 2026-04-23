@@ -11,8 +11,18 @@ using System.ComponentModel;
 
 namespace AzureFoundrySkAgent
 {
+    /// <summary>
+    /// Workflow orchestration sample: the agent executes a multi-step workflow
+    /// by calling Task1, Task2, and Task3 tool functions in sequence.
+    /// The execution order and data flow between tasks is determined by the
+    /// natural-language prompt (e.g., "pass the result of Task2 to Task3").
+    /// Requires environment variable: AgentFrameworkOpenAIEndpointUrl
+    /// </summary>
     internal class AgentFramework_WorkflowSample
     {
+        /// <summary>
+        /// Sets up DI with WorkflowPlugin, creates the agent, and starts the conversation loop.
+        /// </summary>
         public static async Task RunAsync()
         {
             var endpoint = Environment.GetEnvironmentVariable("AgentFrameworkOpenAIEndpointUrl")!;

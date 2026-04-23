@@ -12,10 +12,20 @@ namespace AzureFoundrySkAgent
     /// <summary>
     /// Demonstrates how to use Azure Foundry Persistent Agents with the Agent Framework SDK and multiturn conversation.
     /// </summary>
+    /// <summary>
+    /// Demonstrates Azure Foundry Persistent Agents – agents whose definitions live
+    /// server-side and survive across sessions. Shows multi-turn conversation with
+    /// thread-based state so the agent remembers previous results.
+    /// Requires environment variable: AgentFrameworkFoundryAgentEndpointUrl
+    /// </summary>
     internal class AgentFrameworkPersistedAgentSamples
     {
         private const string _cModelDeploymentName = "gpt-4o-mini";
 
+        /// <summary>
+        /// Retrieves (or creates) a persistent agent, then demonstrates stateless vs.
+        /// stateful (threaded) invocations to show how conversation context is preserved.
+        /// </summary>
         public static async Task RunPersistentAgents()
         {
             string agentId = "asst_qOM7Mh9TtFw2tGbjFfP4fGst";

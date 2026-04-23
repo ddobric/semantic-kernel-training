@@ -10,6 +10,13 @@ using System.Threading.Tasks;
 
 namespace AzureFoundrySkAgent
 {
+    /// <summary>
+    /// Classic Semantic Kernel ChatCompletionAgent sample.
+    /// Uses the SK agent abstraction (not the newer Agent Framework SDK) with
+    /// Azure OpenAI, automatic function calling, and the MyPlugin tool.
+    /// Requires environment variables: AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT,
+    /// AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY
+    /// </summary>
     internal class SemanticKernelAgent
     {
         public static async Task RunAsync(string[] args)

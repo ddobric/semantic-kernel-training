@@ -3,17 +3,17 @@
     "semantickernelsample": {
       "commandName": "Project",
       "environmentVariables": {
-        "OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
-        "OPENAI_API_KEY": "",
-        "OPENAI_ORGID": "",
-        "AgentEndpointUrl": "",
+        //"OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
+        //"OPENAI_API_KEY": "",
+        //"OPENAI_ORGID": "",
+        //"AgentEndpointUrl": "",
 
-        "AZURE_OPENAI_EMBEDDING_DEPLOYMENT": "text-embedding-3-large",
-        "AZURE_OPENAI_EMBEDDINGMODELURL": "",
-        "AZURE_OPENAI_EMBEDDINGMODELKEY": "",
-        "AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
-        "AZURE_OPENAI_ENDPOINT": "https://.openai.azure.com/",
-        "AZURE_OPENAI_API_KEY": "",
+        //"AZURE_OPENAI_EMBEDDING_DEPLOYMENT": "text-embedding-3-large",
+        //"AZURE_OPENAI_EMBEDDINGMODELURL": "",
+        //"AZURE_OPENAI_EMBEDDINGMODELKEY": "",
+        //"AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",
+        //"AZURE_OPENAI_ENDPOINT": "https://.openai.azure.com/",
+        //"AZURE_OPENAI_API_KEY": "",
 
         "OLLAMA_CHATCOMPLETION_MODEL": "mistral:7b", //nemotron-mini:latest", //"phi4-mini:latest", //"mistral-small3.1:latest", //"llama2", //"mistral-small3.1\",",
         "OLLAMA_ENDPOINT": "http://localhost:11434",

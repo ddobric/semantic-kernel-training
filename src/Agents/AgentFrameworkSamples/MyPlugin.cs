@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace AzureFoundrySkAgent
 {
+    /// <summary>
+    /// Semantic Kernel plugin used by <see cref="SemanticKernelAgent"/>.
+    /// Exposes a weather tool as a KernelFunction that the SK agent can invoke.
+    /// </summary>
     public class MyPlugin
     {
         [KernelFunction, Description("Gets the weater conditions.")]

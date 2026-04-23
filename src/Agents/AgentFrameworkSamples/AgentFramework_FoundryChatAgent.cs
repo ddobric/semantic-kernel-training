@@ -7,11 +7,20 @@ using Microsoft.Extensions.AI;
 
 namespace AzureFoundrySkAgent
 {
+    /// <summary>
+    /// Shows how to create or retrieve an Azure Foundry-hosted agent using the AIProjectClient,
+    /// register a function tool, and run an interactive streaming conversation.
+    /// Requires environment variable: AgentFrameworkFoundryAgentEndpointUrl
+    /// </summary>
     internal class AgentFramework_FoundryChatAgent
     {
         private const string _cModelDeploymentName = "gpt-4o";
 
 
+        /// <summary>
+        /// Retrieves an existing Foundry agent by name, or creates a new one if not found.
+        /// Registers a TemperatureTool function and starts the conversation loop.
+        /// </summary>
         public static async Task RunAsync()
         {
             string agentName = "JettwareMessageReaderAgent";
@@ -33,8 +42,8 @@ namespace AzureFoundrySkAgent
 
             if (agentId != null)
             {
-                agent = await aiProjectClient.GetAIAgentAsync(agentName);
-                var agentPrj = await aiProjectClient.Agents.GetAgentAsync(agentName);
+                agent = await aiProjectClient.AsAIAgent(agentName);
+                //var agentPrj = await aiProjectClient.Agents.GetAgentAsync(agentName);
             }
             
             if (agent == null)
@@ -47,6 +56,10 @@ namespace AzureFoundrySkAgent
 
        
 
+        /// <summary>
+        /// Simulated temperature tool that returns a hardcoded value.
+        /// Demonstrates how to expose a C# method as an AI function tool.
+        /// </summary>
         [Description("Get the weather for a given location.")]
         public static string TemperatureTool(
             [Description("The city")] string? city,
@@ -58,6 +71,9 @@ namespace AzureFoundrySkAgent
                 return "35";
         }
 
+        /// <summary>
+        /// Interactive console loop with streaming output. Type "exit" to quit.
+        /// </summary>
         protected static async Task RunConversationLoopAsync(AIAgent agent)
         {
             Microsoft.Agents.AI.AgentThread thread = agent!.GetNewThread();

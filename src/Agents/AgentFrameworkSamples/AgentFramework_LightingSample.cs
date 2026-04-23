@@ -5,12 +5,23 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using OpenAI;
+using OpenAI.Chat;
 using System.ComponentModel;
 
 namespace AzureFoundrySkAgent
 {
+    /// <summary>
+    /// IoT-style demo: an AI agent controls a virtual light through function-calling tools.
+    /// Demonstrates dependency injection (DI) with the Agent Framework – the LightPlugin
+    /// is registered in a ServiceCollection and resolved at runtime.
+    /// Requires environment variable: AgentFrameworkOpenAIEndpointUrl
+    /// </summary>
     internal class AgentFramework_LightingSample
     {
+        /// <summary>
+        /// Builds the DI container, registers LightPlugin, creates the agent,
+        /// and starts the interactive conversation loop.
+        /// </summary>
         public static async Task RunAsync()
         {
             var endpoint = Environment.GetEnvironmentVariable("AgentFrameworkOpenAIEndpointUrl")!;
@@ -26,7 +37,7 @@ namespace AzureFoundrySkAgent
                 new Uri(endpoint),
                 new AzureCliCredential())
                 .GetChatClient(deploymentName)
-                .CreateAIAgent(
+                .AsAIAgent(
                     instructions: "You are a helpful assistant that helps people find information.",
                     name: "Assistant",
                     tools: [.. serviceProvider.GetRequiredService<LightPlugin>().AsAITools()],
@@ -37,7 +48,7 @@ namespace AzureFoundrySkAgent
 
         private static async Task RunConversationLoopAsync(AIAgent agent)
         {
-            Microsoft.Agents.AI.AgentThread thread = agent!.GetNewThread();
+            Microsoft.Agents.AI.AgentSession thread = await agent!.CreateSessionAsync();
 
             while (true)
             {
@@ -71,6 +82,10 @@ namespace AzureFoundrySkAgent
         }
     }
 
+    /// <summary>
+    /// Plugin that simulates an IoT light with on/off state.
+    /// Exposes GetState and ChangeState as AI-callable tools, plus a product lookup demo.
+    /// </summary>
     internal class LightPlugin
     {
         public bool IsOn { get; set; } = false;

@@ -11,8 +11,17 @@ using System.ComponentModel;
 
 namespace AzureFoundrySkAgent
 {
+    /// <summary>
+    /// Natural-language-to-SQL sample: the agent translates conversational prompts
+    /// into T-SQL queries, executes them against a SQL Server database, and returns
+    /// the results. Uses three tools: GetCurrentUtcDate, GetScheme, and QuerySqlTable.
+    /// Requires environment variables: AgentFrameworkOpenAIEndpointUrl, SQL_CONNECTION_STRING
+    /// </summary>
     internal class AgentFramework_TalkToSqlSample
     {
+        /// <summary>
+        /// Sets up DI with SqlServerTool, creates the agent, and starts the conversation loop.
+        /// </summary>
         public static async Task RunAsync()
         {
             var endpoint = Environment.GetEnvironmentVariable("AgentFrameworkOpenAIEndpointUrl")!;
@@ -65,6 +74,10 @@ namespace AzureFoundrySkAgent
             }
         }
 
+        /// <summary>
+        /// Encapsulates the SQL Server tooling exposed to the agent.
+        /// Provides schema retrieval, date helpers, and parameterised query execution.
+        /// </summary>
         public class SqlServerTool
         {            
             public SqlServerTool()
