@@ -35,7 +35,12 @@ namespace AzureFoundrySkAgent
 
             //await HelloAgent.RunAsync();
 
-            await OpenAIConversationSample.RunAsync();
+            //await OpenAIConversationSample.RunAsync();
+            await OpenAICodeInterpreter.RunAsync();
+
+
+
+
 
             //await AgentFramework_FoundryChatAgent.RunAsync();
 
