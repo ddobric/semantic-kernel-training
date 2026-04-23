@@ -24,15 +24,10 @@ namespace AgentFramework_Samples.OpenAIAgents
     /// </summary>
     internal class OpenAIReasoningSamples
     {
-        private static void GetModelAndKey(out string apiKey, out string model)
-        {
-            apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new InvalidOperationException("OPENAI_API_KEY is not set.");
-            model = Environment.GetEnvironmentVariable("OPENAI_CHAT_MODEL_NAME") ?? "gpt-5.4-mini";
-        }
 
         public static async Task RunReasoningAsync()
         {
-            GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetModelAndKey(out var apiKey, out var model);
 
             var client = new OpenAIClient(apiKey)
             .GetResponsesClient()
@@ -60,7 +55,7 @@ namespace AgentFramework_Samples.OpenAIAgents
 
         public static async Task RunReasoningWithStreamingAsync()
         {
-            GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetModelAndKey(out var apiKey, out var model);
 
             var client = new OpenAIClient(apiKey)
             .GetResponsesClient()

@@ -1,4 +1,5 @@
-﻿using AgentFramework_Samples.OpenAIAgents;
+﻿using AgentFramework_Samples.GettingStarted;
+using AgentFramework_Samples.OpenAIAgents;
 using Azure;
 using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
@@ -24,12 +25,17 @@ namespace AzureFoundrySkAgent
     {
         public static async Task Main(string[] args)
         {
+            // OPEN AI AGENTS SAMPLES (non-Azure)
             //await OpenAISamples.RunResponsesClientAsync();
             //await OpenAISamples.RunChatClientAsync();
             //await OpenAISamples.RunConversationAsync();
 
-            await OpenAIReasoningSamples.RunReasoningAsync();
-            await OpenAIReasoningSamples.RunReasoningWithStreamingAsync();
+            //await OpenAIReasoningSamples.RunReasoningAsync();
+            //await OpenAIReasoningSamples.RunReasoningWithStreamingAsync();
+
+            //await HelloAgent.RunAsync();
+
+            await OpenAIConversationSample.RunAsync();
 
             //await AgentFramework_FoundryChatAgent.RunAsync();
 
@@ -55,7 +61,7 @@ namespace AzureFoundrySkAgent
 
         // Following functions are related to SK Agents
 
-      
+
 
         public static async Task MainOcrSample(string[] args)
         {

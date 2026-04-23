@@ -5,7 +5,7 @@ namespace AgentFramework_Samples
     /// <summary>
     /// Provides console UI helpers for interactive agent conversations.
     /// </summary>
-    internal static class ConsoleHelper
+    internal static class Helpers
     {
         private const ConsoleColor UserColor = ConsoleColor.Cyan;
         private const ConsoleColor AgentColor = ConsoleColor.Green;
@@ -55,6 +55,12 @@ namespace AgentFramework_Samples
                     WriteLineColored(ErrorColor, $"Error: {ex.Message}");
                 }
             }
+        }
+
+        public static void GetModelAndKey(out string apiKey, out string model)
+        {
+            apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new InvalidOperationException("OPENAI_API_KEY is not set.");
+            model = Environment.GetEnvironmentVariable("OPENAI_CHAT_MODEL_NAME") ?? "gpt-5.4-mini";
         }
 
         private static void WriteColored(ConsoleColor color, string text)

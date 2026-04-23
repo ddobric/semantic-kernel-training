@@ -19,11 +19,6 @@ namespace AgentFramework_Samples.OpenAIAgents
     /// </summary>
     internal class OpenAISamples
     {
-        private static void GetModelAndKey(out string apiKey, out string model)
-        {
-            apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new InvalidOperationException("OPENAI_API_KEY is not set.");
-            model = Environment.GetEnvironmentVariable("OPENAI_CHAT_MODEL_NAME") ?? "gpt-5.4-mini";
-        }
 
         /// <summary>
         /// Creates two agents – one via raw OpenAI key, one via AzureOpenAIClient –
@@ -31,7 +26,7 @@ namespace AgentFramework_Samples.OpenAIAgents
         /// </summary>
         public static async Task RunResponsesClientAsync()
         {
-            GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetModelAndKey(out var apiKey, out var model);
 
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             AIAgent agent =
@@ -52,7 +47,7 @@ namespace AgentFramework_Samples.OpenAIAgents
 
         public static async Task RunChatClientAsync()
         {
-            GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetModelAndKey(out var apiKey, out var model);
 
             AIAgent agent = new OpenAIClient(apiKey)
             .GetChatClient(model)
@@ -69,7 +64,7 @@ namespace AgentFramework_Samples.OpenAIAgents
 
         public static async Task RunConversationAsync()
         {
-            GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetModelAndKey(out var apiKey, out var model);
 
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             AIAgent agent =
@@ -77,7 +72,7 @@ namespace AgentFramework_Samples.OpenAIAgents
                 .AsAIAgent(model: model, instructions: "You are good at telling jokes.", name: "Joker", tools: [Microsoft.Extensions.AI.AIFunctionFactory.Create(GetWeather)]);
 #pragma warning restore OPENAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
-            await ConsoleHelper.RunConversationLoopAsync(agent);
+            await Helpers.RunConversationLoopAsync(agent);
         }
 
 

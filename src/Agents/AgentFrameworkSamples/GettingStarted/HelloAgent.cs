@@ -20,7 +20,7 @@ namespace AgentFramework_Samples.GettingStarted
                 new Uri(endpoint),
                 new DefaultAzureCredential())
                 .GetChatClient(deploymentName)
-                .AsAIAgent(instructions: "You are good at telling jokes.", name: "Joker");
+                .AsAIAgent(instructions: "You are good at telling jokes.", name: nameof(HelloAgent));
 
             // Invoke the agent and output the text result.
             Console.WriteLine(await agent.RunAsync("Tell me a joke about a pirate."));
