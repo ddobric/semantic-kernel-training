@@ -6,6 +6,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents.AzureAI;
 using Microsoft.SemanticKernel.ChatCompletion;
 using AgentFramework_Samples.GettingStarted;
+using AgentFramework_Samples.HostedAgentsWithAzureFoundryModels;
 
 #pragma warning disable SKEXP0110 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
@@ -24,7 +25,9 @@ namespace AzureFoundrySkAgent
             //await HelloAgent.RunAsync();
             //await HelloAgent.RunMultiturnAsync();
             //await HelloAgent.RunWithToolsAsync();
-            await AgentWithMemory.RunAsync();
+            //await AgentWithMemory.RunAsync();
+             await SimpleWorkflow.RunAsync();
+            //await AgentsInWorkflow.RunAsync();
 
             // OPEN AI AGENTS SAMPLES (non-Azure)
             //await OpenAISamples.RunResponsesClientAsync();
