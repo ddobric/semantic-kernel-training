@@ -42,10 +42,12 @@ namespace AgentFramework_Samples
                 try
                 {
                     Console.ForegroundColor = AgentColor;
-                    await foreach (var update in agent.RunStreamingAsync(userInput))
+
+                    await foreach (var update in agent.RunStreamingAsync(userInput, session))
                     {
                         Console.Write(update);
                     }
+
                     Console.ResetColor();
                     Console.WriteLine();
                 }
@@ -61,6 +63,12 @@ namespace AgentFramework_Samples
         {
             apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new InvalidOperationException("OPENAI_API_KEY is not set.");
             model = Environment.GetEnvironmentVariable("OPENAI_CHAT_MODEL_NAME") ?? "gpt-5.4-mini";
+        }
+
+        public static void GetAzureEndpointAndModelDeployment(out string apiKey, out string model)
+        {
+            apiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException("OPENAI_API_KEY is not set.");
+            model = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME") ?? "gpt-5.4-mini";
         }
 
         private static void WriteColored(ConsoleColor color, string text)

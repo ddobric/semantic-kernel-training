@@ -1,17 +1,11 @@
-﻿using AgentFramework_Samples.GettingStarted;
-using AgentFramework_Samples.OpenAIAgents;
-using Azure;
+﻿using HostedAgentsWithAzureFoundryModels;
 using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
 using Azure.Identity;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Agents.AzureAI;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-using System.Security.Cryptography;
-using System.Text.Json;
+using AgentFramework_Samples.GettingStarted;
 
 #pragma warning disable SKEXP0110 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
@@ -25,6 +19,13 @@ namespace AzureFoundrySkAgent
     {
         public static async Task Main(string[] args)
         {
+            // Hosted Agents with Azure Foundry Models samples
+
+            //await HelloAgent.RunAsync();
+            //await HelloAgent.RunMultiturnAsync();
+            //await HelloAgent.RunWithToolsAsync();
+            await AgentWithMemory.RunAsync();
+
             // OPEN AI AGENTS SAMPLES (non-Azure)
             //await OpenAISamples.RunResponsesClientAsync();
             //await OpenAISamples.RunChatClientAsync();
@@ -36,7 +37,7 @@ namespace AzureFoundrySkAgent
             //await HelloAgent.RunAsync();
 
             //await OpenAIConversationSample.RunAsync();
-            await OpenAICodeInterpreter.RunAsync();
+            //await OpenAICodeInterpreter.RunAsync();
 
 
 
