@@ -34,7 +34,7 @@ namespace AgentFramework_Samples.GettingStarted
             AIAgent agent = chatClient.AsAIAgent(new ChatClientAgentOptions()
             {
                 ChatOptions = new() { Instructions = "You are a friendly assistant. Always address the user by their name." },
-                AIContextProviders = [new CustomMemory<UserInfo>(chatClient.AsIChatClient())]
+                AIContextProviders = [new UserInfoMemory(chatClient.AsIChatClient())]
             });
 
             // Create a new session for the conversation.
@@ -44,8 +44,8 @@ namespace AgentFramework_Samples.GettingStarted
 
             // Invoke the agent and output the text result.
             Console.WriteLine(await agent.RunAsync("Hello, what is the square root of 9?", session));
-            Console.WriteLine(await agent.RunAsync("My name is Ruaidhrí", session));
-            Console.WriteLine(await agent.RunAsync("I am 20 years old", session));
+            Console.WriteLine(await agent.RunAsync("My name is Damir Dobric", session));
+            Console.WriteLine(await agent.RunAsync("I am 40 years old", session));
 
             // We can serialize the session. The serialized state will include the state of the memory component.
             JsonElement sesionElement = await agent.SerializeSessionAsync(session);
@@ -59,7 +59,7 @@ namespace AgentFramework_Samples.GettingStarted
             Console.WriteLine("\n>> Read memories using memory component\n");
 
             // It's possible to access the memory component via the agent's GetService method.
-            var userInfo = agent.GetService<CustomMemory<UserInfo>>()?.GetValue(deserializedSession);
+            var userInfo = agent.GetService<UserInfoMemory>()?.GetValue(deserializedSession);
 
             // Output the user info that was captured by the memory component.
             Console.WriteLine($"MEMORY - User Name: {userInfo?.UserName}");
@@ -70,7 +70,7 @@ namespace AgentFramework_Samples.GettingStarted
             // It is also possible to set the memories using a memory component on an individual session.
             // This is useful if we want to start a new session, but have it share the same memories as a previous session.
             var newSession = await agent.CreateSessionAsync();
-            if (userInfo is not null && agent.GetService<CustomMemory<UserInfo>>() is CustomMemory<UserInfo> newSessionMemory)
+            if (userInfo is not null && agent.GetService<UserInfoMemory>() is UserInfoMemory newSessionMemory)
             {
                 newSessionMemory.SetValue(newSession, userInfo);
             }
@@ -82,73 +82,69 @@ namespace AgentFramework_Samples.GettingStarted
     }
 
 
-
     /// <summary>
-    /// Sample memory component = ContextProvider that can remember a user's name and age.
+    /// Sample memory component that can remember a user's name and age.
     /// </summary>
-    internal sealed class CustomMemory<T> : AIContextProvider
-        where T : class, IContextValue, new()
+    internal sealed class UserInfoMemory : AIContextProvider
     {
-        private readonly ProviderSessionState<T> _sessionState;
+        private readonly ProviderSessionState<UserInfo> _sessionState;
         private IReadOnlyList<string>? _stateKeys;
         private readonly IChatClient _chatClient;
 
-        public CustomMemory(IChatClient chatClient, Func<AgentSession?, T>? stateInitializer = null)
+        public UserInfoMemory(IChatClient chatClient, Func<AgentSession?, UserInfo>? stateInitializer = null)
         {
-            this._sessionState = new ProviderSessionState<T>(
-               stateInitializer ?? (_ => new T()),
-               this.GetType().Name);
+            this._sessionState = new ProviderSessionState<UserInfo>(
+                stateInitializer ?? (_ => new UserInfo()),
+                this.GetType().Name);
             this._chatClient = chatClient;
         }
 
-        public override IReadOnlyList<string> StateKeys
-        {
-            get
-            {
-                return this._stateKeys ??= [this._sessionState.StateKey];
-            }
-        }
+        public override IReadOnlyList<string> StateKeys => this._stateKeys ??= [this._sessionState.StateKey];
 
-        public T? GetValue(AgentSession session)
+        public UserInfo GetValue(AgentSession session)
             => this._sessionState.GetOrInitializeState(session);
 
-        public void SetValue(AgentSession session, T val)
-            => this._sessionState.SaveState(session, val);
+        public void SetValue(AgentSession session, UserInfo userInfo)
+            => this._sessionState.SaveState(session, userInfo);
 
         protected override async ValueTask StoreAIContextAsync(InvokedContext context, CancellationToken cancellationToken = default)
         {
-            var val = this._sessionState.GetOrInitializeState(context.Session);
+            var userInfo = this._sessionState.GetOrInitializeState(context.Session);
 
-            // Try and extract the state.
-            if ((!val.IsPopulated) && context.RequestMessages.Any(x => x.Role == ChatRole.User))
+            // Try and extract the user name and age from the message if we don't have it already and it's a user message.
+            if ((userInfo.UserName is null || userInfo.UserAge is null) && context.RequestMessages.Any(x => x.Role == ChatRole.User))
             {
-                var response = await this._chatClient.GetResponseAsync<T>(
+                var result = await this._chatClient.GetResponseAsync<UserInfo>(
                     context.RequestMessages,
                     new ChatOptions()
                     {
-                        Instructions = "Extract the state values from the message if present. If not present return nulls."
+                        Instructions = "Extract the user's name and age from the message if present. If not present return nulls."
                     },
                     cancellationToken: cancellationToken);
 
-                val = response.Result;
+                userInfo.UserName ??= result.Result.UserName;
+                userInfo.UserAge ??= result.Result.UserAge;
             }
 
-            this._sessionState.SaveState(context.Session, val!);
+            this._sessionState.SaveState(context.Session, userInfo);
         }
 
         protected override ValueTask<AIContext> ProvideAIContextAsync(InvokingContext context, CancellationToken cancellationToken = default)
         {
-            var val = this._sessionState.GetOrInitializeState(context.Session);
+            var userInfo = this._sessionState.GetOrInitializeState(context.Session);
 
             StringBuilder instructions = new();
 
-            if (val.IsPopulated == false)
-            {
-                // If we don't already know the user's name and age, add instructions to ask for them, otherwise just provide what we have to the context.
-                instructions
-                    .AppendLine(
-                        val.GetInstructions());
-            }
+            // If we don't already know the user's name and age, add instructions to ask for them, otherwise just provide what we have to the context.
+            instructions
+                .AppendLine(
+                    userInfo.UserName is null ?
+                        "Ask the user for their name and politely decline to answer any questions until they provide it." :
+                        $"The user's name is {userInfo.UserName}.")
+                .AppendLine(
+                    userInfo.UserAge is null ?
+                        "Ask the user for their age and politely decline to answer any questions until they provide it." :
+                        $"The user's age is {userInfo.UserAge}.");
 
             return new ValueTask<AIContext>(new AIContext
             {
@@ -157,39 +153,9 @@ namespace AgentFramework_Samples.GettingStarted
         }
     }
 
-    public interface IContextValue
-    {
-        string GetInstructions();
-
-        public bool IsPopulated { get; }
-    }
-
-    internal sealed class UserInfo : IContextValue
+    internal sealed class UserInfo
     {
         public string? UserName { get; set; }
         public int? UserAge { get; set; }
-
-        public bool IsPopulated
-        {
-            get
-            {
-                return this.UserName is not null && this.UserAge is not null;
-            }
-        }
-
-        public string GetInstructions()
-        {
-            if (this.UserName is null)
-                return "Ask the user to provide his name and politely decline to answer any questions until the state is provided.";
-            if (this.UserAge is null)
-                return "Ask user politly to provide his age.";
-
-            return String.Empty;
-        }
-
-        public override string ToString()
-        {
-            return $"User: {UserName}, Age: {UserAge}";
-        }
     }
 }
