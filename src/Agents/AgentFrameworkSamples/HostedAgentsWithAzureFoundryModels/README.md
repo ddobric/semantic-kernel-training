@@ -101,6 +101,134 @@ The `[Description]` attributes are critical — they are the only way the model 
 
 ---
 
+## Workflows
+
+The Agent Framework includes a lightweight workflow engine that connects **executors** (processing units) via typed message edges into a directed graph. Workflows can range from simple deterministic pipelines to complex AI-driven feedback loops.
+
+### Scenario 1 — Linear Pipeline (`RunAsync`)
+
+The simplest possible workflow — a **linear two-step pipeline** with no AI involved. It demonstrates the core workflow mechanics in isolation.
+
+**Pipeline:**
+
+```
+Input: "Hello, World!"
+       │
+       ▼
+┌──────────────────┐       ┌──────────────────────┐
+│ UppercaseExecutor│──────▶│ ReverseTextExecutor  │──── Output
+│  (lambda)        │       │  (custom Executor)   │
+└──────────────────┘       └──────────────────────┘
+       ↓                          ↓
+  "HELLO, WORLD!"           "!DLROW ,OLLEH"
+```
+
+**Key concepts demonstrated:**
+
+| Concept | How it's shown |
+|---|---|
+| **Lambda executor** | A `Func<string, string>` bound as an executor via `BindAsExecutor()` — no subclassing needed for simple transforms. |
+| **Custom executor** | `ReverseTextExecutor` extends `Executor<string, string>` with a typed `HandleAsync` method. |
+| **WorkflowBuilder** | `AddEdge(a, b)` connects executors; `WithOutputFrom(b)` marks which executor yields the final result. |
+| **Synchronous run** | `InProcessExecution.RunAsync` runs the workflow to completion and returns a `Run` object with all `NewEvents`. |
+| **ExecutorCompletedEvent** | Each executor emits this event when it finishes, carrying the executor ID and output data. |
+
+**When to use this pattern:** Pre/post-processing pipelines, data transformation chains, or any workflow where you want deterministic step-by-step processing without LLM calls.
+
+---
+
+### Scenario 2 — Inter-Executor Messaging (`RunWithMessagingAsync`)
+
+Extends the linear pipeline to a **four-step chain** and introduces two advanced workflow features: **inter-executor messaging** via `SendMessageAsync` and **custom domain events** via `AddEventAsync`.
+
+**Pipeline:**
+
+```
+Input: "Hello, World!"
+       │
+       ▼
+┌──────────────────┐     ┌─────────────────────┐     ┌────────────────┐     ┌────────────────┐
+│ UppercaseExecutor│────▶│ ReverseTextExecutor │────▶│  MyExecutor2   │────▶│  MyExecutor1   │── Output
+│  (lambda)        │     │  (Executor<s,s>)    │     │  (Executor<s,s>)│     │  (Executor)    │
+└──────────────────┘     └─────────────────────┘     └───────┬────────┘     └───────┬────────┘
+                                                             │                      │
+                                                     SendMessageAsync ──────▶ [MessageHandler]
+                                                       (MyEvent1)          Handle2Async(MyEvent1)
+                                                                                    │
+                                                                             AddEventAsync
+                                                                              (MyEvent2)
+```
+
+**How messaging works:**
+
+1. `MyExecutor2` processes the string from its edge input, then calls `context.SendMessageAsync(new MyEvent1(...))` to dispatch a typed message.
+2. `MyExecutor1` has two `[MessageHandler]` methods — one for `string` (the edge data) and one for `MyEvent1` (the sent message). The workflow engine routes each message to the matching handler automatically.
+3. When `MyExecutor1` handles the `MyEvent1`, it emits a `MyEvent2` via `context.AddEventAsync(...)`. This event appears in the `run.NewEvents` stream for watchers but does **not** trigger any executor — it is purely for observability.
+
+**Key concepts demonstrated:**
+
+| Concept | How it's shown |
+|---|---|
+| **`SendMessageAsync`** | `MyExecutor2` sends a `MyEvent1` message to any executor that can handle it, independent of the edge graph. |
+| **`[MessageHandler]` routing** | `MyExecutor1` uses the untyped `Executor` base with `partial class` and `[MessageHandler]` attributes. The source generator wires up type-based dispatch so each handler receives only its matching message type. |
+| **`[SendsMessage]` attribute** | Declared on `MyExecutor2` to tell the workflow engine which message types it may send — enables compile-time/build-time validation. |
+| **Custom domain events** | `MyEvent2` is emitted via `AddEventAsync` for observability. Unlike `SendMessageAsync`, events do not route to executors — they are for external watchers only. |
+| **Event stream inspection** | The event loop distinguishes `ExecutorCompletedEvent`, custom `MyEvent2` (highlighted in green), and other events. |
+
+---
+
+## Complex Workflow Example (`4_ComplexWorkflow.cs`)
+
+Demonstrates a **multi-agent feedback loop** where two AI executors collaborate iteratively to produce a polished slogan.
+
+### Concept
+
+The workflow follows a graph-based execution model inspired by the [Pregel BSP pattern](https://kowshik.github.io/JPregel/pregel_paper.pdf). Two executors communicate by passing typed messages along directed edges:
+
+```
+          SloganResult                  FeedbackResult
+┌──────────────┐        ┌───────────────────┐
+│ SloganWriter │───────▶│ FeedbackProvider  │
+│  (Executor)  │◀───────│    (Executor)     │
+└──────────────┘        └───────────────────┘
+     │ handles:               │ handles:
+     │  string (initial)      │  SloganResult
+     │  FeedbackResult        │
+     │  (revision)            │ decides:
+     │                        │  ✓ Accept (rating ≥ 8)
+     │                        │  ✗ Reject (max 3 attempts)
+     │                        │  ↻ Loop (send feedback back)
+```
+
+### Components
+
+| Component | Role |
+|---|---|
+| **`SloganWriterExecutor`** | Generates or revises slogans. Has two `[MessageHandler]` methods: one for the initial `string` prompt, one for `FeedbackResult` revisions. Uses structured JSON output (`ResponseFormat`). |
+| **`FeedbackExecutor`** | Reviews slogans and produces a `FeedbackResult` with comments, a 1–10 rating, and suggested actions. Decides whether to accept, reject, or loop. |
+| **`SloganResult`** | Data contract carrying the task description and generated slogan. |
+| **`FeedbackResult`** | Data contract carrying review comments, numeric rating, and improvement actions. |
+| **`SloganGeneratedEvent` / `FeedbackEvent`** | Custom `WorkflowEvent` subclasses emitted for observability — watchers see progress in real time. |
+
+### Workflow Lifecycle
+
+1. **Build the graph** — `WorkflowBuilder` connects the two executors with bidirectional edges and marks `FeedbackExecutor` as the output source.
+2. **Run with streaming** — `InProcessExecution.RunStreamingAsync` starts the workflow. Events are consumed via `WatchStreamAsync()`.
+3. **Iteration loop:**
+   - The `SloganWriter` generates a slogan → emits `SloganGeneratedEvent`.
+   - The `FeedbackProvider` reviews it → emits `FeedbackEvent`.
+   - If the rating ≥ `MinimumRating` (default 8), the slogan is accepted via `YieldOutputAsync`.
+   - If `MaxAttempts` (default 3) is reached, the workflow stops with the last slogan.
+   - Otherwise, the `FeedbackResult` is sent back to `SloganWriter` for revision.
+4. **Output** — The final accepted (or best-effort) slogan is yielded as a `WorkflowOutputEvent`.
+
+### Key Patterns
+
+- **Structured output** — Both executors use `ChatResponseFormat.ForJsonSchema<T>()` to force the model to return valid JSON matching the data contracts.
+- **Session persistence** — Each executor lazily creates an `AgentSession`, preserving conversation history across loop iterations so the agent can build on prior feedback.
+- **Message-based routing** — The `[MessageHandler]` attribute and `partial class` with source generators wire up type-based message dispatch automatically.
+- **Observability** — Custom `WorkflowEvent` subclasses provide a structured event stream that callers can monitor, log, or display.
+
 ## Project Structure
 
 | Path | Description |

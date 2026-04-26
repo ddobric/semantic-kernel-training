@@ -24,44 +24,54 @@ Superstep N:
  */
 namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
 {
-    internal class SimpleWorkflow
+    /// <summary>
+    /// Scenario 4: Simple Workflow — a feedback loop between two AI executors.
+    /// A SloganWriter generates slogans, a FeedbackProvider reviews them,
+    /// and the loop repeats until the rating is high enough or max attempts are reached.
+    /// Inspired by the Pregel BSP (Bulk Synchronous Parallel) model.
+    /// </summary>
+    internal class ComplexWorkflow
     {
         public static async Task RunAsync()
         {
-            // Set up the Azure OpenAI client
             Helpers.GetAzureEndpointAndModelDeployment(out var endpoint, out var deploymentName);
 
+            // Wrap the Azure OpenAI ChatClient as an IChatClient — shared by both executors.
             var chatClient = new AzureOpenAIClient(new Uri(endpoint),
                 new DefaultAzureCredential()).GetChatClient(deploymentName).AsIChatClient();
 
-            // Create the executors
+            // Instantiate the two workflow participants (executors).
             var sloganWriterExecutor = new SloganWriterExecutor("SloganWriter", chatClient);
             var feedbackExecutor = new FeedbackExecutor("FeedbackProvider", chatClient);
 
-            // Build the workflow by adding executors and connecting them
+            // Define the workflow graph:
+            //   SloganWriter ──▶ FeedbackProvider ──▶ SloganWriter (loop)
+            // Output is yielded by the FeedbackProvider when a slogan is accepted.
             var workflow = new WorkflowBuilder(sloganWriterExecutor)
                 .AddEdge(sloganWriterExecutor, feedbackExecutor)
                 .AddEdge(feedbackExecutor, sloganWriterExecutor)
                 .WithOutputFrom(feedbackExecutor)
                 .Build();
 
-            // Execute the workflow
+            // Run the workflow with streaming — events arrive as they happen.
             await using StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, input: "Create a slogan for a new electric SUV that is affordable and fun to drive.");
             await foreach (WorkflowEvent evt in run.WatchStreamAsync())
             {
                 Console.WriteLine($"Event: {evt.GetType().Name}");
 
+                // Custom domain events for observability.
                 if (evt is SloganGeneratedEvent or FeedbackEvent)
                 {
-                    // Custom events to allow us to monitor the progress of the workflow.
                     Console.WriteLine($"{evt}");
                 }
 
+                // Final accepted output from the workflow.
                 if (evt is WorkflowOutputEvent outputEvent)
                 {
                     Console.WriteLine($"{outputEvent}");
                 }
 
+                // Error handling.
                 if (evt is WorkflowErrorEvent errorEvent)
                 {
                     Console.WriteLine($"Workflow error: {errorEvent.Exception?.Message}");
@@ -137,20 +147,29 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
             this._agent = new ChatClientAgent(chatClient, agentOptions);
         }
 
+        /// <summary>
+        /// Handles the initial user prompt — generates the first slogan.
+        /// </summary>
         [MessageHandler]
         public async ValueTask<SloganResult> HandleAsync(string message, IWorkflowContext context, CancellationToken cancellationToken = default)
         {
+            // Lazily create a session so the agent remembers prior turns in this workflow run.
             this._session ??= await this._agent.CreateSessionAsync(cancellationToken);
 
             var result = await this._agent.RunAsync(message, this._session, cancellationToken: cancellationToken);
 
+            // The agent returns structured JSON thanks to ResponseFormat; deserialize it.
             var sloganResult = JsonSerializer.Deserialize<SloganResult>(result.Text) ?? throw new InvalidOperationException("Failed to deserialize slogan result.");
 
+            // Emit a domain event so watchers can observe progress.
             await context.AddEventAsync(new SloganGeneratedEvent(sloganResult), cancellationToken);
          
             return sloganResult;
         }
 
+        /// <summary>
+        /// Handles feedback from the FeedbackExecutor — revises the slogan based on review comments.
+        /// </summary>
         [MessageHandler]
         public async ValueTask<SloganResult> HandleAsync(FeedbackResult message, IWorkflowContext context, CancellationToken cancellationToken = default)
         {
@@ -228,10 +247,14 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
             this._agent = new ChatClientAgent(chatClient, agentOptions);
         }
 
+        /// <summary>
+        /// Reviews a slogan and either accepts it, rejects after max attempts, or sends feedback back for revision.
+        /// </summary>
         public override async ValueTask HandleAsync(SloganResult message, IWorkflowContext context, CancellationToken cancellationToken = default)
         {
             this._session ??= await this._agent.CreateSessionAsync(cancellationToken);
 
+            // Ask the feedback agent to rate the slogan.
             var sloganMessage = $"""
             Here is a slogan for the task '{message.Task}':
             Slogan: {message.Slogan}
@@ -243,18 +266,21 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
 
             await context.AddEventAsync(new FeedbackEvent(feedback), cancellationToken);
 
+            // Accept: rating meets the threshold.
             if (feedback.Rating >= this.MinimumRating)
             {
                 await context.YieldOutputAsync($"The following slogan was accepted:\n\n{message.Slogan}", cancellationToken);
                 return;
             }
 
+            // Give up: too many iterations.
             if (this._attempts >= this.MaxAttempts)
             {
                 await context.YieldOutputAsync($"The slogan was rejected after {this.MaxAttempts} attempts. Final slogan:\n\n{message.Slogan}", cancellationToken);
                 return;
             }
 
+            // Loop: send feedback back to the SloganWriter for another revision.
             await context.SendMessageAsync(feedback, cancellationToken: cancellationToken);
             this._attempts++;
         }

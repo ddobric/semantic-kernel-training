@@ -27,7 +27,9 @@ namespace AzureFoundrySkAgent
             //await HelloAgent.RunMultiturnAsync();
             //await HelloAgent.RunWithToolsAsync();
             //await AgentWithMemory.RunAsync();
-            // await SimpleWorkflow.RunAsync();
+            //await HelloWorkflow.RunAsync();
+            await HelloWorkflow.RunWithMessagingAsync();
+            //await ComplexWorkflow.RunAsync();
             //await AgentsInWorkflow.RunAsync();
 
 

@@ -10,6 +10,9 @@ using System.Text.Json;
 
 namespace AgentFramework_Samples.GettingStarted
 {
+    /// <summary>
+    /// Context Providers and Memory.
+    /// </summary>
     public class AgentWithMemory
     {
         public static async Task RunAsync()
@@ -45,7 +48,7 @@ namespace AgentFramework_Samples.GettingStarted
             // Invoke the agent and output the text result.
             Console.WriteLine(await agent.RunAsync("Hello, what is the square root of 9?", session));
             Console.WriteLine(await agent.RunAsync("My name is Damir Dobric", session));
-            Console.WriteLine(await agent.RunAsync("I am 40 years old", session));
+            Console.WriteLine(await agent.RunAsync("I am 18 years old", session));
 
             // We can serialize the session. The serialized state will include the state of the memory component.
             JsonElement sesionElement = await agent.SerializeSessionAsync(session);
