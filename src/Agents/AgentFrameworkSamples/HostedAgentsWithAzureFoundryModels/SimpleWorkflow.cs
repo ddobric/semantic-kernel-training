@@ -6,6 +6,22 @@ using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 
+//https://kowshik.github.io/JPregel/pregel_paper.pdf
+/*
+Superstep N:
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Collect All    │───▶│  Route Messages │───▶│  Execute All    │
+│  Pending        │    │  Based on Type  │    │  Target         │
+│  Messages       │    │  & Conditions   │    │  Executors      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                       │
+                                                       │ (barrier: wait for all)
+┌─────────────────┐    ┌─────────────────┐             │
+│  Start Next     │◀───│  Emit Events &  │◀────────────┘
+│  Superstep      │    │  New Messages   │
+└─────────────────┘    └─────────────────┘
+
+ */
 namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
 {
     internal class SimpleWorkflow
@@ -19,20 +35,22 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
                 new DefaultAzureCredential()).GetChatClient(deploymentName).AsIChatClient();
 
             // Create the executors
-            var sloganWriter = new SloganWriterExecutor("SloganWriter", chatClient);
-            var feedbackProvider = new FeedbackExecutor("FeedbackProvider", chatClient);
+            var sloganWriterExecutor = new SloganWriterExecutor("SloganWriter", chatClient);
+            var feedbackExecutor = new FeedbackExecutor("FeedbackProvider", chatClient);
 
             // Build the workflow by adding executors and connecting them
-            var workflow = new WorkflowBuilder(sloganWriter)
-                .AddEdge(sloganWriter, feedbackProvider)
-                .AddEdge(feedbackProvider, sloganWriter)
-                .WithOutputFrom(feedbackProvider)
+            var workflow = new WorkflowBuilder(sloganWriterExecutor)
+                .AddEdge(sloganWriterExecutor, feedbackExecutor)
+                .AddEdge(feedbackExecutor, sloganWriterExecutor)
+                .WithOutputFrom(feedbackExecutor)
                 .Build();
 
             // Execute the workflow
             await using StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, input: "Create a slogan for a new electric SUV that is affordable and fun to drive.");
             await foreach (WorkflowEvent evt in run.WatchStreamAsync())
             {
+                Console.WriteLine($"Event: {evt.GetType().Name}");
+
                 if (evt is SloganGeneratedEvent or FeedbackEvent)
                 {
                     // Custom events to allow us to monitor the progress of the workflow.
@@ -129,6 +147,7 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
             var sloganResult = JsonSerializer.Deserialize<SloganResult>(result.Text) ?? throw new InvalidOperationException("Failed to deserialize slogan result.");
 
             await context.AddEventAsync(new SloganGeneratedEvent(sloganResult), cancellationToken);
+         
             return sloganResult;
         }
 
@@ -151,10 +170,18 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
             return sloganResult;
         }
 
-        protected override ProtocolBuilder ConfigureProtocol(ProtocolBuilder protocolBuilder)
-        {
-            return protocolBuilder;
-        }
+
+        // Not required if the package Microsoft.Agents.AI.Workflows.Generators is added!
+        //protected override ProtocolBuilder ConfigureProtocol(ProtocolBuilder protocolBuilder)
+        //{
+        //    protocolBuilder.ConfigureRoutes(routeBuilder =>
+        //    {
+        //        routeBuilder
+        //               .AddHandler<string, SloganResult>(this.HandleAsync)
+        //               .AddHandler<FeedbackResult, SloganResult>(this.HandleAsync);
+        //    });
+        //    return protocolBuilder;
+        //}
     }
 
     /// <summary>
