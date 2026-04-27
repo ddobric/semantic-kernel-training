@@ -3,14 +3,17 @@ using Azure.Identity;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Agents.AI.Hosting;
 
 namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
 {
     internal class WorkflowAsAgent
     {
+        /*
         public static async Task RunAsync()
         {
             // Set up the Azure OpenAI client
@@ -23,38 +26,16 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
             AIAgent spanishAgent = GetTranslationAgent("Spanish", chatClient);
             AIAgent englishAgent = GetTranslationAgent("English", chatClient);
 
+            var builder = WebApplication.CreateBuilder(args);
             // Build the workflow by adding executors and connecting them
-            var workflow = new WorkflowBuilder(frenchAgent)
+            var builder = new WorkflowBuilder(frenchAgent)
                 .AddEdge(frenchAgent, spanishAgent)
-                .AddEdge(spanishAgent, englishAgent)
-                .Build();
-
-            // Execute the workflow
-            await using StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, new ChatMessage(ChatRole.User, "Hello World!"));
-
-            // Must send the turn token to trigger the agents.
-            // The agents are wrapped as executors. When they receive messages,
-            // they will cache the messages and only start processing when they receive a TurnToken.
-            await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
-            await foreach (WorkflowEvent evt in run.WatchStreamAsync())
-            {
-                if (evt is AgentResponseUpdateEvent executorComplete)
-                {
-                    Console.WriteLine($"{executorComplete.ExecutorId}: {executorComplete.Data}");
-                }
-                else if (evt is WorkflowErrorEvent workflowError)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Error.WriteLine(workflowError.Exception?.ToString() ?? "Unknown workflow error occurred.");
-                    Console.ResetColor();
-                }
-                else if (evt is ExecutorFailedEvent executorFailed)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Error.WriteLine($"Executor '{executorFailed.ExecutorId}' failed with {(executorFailed.Data == null ? "unknown error" : $"exception {executorFailed.Data}")}.");
-                    Console.ResetColor();
-                }
-            }
+                .AddEdge(spanishAgent, englishAgent);
+         
+            var workflowAsAgent = builder
+                .AddWorkflow()
+                .AddAsAIAgent();  // Now the workflow can be used as an agent
+          
         }
 
         /// <summary>
@@ -66,6 +47,8 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
         private static ChatClientAgent GetTranslationAgent(string targetLanguage, IChatClient chatClient) =>
             new(chatClient, 
                 $"You are a translation assistant that translates the provided text to {targetLanguage}.");
+    }
+        */
     }
 }
 

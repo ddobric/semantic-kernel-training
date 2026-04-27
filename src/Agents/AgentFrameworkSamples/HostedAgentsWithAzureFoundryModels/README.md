@@ -105,11 +105,11 @@ The `[Description]` attributes are critical — they are the only way the model 
 
 The Agent Framework includes a lightweight workflow engine that connects **executors** (processing units) via typed message edges into a directed graph. Workflows can range from simple deterministic pipelines to complex AI-driven feedback loops.
 
-### Scenario 1 — Linear Pipeline (`RunAsync`)
+### Sequential Workflow  (`RunAsync`)
 
-The simplest possible workflow — a **linear two-step pipeline** with no AI involved. It demonstrates the core workflow mechanics in isolation.
+The simplest possible workflow — a **Sequential Workflow** with no AI involved. It demonstrates the core workflow mechanics in isolation.
 
-**Pipeline:**
+**Two Step Workflow:**
 
 ```
 Input: "Hello, World!"
@@ -128,7 +128,7 @@ Input: "Hello, World!"
 | Concept | How it's shown |
 |---|---|
 | **Lambda executor** | A `Func<string, string>` bound as an executor via `BindAsExecutor()` — no subclassing needed for simple transforms. |
-| **Custom executor** | `ReverseTextExecutor` extends `Executor<string, string>` with a typed `HandleAsync` method. |
+| **Delegate executor** | `ReverseTextExecutor` extends `Executor<string, string>` with a typed `HandleAsync` method. |
 | **WorkflowBuilder** | `AddEdge(a, b)` connects executors; `WithOutputFrom(b)` marks which executor yields the final result. |
 | **Synchronous run** | `InProcessExecution.RunAsync` runs the workflow to completion and returns a `Run` object with all `NewEvents`. |
 | **ExecutorCompletedEvent** | Each executor emits this event when it finishes, carrying the executor ID and output data. |
@@ -137,7 +137,7 @@ Input: "Hello, World!"
 
 ---
 
-### Scenario 2 — Inter-Executor Messaging (`RunWithMessagingAsync`)
+### Inter-Executor Messaging (`RunWithMessagingAsync`)
 
 Extends the linear pipeline to a **four-step chain** and introduces two advanced workflow features: **inter-executor messaging** via `SendMessageAsync` and **custom domain events** via `AddEventAsync`.
 

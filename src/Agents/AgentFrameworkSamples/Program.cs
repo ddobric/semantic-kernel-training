@@ -21,17 +21,25 @@ namespace AzureFoundrySkAgent
     {
         public static async Task Main(string[] args)
         {
+            ///////////////////////////////////////////////////
             // Hosted Agents with Azure Foundry Models samples
+            ///////////////////////////////////////////////////
 
             //await HelloAgent.RunAsync();
             //await HelloAgent.RunMultiturnAsync();
             //await HelloAgent.RunWithToolsAsync();
             //await AgentWithMemory.RunAsync();
+
+            ///////////////////////////////////////////////////
+            // Workflows
+            ///////////////////////////////////////////////////
+            ///
             //await HelloWorkflow.RunAsync();
-            await HelloWorkflow.RunWithMessagingAsync();
+            //await HelloWorkflow.RunWithMessagingAsync();
             //await ComplexWorkflow.RunAsync();
             //await AgentsInWorkflow.RunAsync();
 
+            await SimpleClawSession.RunAsync();
 
             // MCP
             //await LocalHostedMcpTool.RunAsync();    

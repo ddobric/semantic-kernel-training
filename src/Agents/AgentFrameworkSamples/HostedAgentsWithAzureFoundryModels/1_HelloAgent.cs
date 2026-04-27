@@ -30,7 +30,7 @@ namespace HostedAgentsWithAzureFoundryModels
                 new DefaultAzureCredential())
                 .GetChatClient(deploymentName)
                 .AsAIAgent(instructions: "You are good at telling jokes.", name: nameof(HelloAgent));
-
+        
             // Non-streaming invocation — returns the full response at once.
             AgentResponse agentResp = await agent.RunAsync("Tell me a joke about a pirate.");
             Console.WriteLine(agentResp);
