@@ -6,7 +6,7 @@ using Microsoft.Extensions.AI;
 using OpenAI;
 using OpenAI.Containers;
 using OpenAI.Responses;
-namespace AgentFramework_Samples.OpenAIAgents
+namespace AgentFramework_Samples.Providers.OpenAIAgents
 {
     internal class OpenAICodeInterpreter
     {

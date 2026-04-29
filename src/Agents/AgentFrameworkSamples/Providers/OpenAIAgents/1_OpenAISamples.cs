@@ -10,7 +10,7 @@ using System.Reflection;
 
 
 
-namespace AgentFramework_Samples.OpenAIAgents
+namespace AgentFramework_Samples.Providers.OpenAIAgents
 {
     /// <summary>
     /// Demonstrates the Agent Framework with direct OpenAI API access (non-Azure).

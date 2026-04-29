@@ -1,6 +1,8 @@
 ﻿using AgentFramework_Samples.GettingStarted;
 using AgentFramework_Samples.HostedAgentsWithAzureFoundryModels;
 using AgentFramework_Samples.MCP;
+using AgentFramework_Samples.Providers.Anthropic;
+using AgentFramework_Samples.Providers.OpenAIAgents;
 using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -39,11 +41,16 @@ namespace AzureFoundrySkAgent
             //await ComplexWorkflow.RunAsync();
             //await AgentsInWorkflow.RunAsync();
 
-            await SimpleClawSession.RunAsync();
+            //await SimpleClawSession.RunAsync();
 
             // MCP
             //await LocalHostedMcpTool.RunAsync();    
-            await HttpHostedMcpTool.RunAsync();
+            //await HttpHostedMcpTool.RunAsync();
+
+            //////////////////////////////////////
+            // PROVIDERS
+            /////////////////////////////////////
+
 
             // OPEN AI AGENTS SAMPLES (non-Azure)
             //await OpenAISamples.RunResponsesClientAsync();
@@ -58,7 +65,9 @@ namespace AzureFoundrySkAgent
             //await OpenAIConversationSample.RunAsync();
             //await OpenAICodeInterpreter.RunAsync();
 
+            // Anthropic
 
+            await HelloAnthropicAgent.RunAsync();
 
 
 
