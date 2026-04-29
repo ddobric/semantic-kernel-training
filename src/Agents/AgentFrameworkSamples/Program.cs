@@ -2,6 +2,9 @@
 using AgentFramework_Samples.HostedAgentsWithAzureFoundryModels;
 using AgentFramework_Samples.MCP;
 using AgentFramework_Samples.Providers.Anthropic;
+using AgentFramework_Samples.Providers.FoundryAgents;
+using AgentFramework_Samples.Providers.FoundryLocal;
+using AgentFramework_Samples.Providers.Ollama;
 using AgentFramework_Samples.Providers.OpenAIAgents;
 using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
@@ -67,9 +70,15 @@ namespace AzureFoundrySkAgent
 
             // Anthropic
 
-            await HelloAnthropicAgent.RunAsync();
+            //await HelloAnthropicAgent.RunAsync();
+            
+            // Ollama
+            //await HelloOllamaAgent.RunAsync();
+            await HelloOllamaAgent.RunWithToolsAsync();
 
+            // await HelloFoundryLocalAgent.RunAsync();
 
+            //await HelloFoundryAgent.RunAsync();
 
             //await AgentFramework_FoundryChatAgent.RunAsync();
 

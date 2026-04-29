@@ -93,7 +93,8 @@ namespace HostedAgentsWithAzureFoundryModels
                 new DefaultAzureCredential())
                 .GetChatClient(deploymentName)
                 .AsAIAgent(instructions: "You are the agent that shares information.", name: nameof(HelloAgent),
-                    tools: [AIFunctionFactory.Create(GetProcessInfo)]);
+                    tools: [AIFunctionFactory.Create(GetProcessInfo), AIFunctionFactory.Create(GetVehicleLocation)]
+                    );
 
             // Start an interactive conversation loop with streaming output.
             await Helpers.RunConversationLoopAsync(agent);
@@ -113,6 +114,54 @@ namespace HostedAgentsWithAzureFoundryModels
             foreach (var process in processses)
             {
                 sb.AppendLine($"{process.Id,8} | {process.ProcessName,-40} | Threads: {process.Threads.Count,4} | Memory: {process.WorkingSet64 / 1024.0 / 1024.0,8:F2} MB");
+            }
+
+            return sb.ToString();
+        }
+
+        private static readonly string[] VehicleIds = ["TRK-001", "TRK-002", "VAN-010", "VAN-011", "CAR-100", "CAR-101", "BUS-050", "BUS-051"];
+
+        private static readonly (string City, double Lat, double Lon)[] KnownLocations =
+        [
+            ("Frankfurt", 50.1109, 8.6821),
+            ("Berlin", 52.5200, 13.4050),
+            ("Munich", 48.1351, 11.5820),
+            ("Hamburg", 53.5511, 9.9937),
+            ("Sarajevo", 43.8563, 18.4131),
+            ("Vienna", 48.2082, 16.3738),
+            ("Zurich", 47.3769, 8.5417),
+            ("Amsterdam", 52.3676, 4.9041),
+        ];
+
+        /// <summary>
+        /// Tool function: simulates retrieving the current GPS location of a vehicle.
+        /// Returns a random position near one of the known city locations with slight jitter
+        /// to simulate real-time movement.
+        /// </summary>
+        [Description("Get the current GPS location of a vehicle. Returns latitude, longitude, speed, and heading.")]
+        static string GetVehicleLocation(
+            [Description("The vehicle ID to locate (e.g. TRK-001, VAN-010). If not provided, returns all vehicles.")] string? vehicleId = null)
+        {
+            var rng = Random.Shared;
+            var sb = new StringBuilder();
+
+            var vehiclesToReport = string.IsNullOrWhiteSpace(vehicleId)
+                ? VehicleIds
+                : VehicleIds.Where(v => v.Equals(vehicleId, StringComparison.OrdinalIgnoreCase)).DefaultIfEmpty(vehicleId).ToArray();
+
+            sb.AppendLine($"{"Vehicle",-10} | {"Latitude",10} | {"Longitude",10} | {"Speed (km/h)",13} | {"Heading",8} | City");
+            sb.AppendLine(new string('-', 75));
+
+            foreach (var vid in vehiclesToReport)
+            {
+                // Pick a random known location and add GPS jitter (±0.05°, ~5 km)
+                var loc = KnownLocations[rng.Next(KnownLocations.Length)];
+                double lat = loc.Lat + (rng.NextDouble() - 0.5) * 0.1;
+                double lon = loc.Lon + (rng.NextDouble() - 0.5) * 0.1;
+                int speed = rng.Next(0, 121);
+                int heading = rng.Next(0, 360);
+
+                sb.AppendLine($"{vid,-10} | {lat,10:F4} | {lon,10:F4} | {speed,13} | {heading,6}° | {loc.City}");
             }
 
             return sb.ToString();

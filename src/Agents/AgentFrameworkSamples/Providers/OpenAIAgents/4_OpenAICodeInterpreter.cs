@@ -10,7 +10,6 @@ namespace AgentFramework_Samples.Providers.OpenAIAgents
 {
     internal class OpenAICodeInterpreter
     {
-
         public static async Task RunAsync()
         {
             Helpers.GetModelAndKey(out var apiKey, out var model);

@@ -22,8 +22,8 @@ namespace AgentFramework_Samples.Providers.FoundryLocal
             ILoggerFactory? loggerFactory = null,
             IServiceProvider? services = null)
         {
-            // FoundryLocalChatClient already implements IChatClient.
-            IChatClient chatClient = client;
+
+            IChatClient chatClient = client;// client.GetChatClient(model: "gpt-4o");
 
             // Apply an optional client pipeline transformation (e.g. adding middleware).
             if (clientFactory is not null)

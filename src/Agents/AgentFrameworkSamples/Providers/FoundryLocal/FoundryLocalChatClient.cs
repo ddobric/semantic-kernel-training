@@ -63,7 +63,7 @@ namespace AgentFramework_Samples.Providers.FoundryLocal
             _http.Timeout = TimeSpan.FromMinutes(5); // Local models can be slow
         }
 
-       
+
         /// <summary>
         /// Extracts text from OpenAI-compatible chat completion response.
         /// 
@@ -108,7 +108,8 @@ namespace AgentFramework_Samples.Providers.FoundryLocal
         /// Builds the request payload and sends it to Foundry, trying multiple endpoint paths.
         /// Returns the raw JSON response body on success.
         /// </summary>
-        private async Task<string> SendChatRequestAsync(IEnumerable<ChatMessage> messages, ChatOptions? options, bool stream, CancellationToken cancellationToken)
+        private async Task<string> SendChatRequestAsync(IEnumerable<ChatMessage> messages, ChatOptions? options, 
+            bool stream, CancellationToken cancellationToken)
         {
             var messageArray = messages.Select(m => new
             {
@@ -121,7 +122,17 @@ namespace AgentFramework_Samples.Providers.FoundryLocal
                 model = _modelName,
                 messages = messageArray,
                 temperature = options?.Temperature ?? 0.0,
-                stream
+                //stream
+            };
+
+            body = new
+            {
+                model = _modelName,
+                messages = new[]
+                {
+                        new { role = "user", content = "Hello" }
+                    },
+                temperature = 0.0 // deterministic output for benchmarking
             };
 
             string json = JsonSerializer.Serialize(body);
@@ -140,7 +151,8 @@ namespace AgentFramework_Samples.Providers.FoundryLocal
                 using var req = new HttpRequestMessage(HttpMethod.Post, path);
                 req.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                resp = await _http.SendAsync(req, stream ? HttpCompletionOption.ResponseHeadersRead : HttpCompletionOption.ResponseContentRead, cancellationToken);
+                //resp = await _http.SendAsync(req, stream ? HttpCompletionOption.ResponseHeadersRead : HttpCompletionOption.ResponseContentRead, cancellationToken);
+                resp = await _http.SendAsync(req);
 
                 if (!stream || !resp.IsSuccessStatusCode)
                 {
@@ -303,12 +315,12 @@ namespace AgentFramework_Samples.Providers.FoundryLocal
 
         public object? GetService(Type serviceType, object? serviceKey = null)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+
         }
     }
 
