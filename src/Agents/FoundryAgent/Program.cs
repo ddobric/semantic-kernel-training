@@ -1,27 +1,28 @@
-﻿using Azure;
-using Azure.AI.Agents.Persistent;
-using Azure.AI.OpenAI;
-using Azure.AI.Projects;
+﻿using Azure.AI.Projects;
 using Azure.Identity;
-using OpenAI.Chat;
-using OpenTelemetry;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using System.Text;
-using System.Text.Json;
-using static System.Net.WebRequestMethods;
+using Microsoft.Agents.AI;
 
-namespace FoundryAgent
+
+namespace FoundryAgentDemo
 {
     internal class Program
     {
-        /// <summary>
-        /// Demonstrates how to create and use the agent.
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        static async Task Main(string[] args)
+        public static async Task Main(string[] args)
+        {
+            var agent1 = new FoundryResponsesAgentSample();
+            await agent1.RunAsync();
+
+            var agent2 = new FoundryAgentSample();
+
+            await agent2.RunCreateAgentInFoundryAsync();
+
+            await agent2.RunCreateMultiturnAgentInFoundryAsync();
+        }
+
+
+
+        /*
+        static async Task MainOld(string[] args)
         {
             // How to create the Function definition ot the tool.
             // This is the definition only, not a code!

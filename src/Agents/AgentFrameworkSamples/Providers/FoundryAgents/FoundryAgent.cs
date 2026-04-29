@@ -12,7 +12,7 @@ using System.Text;
 
 namespace AgentFramework_Samples.Providers.FoundryAgents
 {
-    internal class HelloFoundryAgent
+    internal class FoundryAgent
     {
         public static async Task RunAsync()
         {

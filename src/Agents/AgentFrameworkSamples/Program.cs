@@ -74,11 +74,11 @@ namespace AzureFoundrySkAgent
             
             // Ollama
             //await HelloOllamaAgent.RunAsync();
-            await HelloOllamaAgent.RunWithToolsAsync();
+            //await HelloOllamaAgent.RunWithToolsAsync();
 
             // await HelloFoundryLocalAgent.RunAsync();
 
-            //await HelloFoundryAgent.RunAsync();
+            await ResponsesAgent.RunAsync();
 
             //await AgentFramework_FoundryChatAgent.RunAsync();
 
