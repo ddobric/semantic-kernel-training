@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "GithubAgent": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "GitHubSettings__BaseUrl": "https://api.github.com",
+        "GitHubSettings__Token": "",
+        "OPENAI_API_KEY": "",
+        "OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o"
+      }
+    }
+  }
+}

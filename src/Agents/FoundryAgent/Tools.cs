@@ -4,6 +4,9 @@ using System.Text;
 
 namespace FoundryAgentDemo
 {
+    /// <summary>
+    /// Contains tool functions that can be exposed to AI agents for function calling.
+    /// </summary>
     internal static class Tools
     {
         /// <summary>

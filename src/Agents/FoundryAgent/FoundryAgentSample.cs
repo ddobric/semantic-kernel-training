@@ -8,8 +8,16 @@ using Microsoft.Agents.AI.Foundry;
 
 namespace FoundryAgentDemo
 {
+    /// <summary>
+    /// Demonstrates creating and running AI agents that are persisted inside Azure AI Foundry
+    /// using the Projects Agent API (<see cref="AIProjectClient.AgentAdministrationClient"/>).
+    /// </summary>
     internal class FoundryAgentSample
     {
+        /// <summary>
+        /// Creates an agent version in Azure Foundry and runs a single-turn conversation.
+        /// The agent is persisted in the Foundry project and can be managed via the Foundry portal.
+        /// </summary>
         public async Task RunCreateAgentInFoundryAsync()
         {
             Helper.GetAzureEndpointAndModelDeployment(out var projectEndpoint, out var deploymentName);
@@ -33,6 +41,10 @@ namespace FoundryAgentDemo
 
         }
 
+        /// <summary>
+        /// Creates an agent version in Azure Foundry and runs a multi-turn conversation using an <see cref="AgentSession"/>.
+        /// The session maintains conversation context across multiple calls, allowing the agent to remember previous turns.
+        /// </summary>
         public async Task RunCreateMultiturnAgentInFoundryAsync()
         {
             Helper.GetAzureEndpointAndModelDeployment(out var projectEndpoint, out var deploymentName);

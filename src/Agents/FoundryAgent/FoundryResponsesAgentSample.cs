@@ -8,8 +8,16 @@ using System.Text;
 
 namespace FoundryAgentDemo
 {
+    /// <summary>
+    /// Demonstrates running an AI agent using the Responses API without creating a persistent agent in Azure Foundry.
+    /// The agent is created in-memory via <see cref="AIProjectClientExtensions.AsAIAgent"/> and executes a single prompt
+    /// with a custom tool (<see cref="Tools.GetProcessInfo"/>) for listing running processes.
+    /// </summary>
     internal class FoundryResponsesAgentSample
     {
+        /// <summary>
+        /// Creates an in-memory AI agent with a process-info tool and runs a single prompt.
+        /// </summary>
         public async Task RunAsync()
         {
             Helper.GetAzureEndpointAndModelDeployment(out var projectEndpoint, out var deploymentName);

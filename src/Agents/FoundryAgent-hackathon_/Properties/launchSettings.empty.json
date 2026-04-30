@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "FoundryAgent": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "AgentEndpointUrl": "https://***.services.ai.azure.com/api/projects/ddobric-agents-samples",
+        "AZURE_EXPERIMENTAL_ENABLE_ACTIVITY_SOURCE": "true"
+      }
+    }
+  }
+}

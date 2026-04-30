@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "GithubAgent": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "GitHubSettings__BaseUrl": "https://api.github.com",
+        "GitHubSettings__Token": "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",
+        "OPENAI_API_KEY": "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",
+        "OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o"
+      }
+    }
+  }
+}
