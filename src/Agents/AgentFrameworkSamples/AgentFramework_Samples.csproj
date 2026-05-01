@@ -15,7 +15,6 @@
     <Compile Remove="AgentFramework_TalkToSqlSample.cs" />
     <Compile Remove="AgentFramework_WorkflowSample.cs" />
     <Compile Remove="DeclarativeAgents\HelloDeclarativeAgent_ERR.cs" />
-    <Compile Remove="Providers\FoundryAgents\FoundryAgent.cs" />
     <Compile Remove="SemanticKernelFoundryAgentSample.cs" />
   </ItemGroup>
 
@@ -60,7 +59,6 @@
     <None Include="AgentFramework_TalkToSqlSample.cs" />
     <None Include="AgentFramework_WorkflowSample.cs" />
     <None Include="DeclarativeAgents\HelloDeclarativeAgent_ERR.cs" />
-    <None Include="Providers\FoundryAgents\FoundryAgent.cs" />
     <None Include="SemanticKernelFoundryAgentSample.cs" />
   </ItemGroup>
 

@@ -71,15 +71,15 @@ namespace AzureFoundrySkAgent
             // Anthropic
 
             //await HelloAnthropicAgent.RunAsync();
-            
+
             // Ollama
             //await HelloOllamaAgent.RunAsync();
             //await HelloOllamaAgent.RunWithToolsAsync();
 
             // await HelloFoundryLocalAgent.RunAsync();
 
-            await ResponsesAgent.RunAsync();
-
+            // See solution in: "semantic-kernel-training\src\Agents\FoundryAgent\
+      
             //await AgentFramework_FoundryChatAgent.RunAsync();
 
             //await AgentFramework_WorkflowSample.RunAsync();
