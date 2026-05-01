@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="A2AConsumerApp/A2AConsumerApp.csproj" />
+  <Project Path="A2AHost/A2AHost.csproj" />
+</Solution>

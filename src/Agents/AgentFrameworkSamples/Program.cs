@@ -2,7 +2,6 @@
 using AgentFramework_Samples.HostedAgentsWithAzureFoundryModels;
 using AgentFramework_Samples.MCP;
 using AgentFramework_Samples.Providers.Anthropic;
-using AgentFramework_Samples.Providers.FoundryAgents;
 using AgentFramework_Samples.Providers.FoundryLocal;
 using AgentFramework_Samples.Providers.Ollama;
 using AgentFramework_Samples.Providers.OpenAIAgents;
@@ -26,78 +25,138 @@ namespace AzureFoundrySkAgent
     {
         public static async Task Main(string[] args)
         {
-            ///////////////////////////////////////////////////
-            // Hosted Agents with Azure Foundry Models samples
-            ///////////////////////////////////////////////////
+            // ═══════════════════════════════════════════════
+            //  HOSTED AGENTS — Azure OpenAI (Foundry Models)
+            // ═══════════════════════════════════════════════
 
+            // Scenario 1: Basic agent construction & invocation
             //await HelloAgent.RunAsync();
+
+            // Scenario 2: Multi-turn conversations with sessions
             //await HelloAgent.RunMultiturnAsync();
+
+            // Scenario 3: Agent with function tools
             //await HelloAgent.RunWithToolsAsync();
+
+            // Scenario 4: Agent with custom memory (AIContextProvider)
             //await AgentWithMemory.RunAsync();
 
-            ///////////////////////////////////////////////////
-            // Workflows
-            ///////////////////////////////////////////////////
-            ///
+
+            // ═══════════════════════════════════════════════
+            //  WORKFLOWS — Agent Framework Workflow Engine
+            // ═══════════════════════════════════════════════
+
+            // Simple linear pipeline (Uppercase → Reverse)
             //await HelloWorkflow.RunAsync();
+
+            // Pipeline with inter-executor messaging & custom events
             //await HelloWorkflow.RunWithMessagingAsync();
+
+            // AI-driven feedback loop (SloganWriter ↔ FeedbackProvider)
             //await ComplexWorkflow.RunAsync();
+
+            // Multi-agent orchestration as a workflow
             //await AgentsInWorkflow.RunAsync();
 
-            //await SimpleClawSession.RunAsync();
 
-            // MCP
-            //await LocalHostedMcpTool.RunAsync();    
+            // ═══════════════════════════════════════════════
+            //  CLAW — Command Line Agent Workflow
+            // ═══════════════════════════════════════════════
+
+            // Three-agent architecture: Intent → Plan → Task execution
+            await SimpleClawSession.RunAsync();
+
+
+            // ═══════════════════════════════════════════════
+            //  MCP — Model Context Protocol Tool Integration
+            // ═══════════════════════════════════════════════
+
+            // Local MCP server via stdio transport
+            //await LocalHostedMcpTool.RunAsync();
+
+            // Remote MCP server via HTTP (e.g. Microsoft Learn)
             //await HttpHostedMcpTool.RunAsync();
 
-            //////////////////////////////////////
-            // PROVIDERS
-            /////////////////////////////////////
 
+            // ═══════════════════════════════════════════════
+            //  PROVIDERS — OpenAI (direct, non-Azure)
+            // ═══════════════════════════════════════════════
 
-            // OPEN AI AGENTS SAMPLES (non-Azure)
+            // ResponsesClient-based agent
             //await OpenAISamples.RunResponsesClientAsync();
+
+            // ChatClient-based agent
             //await OpenAISamples.RunChatClientAsync();
+
+            // Interactive conversation with tools
             //await OpenAISamples.RunConversationAsync();
 
+            // Reasoning models (non-streaming & streaming)
             //await OpenAIReasoningSamples.RunReasoningAsync();
             //await OpenAIReasoningSamples.RunReasoningWithStreamingAsync();
 
-            //await HelloAgent.RunAsync();
-
+            // Conversation & code interpreter samples
             //await OpenAIConversationSample.RunAsync();
             //await OpenAICodeInterpreter.RunAsync();
 
-            // Anthropic
+
+            // ═══════════════════════════════════════════════
+            //  PROVIDERS — Anthropic
+            // ═══════════════════════════════════════════════
 
             //await HelloAnthropicAgent.RunAsync();
 
-            // Ollama
+
+            // ═══════════════════════════════════════════════
+            //  PROVIDERS — Ollama (local models)
+            // ═══════════════════════════════════════════════
+
+            // Basic agent (single prompt)
             //await HelloOllamaAgent.RunAsync();
+
+            // Agent with function tools (interactive loop)
             //await HelloOllamaAgent.RunWithToolsAsync();
 
-            // await HelloFoundryLocalAgent.RunAsync();
 
-            // See solution in: "semantic-kernel-training\src\Agents\FoundryAgent\
-      
+            // ═══════════════════════════════════════════════
+            //  PROVIDERS — Foundry Local (REST-based)
+            // ═══════════════════════════════════════════════
+
+            //await HelloFoundryLocalAgent.RunAsync();
+
+
+            // ═══════════════════════════════════════════════
+            //  FOUNDRY AGENTS (Azure AI Foundry)
+            //  ⚠️ Moved to: src\Agents\FoundryAgent\FoundryAgent.sln
+            //  See: Providers\FoundryAgents\README.md
+            // ═══════════════════════════════════════════════
+
             //await AgentFramework_FoundryChatAgent.RunAsync();
 
+
+            // ═══════════════════════════════════════════════
+            //  LEGACY / ADDITIONAL SAMPLES
+            // ═══════════════════════════════════════════════
+
             //await AgentFramework_WorkflowSample.RunAsync();
-            // await AgentFramework_TalkToSqlSample.RunAsync();
+            //await AgentFramework_TalkToSqlSample.RunAsync();
             //await AgentFramework_LightingSample.RunAsync();
 
+            // Semantic Kernel agent (SK-based, not Agent Framework)
             //await SemanticKernelAgent.RunAsync(args);
-            //await SemanticKernelFoundryAgentSample.RunAsync(); DEPRECTED.USE AgentFrameworkPersistedAgentSamples
 
-            // OpenAI
+            // SK Foundry Agent — DEPRECATED, use AgentFrameworkPersistedAgentSamples
+            //await SemanticKernelFoundryAgentSample.RunAsync();
+
+            // Azure OpenAI direct samples
             //await AgentFramework_OpenAISamples.RunOpenAIBasicAsync();
             //await AgentFramework_OpenAISamples.RunWithToolsFuncAsync();
             //await AgentFramework_AzOpenAISamples.RunRAGAsync();
-
             //await AgentFramework_AzOpenAISamples.RunOpenAIBasicAsync();
             //await AgentFramework_AzOpenAISamples.RunOpenAIAgentStreamedAsync();
             //await AgentFramework_AzOpenAISamples.RunWithToolsFuncAsync();
 
+            // Persistent (server-side) agents
             //await AgentFrameworkPersistedAgentSamples.RunPersistentAgents();
 
         }
