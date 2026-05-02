@@ -5,6 +5,7 @@ using AgentFramework_Samples.Providers.Anthropic;
 using AgentFramework_Samples.Providers.FoundryLocal;
 using AgentFramework_Samples.Providers.Ollama;
 using AgentFramework_Samples.Providers.OpenAIAgents;
+using AgentFramework_Samples.SqlAgent;
 using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
 using Azure.Identity;
@@ -131,7 +132,8 @@ namespace AzureFoundrySkAgent
             //  See: Providers\FoundryAgents\README.md
             // ═══════════════════════════════════════════════
 
-            //await AgentFramework_FoundryChatAgent.RunAsync();
+            
+            await SqlAgentSample.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -139,7 +141,7 @@ namespace AzureFoundrySkAgent
             // ═══════════════════════════════════════════════
 
             //await AgentFramework_WorkflowSample.RunAsync();
-            //await AgentFramework_TalkToSqlSample.RunAsync();
+
             //await AgentFramework_LightingSample.RunAsync();
 
             // Semantic Kernel agent (SK-based, not Agent Framework)
