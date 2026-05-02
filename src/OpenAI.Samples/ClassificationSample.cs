@@ -55,14 +55,44 @@ namespace OpenAI.Samples
                 OpenAIEmbeddingCollection eS = await clientSmall.GenerateEmbeddingsAsync(inputs);
 
                 // Compare input embedding against each stored document embedding
-                foreach (var entry in entries)
+                var results = entries.Select(entry => new
                 {
-                    var similarityL = Program.CalculateSimilarity(eL[0].ToFloats().ToArray(), entry.EmbeddingLarge);
-                    var similarityS = Program.CalculateSimilarity(eS[0].ToFloats().ToArray(), entry.EmbeddingSmall);
+                    Document = new FileInfo(entry.DocName).Name,
+                    SimilarityLarge = Program.CalculateSimilarity(eL[0].ToFloats().ToArray(), entry.EmbeddingLarge),
+                    SimilaritySmall = Program.CalculateSimilarity(eS[0].ToFloats().ToArray(), entry.EmbeddingSmall)
+                }).ToList();
 
-                    // Display similarity scores for both models side by side
-                    Console.WriteLine($"Document: {new FileInfo(entry.DocName).Name}\t SimilarityL: {similarityL}, SimilarityS: {similarityS}");
+                // Render a formatted console table
+                const string headerDoc = "Document";
+                const string headerLarge = "Large Model";
+                const string headerSmall = "Small Model";
+
+                int docWidth = Math.Max(headerDoc.Length, results.Max(r => r.Document.Length));
+                int largeWidth = Math.Max(headerLarge.Length, 10);
+                int smallWidth = Math.Max(headerSmall.Length, 10);
+
+                string separator = $"+-{new string('-', docWidth)}-+-{new string('-', largeWidth)}-+-{new string('-', smallWidth)}-+";
+
+                Console.WriteLine(separator);
+                Console.WriteLine($"| {headerDoc.PadRight(docWidth)} | {headerLarge.PadRight(largeWidth)} | {headerSmall.PadRight(smallWidth)} |");
+                Console.WriteLine(separator);
+
+                var bestLarge = results.Max(r => r.SimilarityLarge);
+                var bestSmall = results.Max(r => r.SimilaritySmall);
+
+                foreach (var r in results)
+                {
+                    bool isBest = r.SimilarityLarge == bestLarge || r.SimilaritySmall == bestSmall;
+                    if (isBest)
+                        Console.ForegroundColor = ConsoleColor.Green;
+
+                    Console.WriteLine($"| {r.Document.PadRight(docWidth)} | {r.SimilarityLarge.ToString("F6").PadLeft(largeWidth)} | {r.SimilaritySmall.ToString("F6").PadLeft(smallWidth)} |");
+
+                    if (isBest)
+                        Console.ResetColor();
                 }
+
+                Console.WriteLine(separator);
 
                 Console.WriteLine();
                 Console.WriteLine();

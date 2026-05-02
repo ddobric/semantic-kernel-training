@@ -27,7 +27,11 @@ internal class Program
 
         //WorkingWithTokens();
 
-        await WorkingWithEmbeddings();
+        //await WorkingWithEmbeddings();
+
+        //--------------------
+        // R A G
+        //--------------------
 
         //new RagSample(GetKernel()).SplitTextToChunks();       
 

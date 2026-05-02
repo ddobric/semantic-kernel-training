@@ -22,12 +22,12 @@ namespace OpenAI.Samples
             // Sample 1: Embedding Generation & Cosine Similarity
             // Prompts the user for two texts, generates embeddings using text-embedding-3-large,
             // and calculates the cosine similarity between them.
-            await CreateEmbeddingsAsync();
+            //await CreateEmbeddingsAsync();
 
             // Sample 2: Document Classification via Embeddings
             // Loads documents from the Docs/ folder, embeds them with both large and small models,
             // and classifies user input by comparing embedding similarity against each document.
-            //await ClassificationSample.RunAsync();
+            await ClassificationSample.RunAsync();
 
             // Sample 3: Streaming Chat Completion
             // Interactive chat loop that streams the model's response token by token in real time.
@@ -36,7 +36,7 @@ namespace OpenAI.Samples
             // Sample 4: Chat Completions with Log Probabilities
             // Interactive chat loop that returns completions along with the top-5 token
             // log probabilities for each generated token, useful for understanding model confidence.
-            await ChatChatCompletionsAsync();
+            //await ChatChatCompletionsAsync();
 
             // Sample 5: Text-to-Speech
             // Converts a text string to spoken audio using the "tts-1" model and saves it as an MP3 file.
@@ -44,7 +44,7 @@ namespace OpenAI.Samples
 
             // Sample 6: Vision (Image Understanding)
             // Sends a local image to the chat model and asks it to describe the image content.
-            await VisionAsync();
+            //await VisionAsync();
 
             // Sample 7: Image Generation (DALL-E 3)
             // Generates a high-quality image from a text prompt using DALL-E 3 and saves it to disk.

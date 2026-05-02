@@ -18,11 +18,11 @@
         "OLLAMA_CHATCOMPLETION_MODEL": "mistral:7b", //nemotron-mini:latest", //"phi4-mini:latest", //"mistral-small3.1:latest", //"llama2", //"mistral-small3.1\",",
         "OLLAMA_ENDPOINT": "http://localhost:11434",
 
-        "SQL_CONNECTION_STRING": "",
+        //"SQL_CONNECTION_STRING": "",
         // Used by Agent Framework
-        "AgentFrameworkOpenAIEndpointUrl": "https:resource.openai.azure.com/",
+        //"AgentFrameworkOpenAIEndpointUrl": "https:resource.openai.azure.com/",
 
-        "AgentFrameworkFoundryAgentEndpointUrl": "https://.services.ai.azure.com/api/projects/ddobric-agents-samples"
+        //"AgentFrameworkFoundryAgentEndpointUrl": "https://.services.ai.azure.com/api/projects/ddobric-agents-samples"
 
       }
     }

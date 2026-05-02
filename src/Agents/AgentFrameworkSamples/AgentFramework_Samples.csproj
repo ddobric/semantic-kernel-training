@@ -12,7 +12,6 @@
     <Compile Remove="AgentFramework_AzOpenAISamples.cs" />
     <Compile Remove="AgentFramework_FoundryChatAgent.cs" />
     <Compile Remove="AgentFramework_LightingSample.cs" />
-    <Compile Remove="AgentFramework_TalkToSqlSample.cs" />
     <Compile Remove="AgentFramework_WorkflowSample.cs" />
     <Compile Remove="DeclarativeAgents\HelloDeclarativeAgent_ERR.cs" />
     <Compile Remove="SemanticKernelFoundryAgentSample.cs" />
@@ -56,7 +55,6 @@
     <None Include="AgentFramework_AzOpenAISamples.cs" />
     <None Include="AgentFramework_FoundryChatAgent.cs" />
     <None Include="AgentFramework_LightingSample.cs" />
-    <None Include="AgentFramework_TalkToSqlSample.cs" />
     <None Include="AgentFramework_WorkflowSample.cs" />
     <None Include="DeclarativeAgents\HelloDeclarativeAgent_ERR.cs" />
     <None Include="SemanticKernelFoundryAgentSample.cs" />

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
 using Microsoft.SemanticKernel;
 using OpenAI;
+using OpenAI.Chat;
 using System.ComponentModel;
 
 namespace AzureFoundrySkAgent
@@ -38,7 +39,7 @@ namespace AzureFoundrySkAgent
                 new Uri(endpoint),
                 new AzureCliCredential())
                 .GetChatClient(deploymentName)
-                .CreateAIAgent(
+                .AsAIAgent(
                     instructions: "You are a helpful assistant that transforms the user's prompt into the SQL statements.",
                     name: "Assistant",
                     tools: [.. serviceProvider.GetRequiredService<SqlServerTool>().AsAITools()],
@@ -49,7 +50,7 @@ namespace AzureFoundrySkAgent
 
         private static async Task RunConversationLoopAsync(AIAgent agent)
         {
-            Microsoft.Agents.AI.AgentThread thread = agent!.GetNewThread();
+            Microsoft.Agents.AI.AgentSession session = await agent!.CreateSessionAsync();
 
             while (true)
             {
@@ -62,7 +63,7 @@ namespace AzureFoundrySkAgent
 
                 try
                 {
-                    await foreach (var update in agent.RunStreamingAsync(userInput, thread))
+                    await foreach (var update in agent.RunStreamingAsync(userInput, session))
                     {
                         Console.Write(update);
                     }

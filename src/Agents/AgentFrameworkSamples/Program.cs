@@ -64,7 +64,7 @@ namespace AzureFoundrySkAgent
             // ═══════════════════════════════════════════════
 
             // Three-agent architecture: Intent → Plan → Task execution
-            await SimpleClawSession.RunAsync();
+            //await SimpleClawSession.RunAsync();
 
 
             // ═══════════════════════════════════════════════
