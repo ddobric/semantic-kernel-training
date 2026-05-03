@@ -133,7 +133,7 @@ namespace AzureFoundrySkAgent
             // ═══════════════════════════════════════════════
 
             
-            await SqlAgentSample.RunAsync();
+            //await SqlAgentSample.RunAsync();
 
 
             // ═══════════════════════════════════════════════

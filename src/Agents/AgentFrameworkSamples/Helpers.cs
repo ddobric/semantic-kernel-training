@@ -43,8 +43,41 @@ namespace AgentFramework_Samples
                 {
                     Console.ForegroundColor = AgentColor;
 
+                    // Show a rotating dots animation while waiting for the first token.
+                    using var spinnerCts = new CancellationTokenSource();
+                    bool firstTokenReceived = false;
+
+                    var spinnerTask = Task.Run(async () =>
+                    {
+                        string[] frames = ["?", "?", "?", "?", "?", "?", "?", "?", "?", "?"];
+                        int i = 0;
+                        try
+                        {
+                            while (!spinnerCts.Token.IsCancellationRequested)
+                            {
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Write(frames[i % frames.Length]);
+                                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                                i++;
+                                await Task.Delay(80, spinnerCts.Token);
+                            }
+                        }
+                        catch (OperationCanceledException) { }
+                    });
+
                     await foreach (var update in agent.RunStreamingAsync(userInput, session))
                     {
+                        if (!firstTokenReceived)
+                        {
+                            firstTokenReceived = true;
+                            spinnerCts.Cancel();
+                            await spinnerTask;
+                            // Clear the spinner character and restore agent color.
+                            Console.Write(" ");
+                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                            Console.ForegroundColor = AgentColor;
+                        }
+
                         Console.Write(update);
                     }
 
