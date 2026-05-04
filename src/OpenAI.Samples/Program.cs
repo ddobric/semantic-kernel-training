@@ -22,7 +22,7 @@ namespace OpenAI.Samples
             // Sample 1: Embedding Generation & Cosine Similarity
             // Prompts the user for two texts, generates embeddings using text-embedding-3-large,
             // and calculates the cosine similarity between them.
-            //await CreateEmbeddingsAsync();
+            await CreateEmbeddingsAsync();
 
             // Sample 2: Document Classification via Embeddings
             // Loads documents from the Docs/ folder, embeds them with both large and small models,

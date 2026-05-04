@@ -27,7 +27,7 @@ namespace AgentFramework_Samples.Providers.OpenAIAgents
 
         public static async Task RunReasoningAsync()
         {
-            Helpers.GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetOpenAIModelAndKey(out var apiKey, out var model);
 
             var client = new OpenAIClient(apiKey)
             .GetResponsesClient()
@@ -55,7 +55,7 @@ namespace AgentFramework_Samples.Providers.OpenAIAgents
 
         public static async Task RunReasoningWithStreamingAsync()
         {
-            Helpers.GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetOpenAIModelAndKey(out var apiKey, out var model);
 
             var client = new OpenAIClient(apiKey)
             .GetResponsesClient()
@@ -70,15 +70,14 @@ namespace AgentFramework_Samples.Providers.OpenAIAgents
             }).Build();
 
             AIAgent agent = new ChatClientAgent(client);
-
-        
+                    
             await foreach (var update in agent.RunStreamingAsync("Explain the theory of relativity in simple terms."))
             {
                 foreach (var item in update.Contents)
                 {
                     if (item is TextReasoningContent reasoningContent)
                     {
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.Write(reasoningContent.Text);
                         Console.ResetColor();
                     }

@@ -26,44 +26,20 @@ Microsoft Agent Framework supports several types of agents to accommodate differ
 >
 > You are responsible for carefully reviewing and testing applications you build using Microsoft Agent Framework in the context of your specific use cases, and making all appropriate decisions and customizations. This includes implementing your own responsible AI mitigations such as metaprompt, content filters, or other safety systems, and ensuring your applications meet appropriate quality, reliability, security, and trustworthiness standards. See also: [Transparency FAQ](https://github.com/microsoft/agent-framework/blob/main/TRANSPARENCY_FAQS.md)
 
-:::zone pivot="programming-language-csharp"
+Agent Framework makes it easy to create agents based on many different inference services. Any service that provides a `Microsoft.Extensions.AI.IChatClient` implementation (.NET) or a compatible chat client (Python) can be used.
 
-## Simple agents based on inference services
+## Agent Providers
 
-Agent Framework makes it easy to create simple agents based on many different inference services. Any inference service that provides a `Microsoft.Extensions.AI.IChatClient` implementation can be used to build these agents.
+Agent Framework makes it easy to create agents based on many different inference services. Any service that provides a `Microsoft.Extensions.AI.IChatClient` implementation (.NET) or a compatible chat client (Python) can be used. All agents derive from a common base class (`AIAgent` in .NET, `BaseAgent` in Python).
 
-The following providers are available for .NET:
-
-- **[Azure OpenAI](./azure-openai.md)** — Full-featured provider with chat completion, responses API, and tool support.
-- **[OpenAI](./openai.md)** — Direct OpenAI API access with chat completion and responses API.
-- **[Foundry](./microsoft-foundry.md)** — Persistent server-side agents with managed chat history.
-- **[Anthropic](./anthropic.md)** — Claude models with function tools and streaming support.
-- **[Ollama](./ollama.md)** — Run open-source models locally.
-- **[GitHub Copilot](./github-copilot.md)** — GitHub Copilot SDK integration with shell and file access.
-- **[Copilot Studio](./copilot-studio.md)** — Integration with Microsoft Copilot Studio agents.
-- **[Custom](./custom.md)** — Build your own provider by implementing the `AIAgent` base class.
-
-:::zone-end
-
-:::zone pivot="programming-language-python"
-
-## Agent providers
-
-Agent Framework supports many different inference services through chat clients. Each provider offers a different set of features:
-
-- **[Azure OpenAI](./azure-openai.md)** — Full-featured provider with Azure identity support.
-- **[OpenAI](./openai.md)** — Direct OpenAI API access.
-- **[Foundry](./microsoft-foundry.md)** — Microsoft Foundry project inference and service-managed agents.
-- **[Foundry Local](./foundry-local.md)** — Run supported Foundry models locally with `FoundryLocalClient` (Python only).
-- **[Anthropic](./anthropic.md)** — Claude models with extended thinking and hosted tools support.
-- **[Ollama](./ollama.md)** — Run open-source models locally.
-- **[GitHub Copilot](./github-copilot.md)** — GitHub Copilot SDK integration.
-- **[Copilot Studio](./copilot-studio.md)** — Integration with Microsoft Copilot Studio agents.
-- **[Custom](./custom.md)** — Build your own provider by implementing the `BaseAgent` class.
-
-:::zone-end
-
-## Next steps
-
-> [!div class="nextstepaction"]
-> [Azure OpenAI Provider](./azure-openai.md)
+| Provider | Description | .NET | Python |
+|---|---|:---:|:---:|
+| **[Azure OpenAI](./azure-openai.md)** | Full-featured provider with chat completion, responses API, Azure identity, and tool support. | ✅ | ✅ |
+| **[OpenAI](./openai.md)** | Direct OpenAI API access with chat completion and responses API. | ✅ | ✅ |
+| **[Foundry](./microsoft-foundry.md)** | Persistent server-side agents with managed chat history via Microsoft Foundry. | ✅ | ✅ |
+| **[Foundry Local](./foundry-local.md)** | Run supported Foundry models locally via `FoundryLocalClient`. | ✅ | ✅ |
+| **[Anthropic](./anthropic.md)** | Claude models with function tools, extended thinking, and streaming support. | ✅ | ✅ |
+| **[Ollama](./ollama.md)** | Run open-source models locally (llama3.1, mistral, qwen, etc.). | ✅ | ✅ |
+| **[GitHub Copilot](./github-copilot.md)** | GitHub Copilot SDK integration with shell and file access. | ✅ | ✅ |
+| **[Copilot Studio](./copilot-studio.md)** | Integration with Microsoft Copilot Studio agents. | ✅ | ✅ |
+| **[Custom](./custom.md)** | Build your own provider by implementing `AIAgent` (.NET) or `BaseAgent` (Python). | ✅ | ✅ |

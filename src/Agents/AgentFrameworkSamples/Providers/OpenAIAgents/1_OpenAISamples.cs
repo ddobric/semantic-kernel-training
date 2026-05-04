@@ -26,7 +26,7 @@ namespace AgentFramework_Samples.Providers.OpenAIAgents
         /// </summary>
         public static async Task RunResponsesClientAsync()
         {
-            Helpers.GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetOpenAIModelAndKey(out var apiKey, out var model);
 
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             AIAgent agent =
@@ -41,13 +41,13 @@ namespace AgentFramework_Samples.Providers.OpenAIAgents
             ChatMessage systemMessage = ChatMessage.CreateSystemMessage($"Today is {DateTime.Now}");
             ChatCompletion completionRes = await agent.RunAsync([systemMessage, ChatMessage.CreateUserMessage("Tell me a joke about a politic.")]);
 
-            Console.WriteLine(completionRes.Content);
+            Console.WriteLine(completionRes.Content.First().Text);
         }
 
 
         public static async Task RunChatClientAsync()
         {
-            Helpers.GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetOpenAIModelAndKey(out var apiKey, out var model);
 
             AIAgent agent = new OpenAIClient(apiKey)
             .GetChatClient(model)
@@ -64,7 +64,7 @@ namespace AgentFramework_Samples.Providers.OpenAIAgents
 
         public static async Task RunConversationAsync()
         {
-            Helpers.GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetOpenAIModelAndKey(out var apiKey, out var model);
 
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             AIAgent agent =

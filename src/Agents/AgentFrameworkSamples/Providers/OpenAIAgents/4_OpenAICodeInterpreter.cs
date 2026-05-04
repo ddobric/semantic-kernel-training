@@ -12,7 +12,7 @@ namespace AgentFramework_Samples.Providers.OpenAIAgents
     {
         public static async Task RunAsync()
         {
-            Helpers.GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetOpenAIModelAndKey(out var apiKey, out var model);
 
             var openAIClient = new OpenAIClient(new ApiKeyCredential(apiKey));
 

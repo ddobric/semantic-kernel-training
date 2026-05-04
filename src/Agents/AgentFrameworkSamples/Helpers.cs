@@ -1,4 +1,4 @@
-using Microsoft.Agents.AI;
+﻿using Microsoft.Agents.AI;
 
 namespace AgentFramework_Samples
 {
@@ -49,17 +49,21 @@ namespace AgentFramework_Samples
 
                     var spinnerTask = Task.Run(async () =>
                     {
-                        string[] frames = ["?", "?", "?", "?", "?", "?", "?", "?", "?", "?"];
+                        string[] frames =
+                        [
+                            "/ ", "- ", "\\ ", "| "
+                        ];
                         int i = 0;
                         try
                         {
                             while (!spinnerCts.Token.IsCancellationRequested)
                             {
-                                Console.ForegroundColor = ConsoleColor.DarkGray;
-                                Console.Write(frames[i % frames.Length]);
-                                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                                string frame = frames[i % frames.Length];
+                                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                                Console.Write(frame);
+                                Console.CursorLeft -= frame.Length;
                                 i++;
-                                await Task.Delay(80, spinnerCts.Token);
+                                await Task.Delay(200, spinnerCts.Token);
                             }
                         }
                         catch (OperationCanceledException) { }
@@ -72,9 +76,9 @@ namespace AgentFramework_Samples
                             firstTokenReceived = true;
                             spinnerCts.Cancel();
                             await spinnerTask;
-                            // Clear the spinner character and restore agent color.
-                            Console.Write(" ");
-                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                            // Clear the spinner text and restore agent color.
+                            Console.Write("  ");
+                            Console.CursorLeft -= 2;
                             Console.ForegroundColor = AgentColor;
                         }
 
@@ -92,7 +96,7 @@ namespace AgentFramework_Samples
             }
         }
 
-        public static void GetModelAndKey(out string apiKey, out string model)
+        public static void GetOpenAIModelAndKey(out string apiKey, out string model)
         {
             apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new InvalidOperationException("OPENAI_API_KEY is not set.");
             model = Environment.GetEnvironmentVariable("OPENAI_CHAT_MODEL_NAME") ?? "gpt-5.4-mini";

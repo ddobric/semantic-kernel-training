@@ -16,7 +16,7 @@ namespace AgentFramework_Samples.Providers.OpenAIAgents
     {
         public static async Task RunAsync()
         {
-            Helpers.GetModelAndKey(out var apiKey, out var model);
+            Helpers.GetOpenAIModelAndKey(out var apiKey, out var model);
 
             // Create a ConversationClient directly from OpenAIClient
             OpenAIClient openAIClient = new(apiKey);

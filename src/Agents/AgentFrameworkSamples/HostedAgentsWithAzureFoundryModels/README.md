@@ -101,6 +101,43 @@ The `[Description]` attributes are critical — they are the only way the model 
 
 ---
 
+### Scenario 4 — Agent with Memory / Context Providers (`2_AgentWithMemory.cs`)
+
+Demonstrates how to give an agent **persistent memory** across turns using `AIContextProvider`.
+
+**The problem:**
+
+By default, agents have no way to "remember" user-specific facts (name, preferences, etc.) beyond the current session's chat history. If you serialize/deserialize a session or start a new one, that implicit context is lost.
+
+**The solution — `AIContextProvider`:**
+
+A custom `UserInfoMemory` component that:
+1. **Extracts** the user's name and age from conversation messages (using the LLM itself for extraction).
+2. **Injects** remembered facts into the agent's context on every invocation — so the agent always knows the user's name even in a brand-new session.
+3. **Serializes** with the session — `SerializeSessionAsync` / `DeserializeSessionAsync` preserve the memory state.
+
+```
+ Turn 1: "Hello" ──► Agent asks for name (memory empty)
+ Turn 2: "I'm Damir" ──► UserInfoMemory extracts name via LLM
+ Turn 3: "What's my name?" ──► Agent reads from memory: "Damir"
+          │
+    Serialize session ──► JSON includes memory state
+          │
+    Deserialize ──► Memory restored, agent still knows "Damir"
+```
+
+**Key concepts demonstrated:**
+
+| Concept | How it's shown |
+|---|---|
+| **`AIContextProvider`** | `UserInfoMemory` extends `AIContextProvider` with `ProvideAIContextAsync` (inject) and `StoreAIContextAsync` (extract). |
+| **`ProviderSessionState<T>`** | Type-safe, per-session state storage. Each session gets its own `UserInfo` instance. |
+| **LLM-based extraction** | Uses `GetResponseAsync<UserInfo>()` with structured output to extract name/age from messages. |
+| **Session serialization** | `SerializeSessionAsync` / `DeserializeSessionAsync` round-trip the session including memory state. |
+| **Cross-session memory** | `SetValue()` copies memory from one session to a new session, sharing facts without sharing chat history. |
+
+---
+
 ## Workflows
 
 The Agent Framework includes a lightweight workflow engine that connects **executors** (processing units) via typed message edges into a directed graph. Workflows can range from simple deterministic pipelines to complex AI-driven feedback loops.
@@ -229,14 +266,144 @@ The workflow follows a graph-based execution model inspired by the [Pregel BSP p
 - **Message-based routing** — The `[MessageHandler]` attribute and `partial class` with source generators wire up type-based message dispatch automatically.
 - **Observability** — Custom `WorkflowEvent` subclasses provide a structured event stream that callers can monitor, log, or display.
 
+---
+
+## Agents in Workflow (`5_AgentsInWorkflow.cs`)
+
+Demonstrates using **AIAgents as executors** inside a workflow — each agent is a node in the graph, processing and forwarding messages.
+
+### Concept
+
+Three translation agents (French → Spanish → English) are chained in a linear pipeline. Each agent translates the text it receives into its target language and passes the result to the next.
+
+```
+Input: "Hello World!"
+       │
+       ▼
+┌──────────────┐     ┌───────────────┐     ┌───────────────┐
+│ French Agent │────▶│ Spanish Agent │────▶│ English Agent │──── Output
+│  (translate) │     │  (translate)  │     │  (translate)  │
+└──────────────┘     └───────────────┘     └───────────────┘
+       ↓                    ↓                    ↓
+  "Bonjour le monde!"  "¡Hola Mundo!"     "Hello World!"
+```
+
+**Key concepts demonstrated:**
+
+| Concept | How it's shown |
+|---|---|
+| **Agents as executors** | `AIAgent` implements `IExecutor`, so agents can be added directly to `WorkflowBuilder` as graph nodes. |
+| **`TurnToken`** | Agent-executors cache incoming messages and only start processing when they receive a `TurnToken`. This synchronizes multi-agent workflows. |
+| **Streaming workflow** | `InProcessExecution.RunStreamingAsync` + `WatchStreamAsync()` provides real-time event observation. |
+| **`AgentResponseUpdateEvent`** | Emitted as each agent produces streaming output — callers see which agent is responding and what it said. |
+| **Error handling** | `WorkflowErrorEvent` and `ExecutorFailedEvent` provide structured error reporting per-executor. |
+
+---
+
+## Workflow as Agent (`6_WorkflowAsAgent.cs`)
+
+> **⚠️ Work in progress** — This sample is currently commented out and not functional.
+
+Demonstrates the concept of wrapping a workflow as an `AIAgent` so it can be invoked like any other agent (via `RunAsync` / `RunStreamingAsync`), while internally orchestrating a multi-step workflow.
+
+The intended pattern:
+```csharp
+var workflowAsAgent = new WorkflowBuilder(frenchAgent)
+    .AddEdge(frenchAgent, spanishAgent)
+    .AddEdge(spanishAgent, englishAgent)
+    .AddWorkflow()
+    .AddAsAIAgent();  // Workflow exposed as a single AIAgent
+```
+
+---
+
+## CLAW — Command Line Agent Workflow (`7_SimpleClawSession.cs`)
+
+Demonstrates a **three-agent architecture** for decomposing and executing complex CLI/automation tasks:
+
+```
+User Prompt
+     │
+     ▼
+┌─────────────┐  PlanStep[]   ┌─────────────┐  per step    ┌─────────────┐
+│ Intent Agent│──────────────▶│  Plan Agent  │─────────────▶│  Task Agent │
+│ (decompose) │               │ (orchestrate)│◀─────────────│  (execute)  │
+└─────────────┘               └─────────────┘   result +   └─────────────┘
+                                                 context    has: CLI tool
+                                                            has: Playwright
+```
+
+### The Three Agents
+
+| Agent | Role |
+|---|---|
+| **Intent Agent** | Takes the user's natural language prompt and decomposes it into a `PlanStep[]` — each step has instructions, a description, and a type (`cli`, `browser`, or `reasoning`). |
+| **Plan Agent** | Orchestrates execution. For CLI-only plans, it can build an Agent Framework Workflow with one `CommandExecutor` per step. For mixed plans, it iterates through steps and invokes the Task Agent sequentially. |
+| **Task Agent** | Executes a single task. Has access to `ExecuteCliCommandAsync` (runs CLI commands with user approval) and Playwright MCP tools (browser automation). Gets a fresh session per step but receives prior context via the prompt. |
+
+### Key Features
+
+- **Interceptor pattern** — Every step prompts the user for approval (`[Y]es / [S]kip / [A]bort`) before execution.
+- **Playwright MCP** — Connected via stdio transport (`npx @playwright/mcp@latest`), giving the agent browser automation capabilities.
+- **CLI workflow path** — CLI-only plans use `RunCommandLineAsync` to build a dynamic Agent Framework Workflow with `CommandExecutor` nodes.
+- **Context chaining** — Each task result is accumulated as `previousContext` and passed to the next task's prompt.
+
+---
+
+## IoT Lighting Sample (`8_LightingSample.cs`)
+
+Demonstrates **dependency injection (DI)** with the Agent Framework and function tools that simulate IoT device control.
+
+### Concept
+
+An AI agent controls a virtual light bulb through tool calls. The `LightPlugin` is registered in a DI `ServiceCollection` and resolved at runtime, showing how real-world services (databases, APIs, IoT hubs) can be injected into agent tools.
+
+```
+User: "Turn on the light"
+       │
+       ▼
+┌─────────────────┐     ┌──────────────┐
+│   Agent (LLM)   │────▶│ LightPlugin  │ ← resolved from DI
+│                 │     │  ChangeState │ → updates IsOn, draws ASCII bulb
+│                 │◀────│  GetState    │ → returns "on" / "off"
+└─────────────────┘     └──────────────┘
+```
+
+### Tools
+
+| Tool | Description |
+|---|---|
+| **`GetState`** | Returns the current light state (`"on"` or `"off"`). |
+| **`ChangeState`** | Toggles the light and draws an ASCII light bulb in the top-right corner of the console — yellow with rays when on, dark gray when off. |
+| **`LookupProduct`** | Demo tool simulating a product catalog lookup (CPDM system). |
+
+### Key Concepts
+
+| Concept | How it's shown |
+|---|---|
+| **Dependency injection** | `LightPlugin` is registered as a singleton in `ServiceCollection` and resolved via `GetRequiredService<LightPlugin>()`. |
+| **`AsAITools()`** | Explicit tool exposure — only `GetState` and `ChangeState` are registered, not `LookupProduct`. Shows how to control which methods the agent can call. |
+| **`services` parameter** | The `IServiceProvider` is passed to `AsAIAgent()` so the agent can resolve dependencies for tool invocations. |
+| **Visual feedback** | `PaintBox()` draws an ASCII light bulb at a fixed console position, with rays when on and a status label (`ON`/`OFF`). |
+
+### Example Prompts
+
+```
+> Turn on the light
+> What is the current state of the light?
+> Toggle the light off
+> Is the light on or off?
+```
+
 ## Project Structure
 
 | Path | Description |
 |---|---|
-| `HostedAgentsWithAzureFoundryModels/1_HelloAgent.cs` | Core scenarios (this document) |
-| `HostedAgentsWithAzureFoundryModels/AgentWithMemory.cs` | Custom memory / context providers |
-| `HostedAgentsWithAzureFoundryModels/AgentsInWorkflow.cs` | Multi-agent workflow orchestration |
-| `OpenAIAgents/OpenAISamples.cs` | Direct OpenAI (non-Azure) samples |
-| `OpenAIAgents/OpenAIReasoningSamples.cs` | Reasoning models with streaming |
-| `MCP/` | Model Context Protocol tool integration |
-| `Helpers.cs` | Shared utilities (console loop, config) |
+| `1_HelloAgent.cs` | Core agent scenarios: basic invocation, multi-turn sessions, function tools |
+| `2_AgentWithMemory.cs` | Custom memory via `AIContextProvider` with session serialization |
+| `3_SimpleWorkflow.cs` | Sequential workflow pipeline and inter-executor messaging |
+| `4_ComplexWorkflow.cs` | AI-driven feedback loop (SloganWriter ↔ FeedbackProvider) |
+| `5_AgentsInWorkflow.cs` | AIAgents as workflow executors (translation chain) |
+| `6_WorkflowAsAgent.cs` | ⚠️ WIP — wrapping a workflow as an AIAgent |
+| `7_SimpleClawSession.cs` | Three-agent CLAW session (Intent → Plan → Task execution) |
+| `8_LightingSample.cs` | IoT light control with DI and ASCII visual feedback |

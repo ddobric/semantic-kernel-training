@@ -40,7 +40,7 @@ namespace AzureFoundrySkAgent
             //await HelloAgent.RunWithToolsAsync();
 
             // Scenario 4: Agent with custom memory (AIContextProvider)
-            //await AgentWithMemory.RunAsync();
+            await AgentWithMemory.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -67,6 +67,11 @@ namespace AzureFoundrySkAgent
             // Three-agent architecture: Intent → Plan → Task execution
             //await SimpleClawSession.RunAsync();
 
+            // ═══════════════════════════════════════════════
+            //  Lighting Plugin
+            // ═══════════════════════════════════════════════
+            //await LightingSample.RunAsync();
+            //await LightingSample.RunWithOllamaAsync();
 
             // ═══════════════════════════════════════════════
             //  MCP — Model Context Protocol Tool Integration
@@ -132,7 +137,7 @@ namespace AzureFoundrySkAgent
             //  See: Providers\FoundryAgents\README.md
             // ═══════════════════════════════════════════════
 
-            
+
             //await SqlAgentSample.RunAsync();
 
 
@@ -142,7 +147,7 @@ namespace AzureFoundrySkAgent
 
             //await AgentFramework_WorkflowSample.RunAsync();
 
-            //await AgentFramework_LightingSample.RunAsync();
+
 
             // Semantic Kernel agent (SK-based, not Agent Framework)
             //await SemanticKernelAgent.RunAsync(args);
@@ -262,7 +267,7 @@ namespace AzureFoundrySkAgent
             }
         }
 
-      
+
 
 
         // 2. Create an agent instance
