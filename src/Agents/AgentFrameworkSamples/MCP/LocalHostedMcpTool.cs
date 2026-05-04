@@ -15,7 +15,11 @@ using OpenAI.Chat;
 namespace AgentFramework_Samples.MCP
 {
     /// <summary>
-    /// Demonstrates how to invoke MCP tools via STDIO (locally).
+    /// Scenario 1: MCP tools via STDIO transport (locally hosted).
+    /// Connects to two MCP servers running as local processes:
+    ///   1. MonkeyMCP — a custom .NET MCP server (compiled executable)
+    ///   2. GitHub MCP — the official @modelcontextprotocol/server-github (via npx)
+    /// Tools from both servers are merged and registered with a single AI agent.
     /// </summary>
     internal class LocalHostedMcpTool
     {
@@ -23,9 +27,11 @@ namespace AgentFramework_Samples.MCP
         {
             Helpers.GetAzureEndpointAndModelDeployment(out var endpoint, out var deploymentName);
 
-            //
-            // To use thiss MCP server see the project src\Mcp\MonkeyMCP.
-            // This project demonstrates how to implement the MCP server that can be hosted locally using STDIO transport.
+            // ── MCP Server 1: MonkeyMCP (local .NET executable) ──
+            // This is a custom MCP server built as a .NET console app.
+            // It communicates over STDIO — the Agent Framework spawns the process
+            // and exchanges JSON-RPC messages via stdin/stdout.
+            // See project: src\Mcp\MonkeyMCP
             await using var mcpSampleClient = await McpClient.CreateAsync(new StdioClientTransport(new()
             {
                 Name = "MCPMonkey",
@@ -34,11 +40,12 @@ namespace AgentFramework_Samples.MCP
             }));
 
             await ListMcpToolsAsync(mcpSampleClient);
-
             var sampleServerMcpTools = await mcpSampleClient.ListToolsAsync().ConfigureAwait(false);
 
-            //
-            // Create an MCPClient for the GitHub server
+            // ── MCP Server 2: GitHub MCP (via npx) ──
+            // The official GitHub MCP server provides tools for repository operations
+            // (list repos, read files, search code, etc.). It is launched via npx
+            // which downloads and runs the package on demand.
             await using var mcpGitHubClient = await McpClient.CreateAsync(new StdioClientTransport(new()
             {
                 Name = "MCPServer",
@@ -47,28 +54,30 @@ namespace AgentFramework_Samples.MCP
             }));
 
             await ListMcpToolsAsync(mcpGitHubClient);
-
             var mcpGithubTools = await mcpGitHubClient.ListToolsAsync().ConfigureAwait(false);
 
+            // Merge tools from both MCP servers into a single array for the agent.
             var allTools = sampleServerMcpTools.Concat(mcpGithubTools).Cast<AITool>().ToArray();
 
-            // WARNING: DefaultAzureCredential is convenient for development but requires careful consideration in production.
-            // In production, consider using a specific credential (e.g., ManagedIdentityCredential) to avoid
-            // latency issues, unintended credential probing, and potential security risks from fallback mechanisms.
+            // Create an agent with all MCP tools registered.
             AIAgent agent = new AzureOpenAIClient(
                 new Uri(endpoint),
                 new DefaultAzureCredential())
                  .GetChatClient(deploymentName)
-                 .AsAIAgent(instructions: "You answer questions related to GitHub repositories only.", 
+                 .AsAIAgent(instructions: "You are helpful agent who answers only questions which can be answered with the help of loaded tools.",
                  tools: allTools);
             Console.WriteLine();
 
-            // Invoke the agent and output the text result.
-            Console.WriteLine(await agent.RunAsync("Summarize the last four commits to the microsoft/semantic-kernel repository?"));
+            // Single-shot invocation to demonstrate tool usage.
+            Console.WriteLine(await agent.RunAsync("Summarize the last four commits to the microsoft\\agent-framework repository?"));
 
+            // Interactive conversation loop for follow-up questions.
             await Helpers.RunConversationLoopAsync(agent);
         }
 
+        /// <summary>
+        /// Lists all tools exposed by an MCP server to the console.
+        /// </summary>
         private static async Task ListMcpToolsAsync(McpClient mcpMonkeyClient)
         {
             foreach (var item in await mcpMonkeyClient.ListToolsAsync())

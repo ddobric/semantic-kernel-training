@@ -8,27 +8,99 @@ using Microsoft.Extensions.AI;
 
 //https://kowshik.github.io/JPregel/pregel_paper.pdf
 /*
-Superstep N:
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Collect All    │───▶│  Route Messages │───▶│  Execute All    │
-│  Pending        │    │  Based on Type  │    │  Target         │
-│  Messages       │    │  & Conditions   │    │  Executors      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                                       │
-                                                       │ (barrier: wait for all)
-┌─────────────────┐    ┌─────────────────┐             │
-│  Start Next     │◀───│  Emit Events &  │◀────────────┘
-│  Superstep      │    │  New Messages   │
-└─────────────────┘    └─────────────────┘
+ MESSAGING FLOW GRAPH
+ ====================
+
+ ┌─────────────┐                                         ┌─────────────────┐
+ │   Caller     │  "Create a slogan for..."  (string)    │  SloganWriter    │
+ │ (RunAsync)   │───────────────────────────────────────▶│  Executor        │
+ └─────────────┘                                         └────────┬────────┘
+                                                                  │
+                             SUPERSTEP 1                          │
+                             ──────────                           │
+                                                                  │ HandleAsync(string)
+                                                                  │  → LLM generates slogan
+                                                                  │  → emits SloganGeneratedEvent
+                                                                  │  → returns SloganResult
+                                                                  │
+                                                    SloganResult  │
+                                                    (edge data)   │
+                                                                  ▼
+                                                         ┌─────────────────┐
+                                                         │ FeedbackProvider │
+                                                         │  Executor        │
+                                                         └────────┬────────┘
+                                                                  │
+                             SUPERSTEP 2                          │
+                             ──────────                           │
+                                                                  │ HandleAsync(SloganResult)
+                                                                  │  → LLM reviews slogan
+                                                                  │  → emits FeedbackEvent
+                                                                  │  → decides next action:
+                                                                  │
+                          ┌───────────────────────────────────────┼───────────────────────┐
+                          │                                       │                       │
+                          ▼                                       ▼                       ▼
+                   rating ≥ 8                            attempts ≥ 3              otherwise
+                   ┌──────────────┐                     ┌──────────────┐      ┌──────────────────┐
+                   │ YieldOutput  │                     │ YieldOutput  │      │ SendMessage      │
+                   │ "Accepted"   │                     │ "Rejected"   │      │ (FeedbackResult) │
+                   │ + slogan     │                     │ + last slogan│      └────────┬─────────┘
+                   └──────┬───────┘                     └──────┬───────┘               │
+                          │                                    │                       │
+                          ▼                                    ▼                       │
+                   WorkflowOutputEvent                  WorkflowOutputEvent            │
+                   (workflow ends)                      (workflow ends)                │
+                                                                                      │
+                                                                      FeedbackResult  │
+                                                                      (via SendMsg)   │
+                                                                                      ▼
+                                                                             ┌─────────────────┐
+                             SUPERSTEP 3..N                                  │  SloganWriter    │
+                             ──────────────                                  │  Executor        │
+                                                                             └────────┬────────┘
+                                                                                      │
+                                                                HandleAsync(FeedbackResult)
+                                                                  │  → LLM revises slogan
+                                                                  │  → emits SloganGeneratedEvent
+                                                                  │  → returns SloganResult
+                                                                  │
+                                                                  ▼
+                                                         (back to FeedbackProvider)
+                                                         (loop continues until Accept or Reject)
+
+ MESSAGE TYPES:
+   Edge data:     string → SloganResult → FeedbackResult → SloganResult → ...
+   Domain events: SloganGeneratedEvent, FeedbackEvent (observability only, no routing)
+   Control:       YieldOutputAsync (terminates the workflow with a final string output)
 
  */
 namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
 {
     /// <summary>
     /// Complex Workflow: a feedback loop between two AI executors.
-    /// A SloganWriter generates slogans, a FeedbackProvider reviews them,
-    /// and the loop repeats until the rating meets the threshold or max attempts are reached.
+    /// <para>
+    /// <b>Messaging flow:</b>
+    /// <list type="number">
+    ///   <item>Caller sends a <c>string</c> prompt to <see cref="SloganWriterExecutor"/> (edge input).</item>
+    ///   <item><c>SloganWriter</c> invokes the LLM, produces a <see cref="SloganResult"/>,
+    ///         emits a <see cref="SloganGeneratedEvent"/>, and forwards the result via edge to <see cref="FeedbackExecutor"/>.</item>
+    ///   <item><c>FeedbackProvider</c> receives the <see cref="SloganResult"/>, invokes the LLM for review,
+    ///         emits a <see cref="FeedbackEvent"/>, then decides:
+    ///     <list type="bullet">
+    ///       <item><b>Accept</b> (rating ≥ <c>MinimumRating</c>) → calls <c>YieldOutputAsync</c> with the slogan. Workflow ends.</item>
+    ///       <item><b>Reject</b> (attempts ≥ <c>MaxAttempts</c>) → calls <c>YieldOutputAsync</c> with a rejection note. Workflow ends.</item>
+    ///       <item><b>Loop</b> → calls <c>SendMessageAsync(FeedbackResult)</c>, routing back to <c>SloganWriter</c>.</item>
+    ///     </list>
+    ///   </item>
+    ///   <item><c>SloganWriter</c> receives the <see cref="FeedbackResult"/> via <c>[MessageHandler]</c>,
+    ///         revises the slogan, and returns a new <see cref="SloganResult"/>. Flow returns to step 3.</item>
+    /// </list>
+    /// </para>
+    /// <para>
     /// Inspired by the Pregel BSP (Bulk Synchronous Parallel) model.
+    /// Each iteration is a superstep: collect messages → route → execute → emit → barrier → next superstep.
+    /// </para>
     /// </summary>
     internal class ComplexWorkflow
     {

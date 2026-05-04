@@ -30,7 +30,7 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
                 .Build();
 
             // Execute the workflow
-            await using StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, new ChatMessage(ChatRole.User, "Hello World!"));
+            await using StreamingRun run = await InProcessExecution.RunStreamingAsync(workflow, new ChatMessage(ChatRole.User, "Hello World! This sample demonstrates how to use Agents as interceptors."));
 
             // Must send the turn token to trigger the agents.
             // The agents are wrapped as executors. When they receive messages,

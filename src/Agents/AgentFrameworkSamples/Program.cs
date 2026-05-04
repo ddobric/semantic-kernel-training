@@ -51,13 +51,13 @@ namespace AzureFoundrySkAgent
             //await HelloWorkflow.RunAsync();
 
             // Pipeline with inter-executor messaging & custom events
-            await HelloWorkflow.RunWithMessagingAsync();
+            //await HelloWorkflow.RunWithMessagingAsync();
 
             // AI-driven feedback loop (SloganWriter ↔ FeedbackProvider)
-            //await ComplexWorkflow.RunAsync();
+            // await ComplexWorkflow.RunAsync();
 
             // Multi-agent orchestration as a workflow
-            //await AgentsInWorkflow.RunAsync();
+            // await AgentsInWorkflow.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -81,7 +81,7 @@ namespace AzureFoundrySkAgent
             //await LocalHostedMcpTool.RunAsync();
 
             // Remote MCP server via HTTP (e.g. Microsoft Learn)
-            //await HttpHostedMcpTool.RunAsync();
+            await HttpHostedMcpTool.RunAsync();
 
 
             // ═══════════════════════════════════════════════
