@@ -142,6 +142,9 @@ A custom `UserInfoMemory` component that:
 
 The Agent Framework includes a lightweight workflow engine that connects **executors** (processing units) via typed message edges into a directed graph. Workflows can range from simple deterministic pipelines to complex AI-driven feedback loops.
 
+Ref: 
+https://kowshik.github.io/JPregel/pregel_paper.pdf
+
 ### Sequential Workflow  (`RunAsync`)
 
 The simplest possible workflow — a **Sequential Workflow** with no AI involved. It demonstrates the core workflow mechanics in isolation.

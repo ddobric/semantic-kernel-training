@@ -25,9 +25,9 @@ Superstep N:
 namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
 {
     /// <summary>
-    /// Scenario 4: Simple Workflow — a feedback loop between two AI executors.
+    /// Complex Workflow: a feedback loop between two AI executors.
     /// A SloganWriter generates slogans, a FeedbackProvider reviews them,
-    /// and the loop repeats until the rating is high enough or max attempts are reached.
+    /// and the loop repeats until the rating meets the threshold or max attempts are reached.
     /// Inspired by the Pregel BSP (Bulk Synchronous Parallel) model.
     /// </summary>
     internal class ComplexWorkflow
@@ -83,7 +83,8 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
 
 
     /// <summary>
-    /// A class representing the output of the slogan writer agent.
+    /// Data contract for the slogan writer's structured output.
+    /// Contains the original task description and the generated slogan text.
     /// </summary>
     public sealed class SloganResult
     {
@@ -95,7 +96,8 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
     }
 
     /// <summary>
-    /// A class representing the output of the feedback agent.
+    /// Data contract for the feedback agent's structured output.
+    /// Contains review comments, a numeric rating (1–10), and suggested improvement actions.
     /// </summary>
     public sealed class FeedbackResult
     {
@@ -110,7 +112,8 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
     }
 
     /// <summary>
-    /// A custom event to indicate that a slogan has been generated.
+    /// Domain event emitted when the SloganWriter produces a new or revised slogan.
+    /// Watchers can observe this in the streaming event loop for real-time progress.
     /// </summary>
     internal sealed class SloganGeneratedEvent(SloganResult sloganResult) : WorkflowEvent(sloganResult)
     {
@@ -118,10 +121,11 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
     }
 
     /// <summary>
-    /// A custom executor that uses an AI agent to generate slogans based on a given task.
-    /// Note that this executor has two message handlers:
-    /// 1. HandleAsync(string message): Handles the initial task to create a slogan.
-    /// 2. HandleAsync(Feedback message): Handles feedback to improve the slogan.
+    /// Executor that generates and revises slogans using an AI agent.
+    /// Has two message handlers:
+    ///   1. <c>HandleAsync(string)</c> — handles the initial user prompt to create the first slogan.
+    ///   2. <c>HandleAsync(FeedbackResult)</c> — handles review feedback to produce an improved revision.
+    /// Uses structured JSON output via <see cref="ChatResponseFormat"/> to ensure valid deserialization.
     /// </summary>
     internal sealed partial class SloganWriterExecutor : Executor
     {
@@ -204,7 +208,8 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
     }
 
     /// <summary>
-    /// A custom event to indicate that feedback has been provided.
+    /// Domain event emitted when the FeedbackProvider completes a review.
+    /// Serializes the full <see cref="FeedbackResult"/> as indented JSON for console display.
     /// </summary>
     internal sealed class FeedbackEvent(FeedbackResult feedbackResult) : WorkflowEvent(feedbackResult)
     {
@@ -213,7 +218,10 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
     }
 
     /// <summary>
-    /// A custom executor that uses an AI agent to provide feedback on a slogan.
+    /// Executor that reviews slogans and decides the workflow's next step:
+    ///   • <b>Accept</b> — rating ≥ <see cref="MinimumRating"/> → yields the slogan as final output.
+    ///   • <b>Reject</b> — attempts ≥ <see cref="MaxAttempts"/> → yields the last slogan with a rejection note.
+    ///   • <b>Loop</b> — sends <see cref="FeedbackResult"/> back to the SloganWriter for revision.
     /// </summary>
     [SendsMessage(typeof(FeedbackResult))]
     [YieldsOutput(typeof(string))]
@@ -222,8 +230,10 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
         private readonly AIAgent _agent;
         private AgentSession? _session;
 
+        /// <summary>Minimum acceptable rating (1–10). Slogans rated at or above this are accepted.</summary>
         public int MinimumRating { get; init; } = 8;
 
+        /// <summary>Maximum number of revision attempts before the workflow stops with the last slogan.</summary>
         public int MaxAttempts { get; init; } = 3;
 
         private int _attempts;

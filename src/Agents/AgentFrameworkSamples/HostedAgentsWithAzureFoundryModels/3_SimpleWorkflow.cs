@@ -171,7 +171,7 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
             public override async ValueTask<string> HandleAsync(string message, IWorkflowContext context, CancellationToken cancellationToken = default)
             {
                 // Send a typed message to any executor that handles MyEvent1.
-                await context.SendMessageAsync(new MyEvent1("My Message to Executors."));
+                await context.SendMessageAsync(new MyEvent1($"I'm {nameof(MyExecutor2)} sending the message to Executors."));
 
                 return $"Result from MyExecutor {message}";
             }

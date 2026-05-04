@@ -40,7 +40,7 @@ namespace AzureFoundrySkAgent
             //await HelloAgent.RunWithToolsAsync();
 
             // Scenario 4: Agent with custom memory (AIContextProvider)
-            await AgentWithMemory.RunAsync();
+            //await AgentWithMemory.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -51,7 +51,7 @@ namespace AzureFoundrySkAgent
             //await HelloWorkflow.RunAsync();
 
             // Pipeline with inter-executor messaging & custom events
-            //await HelloWorkflow.RunWithMessagingAsync();
+            await HelloWorkflow.RunWithMessagingAsync();
 
             // AI-driven feedback loop (SloganWriter ↔ FeedbackProvider)
             //await ComplexWorkflow.RunAsync();
@@ -146,8 +146,6 @@ namespace AzureFoundrySkAgent
             // ═══════════════════════════════════════════════
 
             //await AgentFramework_WorkflowSample.RunAsync();
-
-
 
             // Semantic Kernel agent (SK-based, not Agent Framework)
             //await SemanticKernelAgent.RunAsync(args);
