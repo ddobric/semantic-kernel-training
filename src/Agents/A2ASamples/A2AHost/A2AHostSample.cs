@@ -33,12 +33,18 @@ namespace A2AHost
                 ?? throw new InvalidOperationException("AZURE_AI_PROJECT_ENDPOINT is not set.");
             string model = builder.Configuration["AZURE_AI_MODEL_DEPLOYMENT_NAME"] ?? "gpt-4o-mini";
 
-            // 1. Create and register the "weather-agent" agent in the DI container.
+            // 1. Create and register the "weather-agent" as a keyed singleton in the DI container.
+            //    Keyed services allow multiple AIAgent instances to coexist, each identified by a unique key.
             builder.Services.AddKeyedSingleton<AIAgent>("weather-agent", (sp, _) =>
             {
+                // Wrap plain C# methods as AITool instances so the LLM can invoke them.
+                // AIFunctionFactory.Create inspects the [Description] attributes and parameter
+                // metadata to generate the tool schema automatically.
                 AITool getCitiesTool = AIFunctionFactory.Create(GetCities);
                 AITool getWeatherTool = AIFunctionFactory.Create(GetWeather);
 
+                // Build the agent using Azure AI Foundry. The AIProjectClient handles
+                // authentication, model routing, and tool-calling orchestration.
                 return new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential())
                     .AsAIAgent(
                         model: model,
@@ -47,15 +53,22 @@ namespace A2AHost
                         tools: [getCitiesTool, getWeatherTool]);
             });
 
-            // 2. Register the A2A server for the "weather-agent" agent.
+            // 2. Register the A2A protocol server middleware for the "weather-agent".
+            //    This wires up the A2A message handling pipeline (JSON-RPC over HTTP)
+            //    that translates incoming A2A requests into AIAgent invocations.
             builder.AddA2AServer("weather-agent");
 
             var app = builder.Build();
 
-            // 3. Map A2A protocol endpoints for the "weather-agent" agent.
+            // 3. Map the A2A HTTP+JSON endpoint.
+            //    This creates a POST route at /a2a/weather-agent that accepts
+            //    A2A protocol messages (tasks/send, tasks/sendSubscribe, etc.).
             app.MapA2AHttpJson("weather-agent", "/a2a/weather-agent");
 
-            // 4. Serve a minimal agent card for the "weather-agent" agent discovery.
+            // 4. Publish the Agent Card at the well-known URL: /.well-known/agent.json
+            //    The Agent Card is the discovery mechanism defined by the A2A specification.
+            //    Remote consumers fetch this card to learn the agent's name, capabilities,
+            //    supported protocol bindings, and endpoint URLs.
             app.MapWellKnownAgentCard(new AgentCard
             {
                 Name = "WeatherAgent",

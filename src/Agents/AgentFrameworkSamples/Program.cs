@@ -81,7 +81,7 @@ namespace AzureFoundrySkAgent
             //await LocalHostedMcpTool.RunAsync();
 
             // Remote MCP server via HTTP (e.g. Microsoft Learn)
-            await HttpHostedMcpTool.RunAsync();
+            //await HttpHostedMcpTool.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -103,7 +103,9 @@ namespace AzureFoundrySkAgent
 
             // Conversation & code interpreter samples
             //await OpenAIConversationSample.RunAsync();
-            //await OpenAICodeInterpreter.RunAsync();
+            
+            // Creating the code from prompt and executing it.
+            await OpenAICodeInterpreter.RunAsync();
 
 
             // ═══════════════════════════════════════════════

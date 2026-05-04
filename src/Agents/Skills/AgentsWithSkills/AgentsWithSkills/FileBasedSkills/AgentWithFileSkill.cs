@@ -17,7 +17,7 @@ namespace AgentsWithSkills.FileBasedSkills
     //
     // This sample uses a unit-converter skill that converts between miles, kilometers, pounds, and kilograms.
 
-    internal class AgentWIthFileSkill
+    internal class AgentWithFileSkill
     {
         public static async Task RunAsync()
         {

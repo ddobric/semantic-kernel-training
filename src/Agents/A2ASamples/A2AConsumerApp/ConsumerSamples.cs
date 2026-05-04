@@ -5,8 +5,15 @@ using Microsoft.Agents.AI;
 namespace A2AConsumerApp
 {
     /// <summary>
-    /// Demonstrates consuming a remote AI agent over the A2A protocol.
-    /// The class resolves the agent's card, creates a local proxy, and invokes it.
+    /// Demonstrates consuming a remote AI agent over the A2A (Agent-to-Agent) protocol.
+    /// <para>
+    /// The workflow follows the standard A2A discovery pattern:
+    /// 1. Point an <see cref="A2ACardResolver"/> at the remote host.
+    /// 2. The resolver fetches the Agent Card from <c>/.well-known/agent.json</c>.
+    /// 3. The card describes the agent's capabilities and endpoint URL.
+    /// 4. A local <see cref="AIAgent"/> proxy is created that forwards calls
+    ///    to the remote A2A endpoint transparently.
+    /// </para>
     /// </summary>
     internal class ConsumerSamples
     {
@@ -15,14 +22,18 @@ namespace A2AConsumerApp
         /// </summary>
         public static async Task RunAsync()
         {
-            // Initialize a resolver pointing at the remote agent's host.
-            // The resolver fetches the well-known agent card from /.well-known/agent.json.
+            // 1. Initialize the A2A card resolver.
+            //    The resolver will fetch the Agent Card from http://localhost:5000/.well-known/agent.json.
+            //    The Agent Card contains the protocol binding (HTTP+JSON), endpoint URL, and metadata.
             A2ACardResolver resolver = new(new Uri("http://localhost:5000/"));
 
-            // Resolve the agent card and create a local AIAgent proxy backed by the remote A2A endpoint.
+            // 2. Resolve the Agent Card and create a local AIAgent proxy.
+            //    All subsequent calls on this proxy are transparently forwarded
+            //    to the remote A2A server over the HTTP+JSON protocol binding.
             AIAgent agent = await resolver.GetAIAgentAsync();
 
-            // Send a message to the remote agent and print its response.
+            // 3. Interact with the remote agent – each RunAsync call sends an A2A
+            //    "tasks/send" message and returns the agent's text response.
             Console.WriteLine(await agent.RunAsync("Hello!"));
 
             Console.WriteLine("Press any key to continue...");

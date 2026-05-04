@@ -1,4 +1,5 @@
 ﻿using AgentsWithSkills.AgentBasedSkills;
+using AgentsWithSkills.FileBasedSkills;
 
 namespace AgentsWithSkills
 {
@@ -6,7 +7,7 @@ namespace AgentsWithSkills
     {
         static async Task Main(string[] args)
         {
-            //await AgentWIthFileSkill.RunAsync();
+            //await AgentWithFileSkill.RunAsync();
 
             await AgentWithClassBasedSkill.RunAsync();
         }
