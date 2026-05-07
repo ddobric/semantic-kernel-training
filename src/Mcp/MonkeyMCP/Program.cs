@@ -29,6 +29,7 @@ builder.Services
     .AddMcpServer()
     .WithStdioServerTransport()
     .WithTools<EchoTool>()
+    .WithTools<AgendaTool>()
     .WithTools<MonkeyTools>();
 
 // Register HttpClient factory for outbound HTTP calls (used by MonkeyService).

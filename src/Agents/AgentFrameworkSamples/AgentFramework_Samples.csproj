@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="AgentFrameworkPersistedAgentSamples.cs" />
-    <Compile Remove="AgentFramework_AzOpenAISamples.cs" />
-    <Compile Remove="AgentFramework_FoundryChatAgent.cs" />
-    <Compile Remove="AgentFramework_WorkflowSample.cs" />
     <Compile Remove="DeclarativeAgents\HelloDeclarativeAgent_ERR.cs" />
     <Compile Remove="SemanticKernelFoundryAgentSample.cs" />
   </ItemGroup>
@@ -47,13 +43,10 @@
 
   <ItemGroup>
     <Folder Include="Assets\" />
+    <Folder Include="Legacy\" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="AgentFrameworkPersistedAgentSamples.cs" />
-    <None Include="AgentFramework_AzOpenAISamples.cs" />
-    <None Include="AgentFramework_FoundryChatAgent.cs" />
-    <None Include="AgentFramework_WorkflowSample.cs" />
     <None Include="DeclarativeAgents\HelloDeclarativeAgent_ERR.cs" />
     <None Include="SemanticKernelFoundryAgentSample.cs" />
   </ItemGroup>

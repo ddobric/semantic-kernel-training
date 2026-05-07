@@ -444,8 +444,8 @@ namespace semantickernelsample
                 // Enable auto function calling
                 OpenAIPromptExecutionSettings executionSettings = new()
                 {
-                    Temperature = 0.0,
-                    MaxTokens = 1500
+                   // Temperature = 0.0,
+                   // MaxTokens = 1500
                 };
 
                 //#pragma warning disable SKEXP0070 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

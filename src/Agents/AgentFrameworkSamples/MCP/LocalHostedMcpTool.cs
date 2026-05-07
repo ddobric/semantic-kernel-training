@@ -8,8 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Server;
-using System;
 using OpenAI.Chat;
+using System;
+using System.Linq;
 
 
 namespace AgentFramework_Samples.MCP
@@ -34,7 +35,7 @@ namespace AgentFramework_Samples.MCP
             // See project: src\Mcp\MonkeyMCP
             await using var mcpSampleClient = await McpClient.CreateAsync(new StdioClientTransport(new()
             {
-                Name = "MCPMonkey",
+                Name = "MCPViaSTDIO",
                 Command = "C:\\dev\\git\\semantic-kernel-training\\src\\Mcp\\MonkeyMCP\\bin\\Debug\\net9.0\\MonkeyMCP.exe",
                 Arguments = [],
             }));
@@ -53,11 +54,20 @@ namespace AgentFramework_Samples.MCP
                 Arguments = ["-y", "--verbose", "@modelcontextprotocol/server-github"],
             }));
 
+            await using var mcpMsLearningClient = await McpClient.CreateAsync(new HttpClientTransport(new()
+            {
+                Name = "MSLearning",
+                Endpoint = new Uri("https://learn.microsoft.com/api/mcp")
+            }));
+
             await ListMcpToolsAsync(mcpGitHubClient);
             var mcpGithubTools = await mcpGitHubClient.ListToolsAsync().ConfigureAwait(false);
 
             // Merge tools from both MCP servers into a single array for the agent.
             var allTools = sampleServerMcpTools.Concat(mcpGithubTools).Cast<AITool>().ToArray();
+
+            var mcpMsLearningTools = await mcpMsLearningClient.ListToolsAsync().ConfigureAwait(false);
+            allTools = allTools.Concat(mcpMsLearningTools.Cast<AITool>()).ToArray();
 
             // Create an agent with all MCP tools registered.
             AIAgent agent = new AzureOpenAIClient(

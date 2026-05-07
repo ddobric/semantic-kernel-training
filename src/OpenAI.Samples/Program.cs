@@ -27,7 +27,7 @@ namespace OpenAI.Samples
             // Sample 2: Document Classification via Embeddings
             // Loads documents from the Docs/ folder, embeds them with both large and small models,
             // and classifies user input by comparing embedding similarity against each document.
-            await ClassificationSample.RunAsync();
+            //await ClassificationSample.RunAsync();
 
             // Sample 3: Streaming Chat Completion
             // Interactive chat loop that streams the model's response token by token in real time.
@@ -36,7 +36,7 @@ namespace OpenAI.Samples
             // Sample 4: Chat Completions with Log Probabilities
             // Interactive chat loop that returns completions along with the top-5 token
             // log probabilities for each generated token, useful for understanding model confidence.
-            //await ChatChatCompletionsAsync();
+            await ChatChatCompletionsAsync();
 
             // Sample 5: Text-to-Speech
             // Converts a text string to spoken audio using the "tts-1" model and saves it as an MP3 file.
@@ -248,7 +248,7 @@ namespace OpenAI.Samples
         public static async Task CreateEmbeddingsAsync()
         {
             // Initialize the embedding client with the large embedding model
-            EmbeddingClient client = new("text-embedding-3-large",//*text-embedding-3-large"
+            EmbeddingClient client = new("text-embedding-3-large",//*text-embedding-3-small"
                 Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
           
             while (true)

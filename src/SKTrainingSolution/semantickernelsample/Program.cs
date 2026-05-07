@@ -35,7 +35,7 @@ internal class Program
 
         //new RagSample(GetKernel()).SplitTextToChunks();       
 
-        //await new RagSample(GetKernel()).RunRAG();
+        await new RagSample(GetKernel()).RunRAG();
 
         //await new RagSample(GetKernel()).RunExperimentLoopAsync();
 

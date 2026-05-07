@@ -34,13 +34,13 @@ namespace AzureFoundrySkAgent
             //await HelloAgent.RunAsync();
 
             // Scenario 2: Multi-turn conversations with sessions
-            //await HelloAgent.RunMultiturnAsync();
+             //await HelloAgent.RunMultiturnAsync();
 
             // Scenario 3: Agent with function tools
-            //await HelloAgent.RunWithToolsAsync();
+            // await HelloAgent.RunWithToolsAsync();
 
             // Scenario 4: Agent with custom memory (AIContextProvider)
-            //await AgentWithMemory.RunAsync();
+           // await AgentWithMemory.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -57,7 +57,7 @@ namespace AzureFoundrySkAgent
             // await ComplexWorkflow.RunAsync();
 
             // Multi-agent orchestration as a workflow
-            // await AgentsInWorkflow.RunAsync();
+            //await AgentsInWorkflow.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -81,7 +81,7 @@ namespace AzureFoundrySkAgent
             //await LocalHostedMcpTool.RunAsync();
 
             // Remote MCP server via HTTP (e.g. Microsoft Learn)
-            //await HttpHostedMcpTool.RunAsync();
+            await HttpHostedMcpTool.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -103,9 +103,9 @@ namespace AzureFoundrySkAgent
 
             // Conversation & code interpreter samples
             //await OpenAIConversationSample.RunAsync();
-            
+
             // Creating the code from prompt and executing it.
-            await OpenAICodeInterpreter.RunAsync();
+            //await OpenAICodeInterpreter.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -132,15 +132,17 @@ namespace AzureFoundrySkAgent
 
             //await HelloFoundryLocalAgent.RunAsync();
 
+            // ═══════════════════════════════════════════════
+            //  ADVANCED 
+            // ═══════════════════════════════════════════════
 
+            // await SqlAgentSample.RunAsync();
+          
             // ═══════════════════════════════════════════════
             //  FOUNDRY AGENTS (Azure AI Foundry)
             //  ⚠️ Moved to: src\Agents\FoundryAgent\FoundryAgent.sln
             //  See: Providers\FoundryAgents\README.md
             // ═══════════════════════════════════════════════
-
-
-            //await SqlAgentSample.RunAsync();
 
 
             // ═══════════════════════════════════════════════

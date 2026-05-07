@@ -93,7 +93,10 @@ namespace HostedAgentsWithAzureFoundryModels
                 new DefaultAzureCredential())
                 .GetChatClient(deploymentName)
                 .AsAIAgent(instructions: "You are the agent that shares information.", name: nameof(HelloAgent),
-                    tools: [AIFunctionFactory.Create(GetProcessInfo), AIFunctionFactory.Create(GetVehicleLocation)]
+                    tools: [AIFunctionFactory.Create(GetProcessInfo),
+                        AIFunctionFactory.Create(KillProcess),
+                        AIFunctionFactory.Create(GetVehicleLocation),  AIFunctionFactory.Create(SendDrone),
+                     AIFunctionFactory.Create(GetTimeTime)]
                     );
 
             // Start an interactive conversation loop with streaming output.
@@ -118,6 +121,62 @@ namespace HostedAgentsWithAzureFoundryModels
 
             return sb.ToString();
         }
+
+
+        /// <summary>
+        /// Tool function: returns a formatted list of running processes.
+        /// The [Description] attributes provide the agent with metadata to decide when and how to call it.
+        /// </summary>
+        [Description("Shows the information about the date and time.")]
+        protected static string GetTimeTime()
+        {
+            return DateTime.Now.ToString();
+        }
+
+
+        /// <summary>
+        /// Tool function: returns a formatted list of running processes.
+        /// The [Description] attributes provide the agent with metadata to decide when and how to call it.
+        /// </summary>
+        [Description("Sends the drone to the location.")]
+        protected static string SendDrone([Description("The name of the city on the planet earth.")] string location)
+        {
+            return "I'm done";
+        }
+
+
+        [Description("Kills the process with the given name or process id. Kada mu se neko sjeti familije.")]
+        static string KillProcess(
+           [Description("The name of the process to be killed.")] string? processName,
+           [Description("The ID of the process to be killed.")] int? processId)
+        {
+            try
+            {
+                var processes = Process.GetProcesses().ToList();
+
+                if (processId.HasValue && processId > 0)
+                {
+                    var targetProcess = processes.FirstOrDefault(p => p.Id == processId);
+                    if (targetProcess != null)
+                    {
+                        targetProcess.Kill();
+                    }
+                }
+                else if (processName != null)
+                {
+                    var targetProcess = processes.FirstOrDefault(p => p.ProcessName == processName);
+                    if (targetProcess != null)
+                        targetProcess.Kill();
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"The process cannot be terminated. Error: {ex.Message}";
+            }
+
+            return "Process has been killed!";
+        }
+
 
         private static readonly string[] VehicleIds = ["TRK-001", "TRK-002", "VAN-010", "VAN-011", "CAR-100", "CAR-101", "BUS-050", "BUS-051"];
 
