@@ -1,1 +1,1 @@
-# semantic-kernel-samples
+# AI for Enterprise Developers
