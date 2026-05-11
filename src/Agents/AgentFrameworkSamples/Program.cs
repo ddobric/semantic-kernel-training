@@ -31,7 +31,7 @@ namespace AzureFoundrySkAgent
             // ═══════════════════════════════════════════════
 
             // Scenario 1: Basic agent construction & invocation
-            //await HelloAgent.RunAsync();
+            await HelloAgent.RunAsync();
 
             // Scenario 2: Multi-turn conversations with sessions
              //await HelloAgent.RunMultiturnAsync();

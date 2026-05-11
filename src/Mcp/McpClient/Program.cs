@@ -23,8 +23,10 @@ namespace McpClientSample
         //  Configuration constants
         // ──────────────────────────────────────────────
         private const string McpServerEndpoint = "https://localhost:7133";
-        private const string AzureOpenAiEndpoint = "https://ddobric-agents-samples-resource.cognitiveservices.azure.com/openai/deployments/gpt-4.1";
-        private const string ModelName = "gpt-4.1";
+
+        // This is inference endpoint in the preview (old) foundry.
+        private static string AzureOpenAiEndpoint = "https://ddobric-agent-samples-resource.cognitiveservices.azure.com/openai/deployments/gpt-4o";
+        private const string ModelName = "gpt-4o";
 
         // ──────────────────────────────────────────────
         //  Entry point
@@ -122,6 +124,7 @@ namespace McpClientSample
             // --- Azure OpenAI client setup -------------------------------------
             var endpoint = new Uri(AzureOpenAiEndpoint);
             var credential = new AzureKeyCredential(Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!);
+           
 
             var client = new ChatCompletionsClient(endpoint, credential, new AzureAIInferenceClientOptions());
 
