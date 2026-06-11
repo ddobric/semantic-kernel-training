@@ -20,7 +20,9 @@ namespace FoundryAgentDemo
         public static async Task Main(string[] args)
         {
             var agent1 = new FoundryResponsesAgentSample();
-            await agent1.RunAsync();
+            //await agent1.RunAsync();
+
+            await agent1.RunWithFileAsync();
 
             var agent2 = new FoundryAgentSample();
 

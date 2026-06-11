@@ -36,7 +36,7 @@ namespace AgentFramework_Samples.MCP
             await using var mcpSampleClient = await McpClient.CreateAsync(new StdioClientTransport(new()
             {
                 Name = "MCPViaSTDIO",
-                Command = "C:\\dev\\git\\semantic-kernel-training\\src\\Mcp\\MonkeyMCP\\bin\\Debug\\net9.0\\MonkeyMCP.exe",
+                Command = "C:\\dev\\git\\semantic-kernel-training\\src\\Mcp\\MonkeyMCP\\bin\\Debug\\net10.0\\MonkeyMCP.exe",
                 Arguments = [],
             }));
 

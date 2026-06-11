@@ -28,3 +28,27 @@ public sealed class MonkeyTools
         return JsonSerializer.Serialize(monkey, MonkeyContext.Default.Monkey);
     }
 }
+
+
+[McpServerToolType]
+public class ToolRight
+{
+    [McpServerTool, Description("Upload documents to a cluster.")]
+    public Task UploadDocuments([Description("The name of the cluster")] string clusterName, 
+        [Description("The folder containing the documents")] string folderWithDocument)
+    {
+        return Task.CompletedTask;
+    }
+}
+
+
+[McpServerToolType]
+public class ToolLeft
+{
+    [McpServerTool, Description("Classify a document.")]
+    public Task ClassifyDocument([Description("The full path of the document")] string documentFullPathName)
+    {
+        return Task.CompletedTask;
+    }
+
+}

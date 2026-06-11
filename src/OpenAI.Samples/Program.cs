@@ -248,7 +248,7 @@ namespace OpenAI.Samples
         public static async Task CreateEmbeddingsAsync()
         {
             // Initialize the embedding client with the large embedding model
-            EmbeddingClient client = new("text-embedding-3-large",//*text-embedding-3-small"
+            EmbeddingClient client = new("text-embedding-3-small",//*text-embedding-3-small"
                 Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
           
             while (true)

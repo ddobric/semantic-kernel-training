@@ -23,7 +23,7 @@ namespace HostedAgentsWithAzureFoundryModels
         public static async Task RunAsync()
         {
             Helpers.GetAzureEndpointAndModelDeployment(out var endpoint, out var deploymentName);
-
+           
             // Build the agent: AzureOpenAIClient → ChatClient → AIAgent
             AIAgent agent = new AzureOpenAIClient(
                 new Uri(endpoint),
@@ -95,8 +95,9 @@ namespace HostedAgentsWithAzureFoundryModels
                 .AsAIAgent(instructions: "You are the agent that shares information.", name: nameof(HelloAgent),
                     tools: [AIFunctionFactory.Create(GetProcessInfo),
                         AIFunctionFactory.Create(KillProcess),
-                        AIFunctionFactory.Create(GetVehicleLocation),  AIFunctionFactory.Create(SendDrone),
-                     AIFunctionFactory.Create(GetTimeTime)]
+                        AIFunctionFactory.Create(GetVehicleLocation),  
+                        AIFunctionFactory.Create(SendDrone),
+                        AIFunctionFactory.Create(GetDateTime)]
                     );
 
             // Start an interactive conversation loop with streaming output.
@@ -128,7 +129,7 @@ namespace HostedAgentsWithAzureFoundryModels
         /// The [Description] attributes provide the agent with metadata to decide when and how to call it.
         /// </summary>
         [Description("Shows the information about the date and time.")]
-        protected static string GetTimeTime()
+        protected static string GetDateTime()
         {
             return DateTime.Now.ToString();
         }

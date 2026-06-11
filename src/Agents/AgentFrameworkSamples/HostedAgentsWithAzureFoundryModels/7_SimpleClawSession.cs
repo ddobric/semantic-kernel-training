@@ -36,6 +36,8 @@ namespace AgentFramework_Samples.GettingStarted
     /// </summary>
     public class SimpleClawSession
     {
+        private static bool _unattendedMode = false;
+
         public static async Task RunAsync()
         {
             Helpers.GetAzureEndpointAndModelDeployment(out var endpoint, out var deploymentName);
@@ -50,8 +52,31 @@ namespace AgentFramework_Samples.GettingStarted
 
             var playwrightTools = await playwrightMcpClient.ListToolsAsync();
 
+
+            await using var mcpMsLearningClient = await McpClient.CreateAsync(new HttpClientTransport(new()
+            {
+                Name = "MSLearning",
+                Endpoint = new Uri("https://learn.microsoft.com/api/mcp")
+            }));
+            var msLearnTools = await mcpMsLearningClient.ListToolsAsync();
+
+            //// Connect to the Playwright MCP server via stdio transport.
+            //await using var linkedInClient = await McpClient.CreateAsync(new StdioClientTransport(new()
+            //{
+            //    Name = "linkedin",
+            //    Command = "docker",
+            //    Arguments = [
+            //                    "run", "--rm", "-i",
+            //                    "-v", "~/.linkedin-mcp:/home/pwuser/.linkedin-mcp",
+            //                    "stickerdaniel/linkedin-mcp-server:latest"
+            //            ],
+            //}));
+
+            var linkedInTools = await playwrightMcpClient.ListToolsAsync();
+            Console.OutputEncoding = Encoding.Unicode;
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine($"Playwright MCP: {playwrightTools.Count} tool(s) available");
+            Console.WriteLine($"MS Learn MCP: {msLearnTools.Count} tool(s) available");
             Console.ResetColor();
 
             // Create a shared ChatClient for all three agents.
@@ -60,10 +85,14 @@ namespace AgentFramework_Samples.GettingStarted
                 new DefaultAzureCredential())
                 .GetChatClient(deploymentName);
 
-            // Tools available to the Task Agent (CLI execution + Playwright + any other tools).
+            // Tools available to the Task Agent (CLI execution + Playwright + MS Learn tools + any other tools).
             AITool[] taskTools = [
                 AIFunctionFactory.Create(ExecuteCliCommandAsync),
-                .. playwrightTools.Cast<AITool>()
+                .. playwrightTools.Cast<AITool>(),
+                .. msLearnTools.Cast<AITool>(),
+                AIFunctionFactory.Create(RememberKeyAsync),
+                AIFunctionFactory.Create(PrintRememberKeyValues)
+                //,.. linkedInTools.Cast<AITool>()
             ];
 
             // Agent 3: Task Agent — executes individual tasks.
@@ -74,8 +103,9 @@ namespace AgentFramework_Samples.GettingStarted
                     along with context from previous steps. Execute the task using the available tools:
                     - Use ExecuteCliCommandAsync for CLI/PowerShell commands.
                     - Use Playwright tools for browser automation tasks.
+                    - Use MS Learn tools for accessing Microsoft documentation and learning resources.
                     - For reasoning or analysis tasks, perform them directly.
-                    
+
                     Always return a clear, concise result describing what was done and the output.
                     If execution fails, explain the error and suggest alternatives.
                     """,
@@ -134,29 +164,79 @@ namespace AgentFramework_Samples.GettingStarted
             await Helpers.RunConversationLoopAsync(intentAgent);
         }
 
+        private static Dictionary<string, string> _memoryStore = new();
+
+        /// <summary>
+        /// Tool function for the Task Agent to execute a CLI command.
+        /// Prompts the user for approval before execution (interceptor pattern).
+        /// </summary>
+        [Description("Remembers information as a key-value pair for later use.")]
+        private static async Task<string> RememberKeyAsync(
+            [Description("The key to remember the information under.")] string key,
+            [Description("The information to remember.")] string value)
+        {
+            if (_memoryStore.ContainsKey(key))
+            {
+                _memoryStore[key] = value;
+            }
+            else
+            {
+                _memoryStore.Add(key, value);
+            }
+
+            return $"Remembered information under key '{key}'.";
+        }
+
+
+        [Description("Prints all remembered key-value pairs.")]
+        private static async void PrintRememberKeyValues()
+        {
+            foreach (var kvp in _memoryStore)
+            {
+                Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
+            }
+        }
+
+
         /// <summary>
         /// Tool function for the Task Agent to execute a CLI command.
         /// Prompts the user for approval before execution (interceptor pattern).
         /// </summary>
         [Description("Execute a CLI or PowerShell command. Use 'cmd' with '/c <command>' or 'pwsh' with '-NoProfile -Command <cmd>'.")]
         static async Task<string> ExecuteCliCommandAsync(
-            [Description("The executable to run (e.g. 'cmd', 'pwsh', 'git', 'dotnet').")] string executable,
-            [Description("The arguments to pass to the executable.")] string arguments)
+             [Description("The executable to run (e.g. 'cmd', 'pwsh', 'git', 'dotnet').")] string executable,
+             [Description("The arguments to pass to the executable.")] string arguments)
         {
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine($"│   CLI: {executable} {arguments}");
             Console.ResetColor();
 
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.Write("│   Execute? [Y]es / [S]kip / [A]bort > ");
-            Console.ResetColor();
+            if (_unattendedMode)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("│   [Unattended Mode: Auto-executing]");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.Write("│   Execute? [Y]es / [S]kip / [A]bort / [U]nattended > ");
+                Console.ResetColor();
 
-            string? input = Console.ReadLine()?.Trim().ToUpperInvariant();
+                string? input = Console.ReadLine()?.Trim().ToUpperInvariant();
 
-            if (input == "A")
-                return "ABORTED: The user chose to abort.";
-            if (input == "S")
-                return "SKIPPED: Command was skipped by the user.";
+                if (input == "U")
+                {
+                    _unattendedMode = true;
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("│   [Unattended mode enabled - all remaining tasks will auto-execute]");
+                    Console.ResetColor();
+                }
+                else if (input == "A")
+                    return "ABORTED: The user chose to abort.";
+                else if (input == "S")
+                    return "SKIPPED: Command was skipped by the user.";
+            }
 
             try
             {
@@ -320,6 +400,8 @@ namespace AgentFramework_Samples.GettingStarted
     /// </summary>
     internal sealed class PlanOrchestrator(AIAgent taskAgent)
     {
+        private static bool _unattendedMode = false;
+
         [Description("""
             Execute all steps in the plan sequentially. Each step is executed by a Task Agent
             that receives step-specific instructions and context from prior steps.
@@ -344,29 +426,44 @@ namespace AgentFramework_Samples.GettingStarted
                 Console.WriteLine($"│   Type: {step.Type ?? "general"}");
                 Console.ResetColor();
 
-                // Interceptor: prompt user for approval.
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.Write("│   Execute? [Y]es / [S]kip / [A]bort > ");
-                Console.ResetColor();
-
-                string? input = Console.ReadLine()?.Trim().ToUpperInvariant();
-
-                if (input == "A")
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("└── Aborted by user.");
-                    Console.ResetColor();
-                    allResults.AppendLine($"--- Step {i + 1}: ABORTED ---");
-                    break;
-                }
-
-                if (input == "S")
+                // Interceptor: prompt user for approval or auto-execute in unattended mode.
+                if (_unattendedMode)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine("└── Skipped.");
+                    Console.WriteLine("│   [Unattended Mode: Auto-executing]");
                     Console.ResetColor();
-                    allResults.AppendLine($"--- Step {i + 1}: SKIPPED ---");
-                    continue;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.Write("│   Execute? [Y]es / [S]kip / [A]bort / [U]nattended > ");
+                    Console.ResetColor();
+
+                    string? input = Console.ReadLine()?.Trim().ToUpperInvariant();
+
+                    if (input == "U")
+                    {
+                        _unattendedMode = true;
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine("│   [Unattended mode enabled - all remaining steps will auto-execute]");
+                        Console.ResetColor();
+                    }
+                    else if (input == "A")
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("└── Aborted by user.");
+                        Console.ResetColor();
+                        allResults.AppendLine($"--- Step {i + 1}: ABORTED ---");
+                        break;
+                    }
+                    else if (input == "S")
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("└── Skipped.");
+                        Console.ResetColor();
+                        allResults.AppendLine($"--- Step {i + 1}: SKIPPED ---");
+                        continue;
+                    }
                 }
 
                 Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -486,6 +583,7 @@ namespace AgentFramework_Samples.GettingStarted
         private readonly string _description;
         private readonly int _stepNumber;
         private readonly int _totalSteps;
+        private static bool _unattendedMode = false;
 
         public CommandExecutor(string id, string executable, string arguments, string description, int stepNumber, int totalSteps)
             : base(id)
@@ -512,28 +610,43 @@ namespace AgentFramework_Samples.GettingStarted
             }
             Console.ResetColor();
 
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.Write("│   Execute? [Y]es / [S]kip / [A]bort > ");
-            Console.ResetColor();
-
-            string? input = Console.ReadLine()?.Trim().ToUpperInvariant();
-
-            if (input == "A")
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("└── Aborted by user.");
-                Console.ResetColor();
-                return "ABORTED: The user chose to abort.";
-            }
-
-            if (input == "S")
+            if (_unattendedMode)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("└── Skipped.");
+                Console.WriteLine("│   [Unattended Mode: Auto-executing]");
                 Console.ResetColor();
-                string skipResult = $"SKIPPED: Step {_stepNumber} was skipped.";
-                await context.AddEventAsync(new CommandCompletedEvent(skipResult, _stepNumber, _totalSteps, _description), cancellationToken);
-                return skipResult;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.Write("│   Execute? [Y]es / [S]kip / [A]bort / [U]nattended > ");
+                Console.ResetColor();
+
+                string? input = Console.ReadLine()?.Trim().ToUpperInvariant();
+
+                if (input == "U")
+                {
+                    _unattendedMode = true;
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("│   [Unattended mode enabled - all remaining steps will auto-execute]");
+                    Console.ResetColor();
+                }
+                else if (input == "A")
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("└── Aborted by user.");
+                    Console.ResetColor();
+                    return "ABORTED: The user chose to abort.";
+                }
+                else if (input == "S")
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("└── Skipped.");
+                    Console.ResetColor();
+                    string skipResult = $"SKIPPED: Step {_stepNumber} was skipped.";
+                    await context.AddEventAsync(new CommandCompletedEvent(skipResult, _stepNumber, _totalSteps, _description), cancellationToken);
+                    return skipResult;
+                }
             }
 
             Console.ForegroundColor = ConsoleColor.DarkGray;

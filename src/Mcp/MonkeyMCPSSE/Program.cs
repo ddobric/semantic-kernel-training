@@ -36,7 +36,9 @@ builder.Services
      })
     // Register tool classes. Each public method with [McpServerTool] becomes an invocable tool.
     .WithTools<MonkeyTools>()
-    .WithTools<EchoTool>();
+    .WithTools<EchoTool>()
+    .WithTools<ToolLeft>()
+    .WithTools<ToolRight>();
 
 // Reference: https://github.com/microsoft/mcp-for-beginners/blob/main/03-GettingStarted/06-http-streaming/solution/dotnet/Program.cs
 
