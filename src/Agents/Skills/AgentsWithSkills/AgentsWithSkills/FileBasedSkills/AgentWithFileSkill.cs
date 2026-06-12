@@ -1,6 +1,7 @@
 ﻿using Azure.AI.OpenAI;
 using Azure.Identity;
 using Microsoft.Agents.AI;
+using Microsoft.Extensions.Logging;
 using OpenAI.Responses;
 
 #pragma warning disable OPENAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
@@ -24,20 +25,36 @@ namespace AgentsWithSkills.FileBasedSkills
             string endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException("AZURE_OPENAI_ENDPOINT is not set.");
             string deploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME") ?? "gpt-5.4-mini";
 
-            //var fileOptions = new AgentFileSkillsSourceOptions
-            //{
-            //    AllowedResourceExtensions = [".md", ".txt"],
-            //    ResourceDirectories = ["docs", "templates"],
-            //};
+            var fileOptions = new AgentFileSkillsSourceOptions
+            {
+                AllowedResourceExtensions = [".md", ".txt", ".py", ".jpg", ".json"],
+            };
+
+            var opts = new AgentSkillsProviderOptions()
+            {
+                 
+            };
 
             //var skillsProvider2 = new AgentSkillsProvider(
             //    Path.Combine(AppContext.BaseDirectory, "FileBasedSkills\\Skills"),
             //    fileOptions: fileOptions);
 
+            // --- Logger Factory Setup ---
+            using ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Trace);
+            });
+
             // --- Skills Provider ---
             // Discovers skills from the 'skills' directory containing SKILL.md files.
             // The script runner runs file-based scripts (e.g. Python) as local subprocesses.
-            var skillsProvider = new AgentSkillsProvider(Path.Combine(AppContext.BaseDirectory, "FileBasedSkills\\Skills"), SubprocessScriptRunner.RunAsync);
+            var skillsProvider = new AgentSkillsProvider(
+                Path.Combine(AppContext.BaseDirectory, "FileBasedSkills\\Skills"),  
+                SubprocessScriptRunner.RunAsync,
+                loggerFactory: loggerFactory,
+                options: opts,
+                fileOptions: fileOptions);
 
             // Discover skills from the 'skills' directory
             //var skillsProvider = new AgentSkillsProvider(
@@ -62,7 +79,13 @@ namespace AgentsWithSkills.FileBasedSkills
 
             AgentResponse response = await agent.RunAsync("How many kilometers is a marathon (26.2 miles)? And how many pounds is 75 kilograms? Use unit-converter skill.");
 
-            response = await agent.RunAsync("List loaded skills.");
+            Console.WriteLine($"Agent: {response.Text}");
+
+            response = await agent.RunAsync("List available skills.");
+
+            Console.WriteLine($"Agent: {response.Text}");
+
+            response = await agent.RunAsync("Create a scientific paper from c:\\temp\\brk245_summary.docx. Author Damir DObric. Title: hopla homplara");
 
             Console.WriteLine($"Agent: {response.Text}");
         }

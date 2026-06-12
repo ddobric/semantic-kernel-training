@@ -1,5 +1,5 @@
 ---
-name: daenet-scientific-pdf
+name: daenet-scientific
 description: >
   Creates a professional daenet TechTalk-branded two-column scientific article PDF
   from a Word document (.docx) and a cover image. Use this skill whenever the user
@@ -46,7 +46,7 @@ To find the skill's own directory (so you can reference `assets/techtalk-cover.j
 locate the SKILL.md file:
 
 ```bash
-find /sessions -name "SKILL.md" -path "*daenet-scientific-pdf*" 2>/dev/null | head -1
+find /sessions -name "SKILL.md" -path "*daenet-scientific*" 2>/dev/null | head -1
 ```
 
 The cover image is at `<skill-dir>/assets/techtalk-cover.jpg`.

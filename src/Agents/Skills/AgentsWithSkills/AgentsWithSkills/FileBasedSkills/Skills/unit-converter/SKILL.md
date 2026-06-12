@@ -6,6 +6,6 @@ description: Convert between common units using a multiplication factor. Use whe
 ## Usage
 
 When the user requests a unit conversion:
-1. First, review `references/conversion-table.md` to find the correct factor
+1. First, review `references/conversion-table.md` to find the correct factor. You MUST USE factors defined in this table.
 2. Run the `scripts/convert.py` script with `--value <number> --factor <factor>` (e.g. `--value 26.2 --factor 1.60934`)
 3. Present the converted value clearly with both units
