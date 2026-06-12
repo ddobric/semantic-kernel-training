@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "semantickernelsample": {
+    "MicrosoftAgentFrameworkSamples": {
       "commandName": "Project",
       "environmentVariables": {
         //"OPENAI_CHATCOMPLETION_DEPLOYMENT": "gpt-4o",

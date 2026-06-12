@@ -109,7 +109,7 @@ namespace HostedAgentsWithAzureFoundryModels
         /// The [Description] attributes provide the agent with metadata to decide when and how to call it.
         /// </summary>
         [Description("Get the information about running processes.")]
-        static string GetProcessInfo([Description("The location to get the weather for.")] string location)
+        static string GetProcessInfo()
         {
             StringBuilder sb = new StringBuilder();
 

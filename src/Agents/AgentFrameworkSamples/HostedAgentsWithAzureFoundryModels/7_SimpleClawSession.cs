@@ -19,10 +19,10 @@ namespace AgentFramework_Samples.GettingStarted
     User Prompt
      │
      ▼
-┌─────────────┐  PlanStep[]   ┌─────────────┐  per step     ┌─────────────┐
+┌─────────────┐  PlanStep[]   ┌─────────────-┐  per step    ┌─────────────┐
 │ Intent Agent│──────────────▶│  Plan Agent  │─────────────▶│  Task Agent │
 │ (decompose) │               │ (orchestrate)│◀─────────────│  (execute)  │
-└─────────────┘               └─────────────┘   result +    └─────────────┘
+└─────────────┘               └─────────────-┘   result +   └─────────────┘
                                                  context     has: CLI tool
                                                              has: Playwright
      *
@@ -72,7 +72,7 @@ namespace AgentFramework_Samples.GettingStarted
             //            ],
             //}));
 
-            var linkedInTools = await playwrightMcpClient.ListToolsAsync();
+            //var linkedInTools = await playwrightMcpClient.ListToolsAsync();
             Console.OutputEncoding = Encoding.Unicode;
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine($"Playwright MCP: {playwrightTools.Count} tool(s) available");

@@ -1,0 +1,30 @@
+{
+  "skill_name": "daenet-scientific-pdf",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I have a Word document with an article about our new caching library written by Marco Rossi. Please create a daenet TechTalk PDF article from it. The cover image is the daenet TechTalk AI cover I sent earlier. Save it to my project folder. The affiliation is DAENET GmbH, Frankfurt.",
+      "expected_output": "A two-column daenet TechTalk branded PDF with full-bleed cover, header zone, running headers/footers with page numbers, and body text in two columns.",
+      "assertions": [
+        {"name": "pdf-file-created",     "description": "A .pdf file exists in the output directory"},
+        {"name": "two-pages-minimum",    "description": "The PDF has at least 2 pages (cover + content)"},
+        {"name": "title-in-pdf",         "description": "The article title appears in the PDF text"},
+        {"name": "author-in-pdf",        "description": "The author name appears in the PDF"},
+        {"name": "daenet-branding",      "description": "The PDF contains daenet brand text (daenet TechTalk or daenet GmbH)"}
+      ],
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "Convert this attached DOCX into a professional scientific magazine PDF in daenet style. The article is about AI monitoring in production systems. Author: Lena Fischer. Add a contributions section at the end: Lena Fischer, Damir Dobric – prototyped at Frankfurt University of Applied Sciences.",
+      "expected_output": "A formatted daenet-branded two-column PDF with cover, abstract, numbered sections, and a Contributions block at the end.",
+      "assertions": [
+        {"name": "pdf-file-created",        "description": "A .pdf file exists in the output directory"},
+        {"name": "contributions-present",   "description": "The PDF contains a Contributions section"},
+        {"name": "author-in-pdf",           "description": "Lena Fischer appears in the PDF"},
+        {"name": "daenet-branding",         "description": "daenet brand text appears in the PDF"}
+      ],
+      "files": []
+    }
+  ]
+}

@@ -24,15 +24,20 @@ namespace AgentsWithSkills.FileBasedSkills
             string endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException("AZURE_OPENAI_ENDPOINT is not set.");
             string deploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME") ?? "gpt-5.4-mini";
 
-            var fileOptions = new AgentFileSkillsSourceOptions
-            {
-                AllowedResourceExtensions = [".md", ".txt"],
-                ResourceDirectories = ["docs", "templates"],
-            };
+            //var fileOptions = new AgentFileSkillsSourceOptions
+            //{
+            //    AllowedResourceExtensions = [".md", ".txt"],
+            //    ResourceDirectories = ["docs", "templates"],
+            //};
 
-            var skillsProvider = new AgentSkillsProvider(
-                Path.Combine(AppContext.BaseDirectory, "skills"),
-                fileOptions: fileOptions);
+            //var skillsProvider2 = new AgentSkillsProvider(
+            //    Path.Combine(AppContext.BaseDirectory, "FileBasedSkills\\Skills"),
+            //    fileOptions: fileOptions);
+
+            // --- Skills Provider ---
+            // Discovers skills from the 'skills' directory containing SKILL.md files.
+            // The script runner runs file-based scripts (e.g. Python) as local subprocesses.
+            var skillsProvider = new AgentSkillsProvider(Path.Combine(AppContext.BaseDirectory, "FileBasedSkills\\Skills"), SubprocessScriptRunner.RunAsync);
 
             // Discover skills from the 'skills' directory
             //var skillsProvider = new AgentSkillsProvider(
@@ -43,7 +48,7 @@ namespace AgentsWithSkills.FileBasedSkills
                 .GetResponsesClient()
                 .AsAIAgent(new ChatClientAgentOptions
                 {
-                    Name = "UnitConverterAgent",
+                    Name = "SkilledAgent",
                     ChatOptions = new()
                     {
                         Instructions = "You are a helpful assistant that can convert units.",
@@ -53,11 +58,11 @@ namespace AgentsWithSkills.FileBasedSkills
                 model: deploymentName);
 
             // --- Example: Unit conversion ---
-            Console.WriteLine("Converting units with file-based skills");
             Console.WriteLine(new string('-', 60));
 
-            AgentResponse response = await agent.RunAsync(
-                "How many kilometers is a marathon (26.2 miles)? And how many pounds is 75 kilograms?");
+            AgentResponse response = await agent.RunAsync("How many kilometers is a marathon (26.2 miles)? And how many pounds is 75 kilograms? Use unit-converter skill.");
+
+            response = await agent.RunAsync("List loaded skills.");
 
             Console.WriteLine($"Agent: {response.Text}");
         }
