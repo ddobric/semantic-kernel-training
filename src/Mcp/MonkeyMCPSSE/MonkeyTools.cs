@@ -51,4 +51,10 @@ public class ToolLeft
         return Task.CompletedTask;
     }
 
+    [McpServerTool, Description("Send a drone to a location.")]
+    public Task SendDrone([Description("The location to send the drone to.")] string location)
+    {
+        return Task.CompletedTask;
+    }
+
 }

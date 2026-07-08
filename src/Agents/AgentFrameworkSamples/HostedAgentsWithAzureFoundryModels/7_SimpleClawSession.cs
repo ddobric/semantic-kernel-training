@@ -100,15 +100,21 @@ namespace AgentFramework_Samples.GettingStarted
             AIAgent taskAgent = chatClient.AsAIAgent(
                 instructions: """
                     You are a task execution agent running on Windows. You receive a specific task to execute
-                    along with context from previous steps. Execute the task using the available tools:
-                    - Use ExecuteCliCommandAsync for CLI/PowerShell commands.
-                    - Use Playwright tools for browser automation tasks.
-                    - Use MS Learn tools for accessing Microsoft documentation and learning resources.
-                    - For reasoning or analysis tasks, perform them directly.
-
+                    along with context from previous steps. Execute the task using the best of available tools.
                     Always return a clear, concise result describing what was done and the output.
                     If execution fails, explain the error and suggest alternatives.
                     """,
+                 //instructions: """
+                 //   You are a task execution agent running on Windows. You receive a specific task to execute
+                 //   along with context from previous steps. Execute the task using the available tools:
+                 //   - Use ExecuteCliCommandAsync for CLI/PowerShell commands.
+                 //   - Use Playwright tools for browser automation tasks.
+                 //   - Use MS Learn tools for accessing Microsoft documentation and learning resources.
+                 //   - For reasoning or analysis tasks, perform them directly.
+
+                 //   Always return a clear, concise result describing what was done and the output.
+                 //   If execution fails, explain the error and suggest alternatives.
+                 //   """,
                 name: "TaskAgent",
                 tools: taskTools);
 
@@ -117,14 +123,14 @@ namespace AgentFramework_Samples.GettingStarted
             var planOrchestrator = new PlanOrchestrator(taskAgent);
 
             AIAgent planAgent = chatClient.AsAIAgent(
-                instructions: """
+                instructions: $"""
                     You are a plan orchestration agent. You receive a plan (a list of steps) and execute
-                    them sequentially by calling the ExecutePlan tool ONCE with the complete plan.
+                    them sequentially by calling the {nameof(planOrchestrator.ExecutePlanAsync)} tool ONCE with the complete plan.
                     Each step will be executed by a Task Agent that has access to CLI and browser tools.
                     After execution, summarize the results of all steps to the user.
                     
                     For CLI-only plans where all steps are simple CLI commands, you may alternatively
-                    call RunCommandLineAsync to build an Agent Framework Workflow with one Executor per step.
+                    call {nameof(RunCommandLineAsync)} to build an Agent Framework Workflow with one Executor per step.
 
                     When executing CLI execute them via CMD with '/c <command>' or PowerShell with '-NoProfile -Command <cmd>'. You cannot directly call CLI tools like 'git' or 'dotnet' - they must be invoked through cmd or pwsh to ensure proper execution and output capture.
                     """,
@@ -139,12 +145,12 @@ namespace AgentFramework_Samples.GettingStarted
             var intentOrchestrator = new IntentOrchestrator(chatClient, planAgent);
 
             AIAgent intentAgent = chatClient.AsAIAgent(
-                instructions: """
+                instructions: $"""
                     You are an intent analysis agent running on Windows. When the user describes a task:
                     
                     1. Analyze the user's intent carefully.
                     2. Decompose it into a sequential plan of concrete steps.
-                    3. Call the CreateAndExecutePlan tool ONCE with the list of steps.
+                    3. Call the {nameof(intentOrchestrator.CreateAndExecutePlanAsync)} tool ONCE with the list of steps.
                        Each step must have:
                        - 'instructions': detailed instructions for executing this specific step,
                          including the exact command, tool, or action to perform.

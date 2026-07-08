@@ -24,12 +24,12 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
             // First executor: a plain lambda bound as an executor via BindAsExecutor().
             // Converts input text to uppercase.
             Func<string, string> uppercaseFunc = s => s.ToUpperInvariant();
+
             var uppercaseExecutor = uppercaseFunc.BindAsExecutor("UppercaseExecutor");
 
             // Second executor: a custom Executor<TIn, TOut> subclass that reverses text.
             ReverseTextExecutor reverseExecutor = new();
-
-            
+                        
             // Build the workflow graph: Uppercase → Reverse, output comes from Reverse.
             WorkflowBuilder builder = new(uppercaseExecutor);
             builder.AddEdge(uppercaseExecutor, reverseExecutor).WithOutputFrom(reverseExecutor);
@@ -49,6 +49,8 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
                     Console.WriteLine($"{evt.GetType().Name}");
                 }
             }
+
+            Console.ReadLine();
         }
 
         /// <summary>
@@ -105,6 +107,8 @@ namespace AgentFramework_Samples.HostedAgentsWithAzureFoundryModels
                     Console.WriteLine($"{evt.GetType().Name}");
                 }
             }
+
+            Console.ReadLine();
         }
 
         /// <summary>

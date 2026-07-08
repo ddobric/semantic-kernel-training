@@ -22,7 +22,7 @@ namespace OpenAI.Samples
             // Sample 1: Embedding Generation & Cosine Similarity
             // Prompts the user for two texts, generates embeddings using text-embedding-3-large,
             // and calculates the cosine similarity between them.
-            await CreateEmbeddingsAsync();
+            //await CreateEmbeddingsAsync();
 
             // Sample 2: Document Classification via Embeddings
             // Loads documents from the Docs/ folder, embeds them with both large and small models,
@@ -48,12 +48,12 @@ namespace OpenAI.Samples
 
             // Sample 7: Image Generation (DALL-E 3)
             // Generates a high-quality image from a text prompt using DALL-E 3 and saves it to disk.
-            await ImageGenerationAsync();
+            //await ImageGenerationAsync();
 
             // Sample 8: Image Editing (DALL-E 2)
             // Demonstrates the image edit API using DALL-E 2 with a source image and mask.
             // Note: This sample is experimental and may not work without a valid mask image.
-            await SimpleImageEditAsync();
+            //await SimpleImageEditAsync();
 
             // Sample 9: Retrieval-Augmented Generation (RAG) with Assistants API
             // Uploads a sales data file, creates an assistant with file search and code interpreter tools,

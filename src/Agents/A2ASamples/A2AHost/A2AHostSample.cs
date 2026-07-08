@@ -29,9 +29,9 @@ namespace A2AHost
             var builder = WebApplication.CreateBuilder();
 
             // Read required Azure AI configuration from appsettings / environment variables.
-            string endpoint = builder.Configuration["AZURE_AI_PROJECT_ENDPOINT"]
-                ?? throw new InvalidOperationException("AZURE_AI_PROJECT_ENDPOINT is not set.");
-            string model = builder.Configuration["AZURE_AI_MODEL_DEPLOYMENT_NAME"] ?? "gpt-4o-mini";
+            string endpoint = builder.Configuration["AZURE_FOUNDRYPROJECT_ENDPOINT"]
+                ?? throw new InvalidOperationException("AZURE_FOUNDRYPROJECT_ENDPOINT is not set.");
+            string model = builder.Configuration["AZURE_OPENAI_DEPLOYMENT_NAME"] ?? "gpt-4o-mini";
 
             // 1. Create and register the "weather-agent" as a keyed singleton in the DI container.
             //    Keyed services allow multiple AIAgent instances to coexist, each identified by a unique key.

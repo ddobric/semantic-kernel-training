@@ -13,22 +13,22 @@ namespace FoundryAgentDemo
     {
         /// <summary>
         /// Runs all agent samples sequentially:
-        /// 1. <see cref="FoundryResponsesAgentSample"/> — runs an agent locally without creating it in Azure Foundry.
+        /// 1. <see cref="FoundryResponsesAgentWithFileSample"/> — runs an agent locally without creating it in Azure Foundry.
         /// 2. <see cref="FoundryAgentSample.RunCreateAgentInFoundryAsync"/> — creates and runs a single-turn agent in Azure Foundry.
         /// 3. <see cref="FoundryAgentSample.RunCreateMultiturnAgentInFoundryAsync"/> — creates and runs a multi-turn agent with session context in Azure Foundry.
         /// </summary>
         public static async Task Main(string[] args)
         {
-            var agent1 = new FoundryResponsesAgentSample();
+            var agent1 = new FoundryResponsesAgentWithFileSample();
             //await agent1.RunAsync();
 
             await agent1.RunWithFileAsync();
 
-            var agent2 = new FoundryAgentSample();
+            //var agent2 = new FoundryAgentSample();
 
-            await agent2.RunCreateAgentInFoundryAsync();
+            //await agent2.RunCreateAgentInFoundryAsync();
 
-            await agent2.RunCreateMultiturnAgentInFoundryAsync();
+            //await agent2.RunCreateMultiturnAgentInFoundryAsync();
         }
 
 

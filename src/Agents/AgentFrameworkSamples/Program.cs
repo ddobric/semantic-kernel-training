@@ -31,16 +31,19 @@ namespace AzureFoundrySkAgent
             // ═══════════════════════════════════════════════
 
             // Scenario 1: Basic agent construction & invocation
-            //await HelloAgent.RunAsync();
+            await HelloAgent.RunWithKeyAsync();
+
+            // Scenario 1: Basic agent construction & invocation
+            await HelloAgent.RunAsync();
 
             // Scenario 2: Multi-turn conversations with sessions
-             //await HelloAgent.RunMultiturnAsync();
+            //await HelloAgent.RunMultiturnAsync();
 
             // Scenario 3: Agent with function tools
             //await HelloAgent.RunWithToolsAsync();
 
             // Scenario 4: Agent with custom memory (AIContextProvider)
-           // await AgentWithMemory.RunAsync();
+            // await AgentWithMemory.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -81,7 +84,7 @@ namespace AzureFoundrySkAgent
             //await LocalHostedMcpTool.RunAsync();
 
             // Remote MCP server via HTTP (e.g. Microsoft Learn)
-            await HttpHostedMcpTool.RunAsync();
+            //await HttpHostedMcpTool.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -136,8 +139,8 @@ namespace AzureFoundrySkAgent
             //  ADVANCED 
             // ═══════════════════════════════════════════════
 
-            // await SqlAgentSample.RunAsync();
-          
+            //await SqlAgentSample.RunAsync();
+
             // ═══════════════════════════════════════════════
             //  FOUNDRY AGENTS (Azure AI Foundry)
             //  ⚠️ Moved to: src\Agents\FoundryAgent\FoundryAgent.sln
@@ -168,6 +171,11 @@ namespace AzureFoundrySkAgent
             // Persistent (server-side) agents
             //await AgentFrameworkPersistedAgentSamples.RunPersistentAgents();
 
+            // ═══════════════════════════════════════════════
+            //  Azure MCP Server
+            // ═══════════════════════════════════════════════
+
+            //await AzureMcp.RunAsync();
         }
 
         // Following functions are related to SK Agents

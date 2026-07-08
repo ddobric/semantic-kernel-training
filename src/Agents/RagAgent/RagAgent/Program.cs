@@ -8,6 +8,7 @@
         static async Task Main(string[] args)
         {
             // Display a styled startup banner.
+            Console.OutputEncoding = System.Text.Encoding.UTF8; // Ensure UTF-8 encoding for emojis
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("╔══════════════════════════════════════════════╗");
             Console.WriteLine("║           🤖  RAG Agent Sample  🤖          ║");

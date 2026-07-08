@@ -35,14 +35,14 @@ internal class Program
 
         //new RagSample(GetKernel()).SplitTextToChunks();       
 
-        await new RagSample(GetKernel()).RunRAG();
+        //await new RagSample(GetKernel()).RunRAG();
 
         //await new RagSample(GetKernel()).RunExperimentLoopAsync();
 
         //
         // The ultimate scenario
         //
-        await Sample_Lighting();
+        //await Sample_Lighting();
 
         //--------------------
         // NATIVE FUNCTIONS
@@ -1180,7 +1180,7 @@ We offer you our profound cloud knowledge as standardized best-practice service 
                   Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDINGMODELURL")!,    // The endpoint of your Azure OpenAI service
                   Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDINGMODELKEY")!)
             .AddAzureOpenAIChatCompletion(
-                Environment.GetEnvironmentVariable("AZURE_OPENAI_CHATCOMPLETION_DEPLOYMENT")!,  // The name of your deployment (e.g., "text-davinci-003")
+                Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME")!,  // The name of your deployment (e.g., "text-davinci-003")
                 Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")!,    // The endpoint of your Azure OpenAI service
                 Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY")!      // The API key of your Azure OpenAI service
             );

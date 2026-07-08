@@ -11,6 +11,127 @@ namespace MonkeyMCP
     [McpServerToolType]
     internal class AgendaTool
     {
+        [McpServerTool, Description("Show the agenda for the DWX Masterclass.")]
+        public string ShowDwxMasterclassAgenda()
+        {
+            const int W = 80;
+            string top = "┌" + new string('─', W - 2) + "┐";
+            string bot = "└" + new string('─', W - 2) + "┘";
+            string mid = "├" + new string('─', W - 2) + "┤";
+
+            string C(string t)   // centre
+            {
+                int pad = Math.Max(0, W - 2 - t.Length);
+                return $"│{new string(' ', pad / 2)}{t}{new string(' ', pad - pad / 2)}│";
+            }
+            string L(string t)   // left-align
+            {
+                if (t.Length > W - 2) t = t[..(W - 2)];
+                return $"│{t.PadRight(W - 2)}│";
+            }
+            IEnumerable<string> Wrap(string text, int max)
+            {
+                var line = new StringBuilder();
+                foreach (var word in text.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (line.Length == 0) line.Append(word);
+                    else if (line.Length + 1 + word.Length <= max) line.Append(' ').Append(word);
+                    else { yield return line.ToString(); line.Clear().Append(word); }
+                }
+                if (line.Length > 0) yield return line.ToString();
+            }
+
+            // ── Agenda data ──────────────────────────────────────────────────────────
+
+            var sessions = new[]
+            {
+        (Time: "10:45 – 11:15", Title: "FOUNDATIONS", Topics: new[]
+        {
+            ("Tokens",
+             "What are tokens? Byte-Pair Encoding, token pricing, " +
+             "counting tokens and the Tokenizer, working with tokens in C#"),
+
+            ("Embeddings",
+             "Embedding vectors explained, embedding models, cosine similarity, " +
+             "semantic similarity in C#, use-cases: search, classification, " +
+             "clustering, recommendations"),
+
+            ("Vector Databases",
+             "Popular vector databases overview (Qdrant, Weaviate, Redis, Azure AI Search, …), " +
+             "SQL Server 2026 native vector search, T-SQL VECTOR type, " +
+             "INSERT & VECTOR_DISTANCE queries in C#"),
+        }),
+
+        (Time: "13:00 – 14:00", Title: "COMPLETIONS & RAG", Topics: new[]
+        {
+            ("Completions",
+             "How LLMs complete text, Transformers under the hood, " +
+             "ChatCompletions API with the OpenAI NuGet package in C#, " +
+             "exploring token probabilities"),
+
+            ("Retrieval Augmented Generation (RAG)",
+             "What is RAG and why it matters (arxiv 2005.11401), building a RAG pipeline: " +
+             "chunking → embeddings → in-memory vector DB → similarity search, " +
+             "the embedding-similarity vs. true-relevance problem, " +
+             "reranking: second-pass scoring for higher precision results"),
+        }),
+
+        (Time: "15:45 – 16:15", Title: "AGENTS & MCP", Topics: new[]
+        {
+            ("Microsoft Agent Framework (MAF)",
+             "Single Agent & service connectors (Azure OpenAI, Anthropic, Gemini, Ollama, …), " +
+             "middleware hooks (safety filters, logging, custom policies), " +
+             "agent memory & context providers (Mem0, Redis, Neo4j, vector retrieval), " +
+             "graph-based agent workflows with checkpointing, " +
+             "multi-agent orchestration: sequential, concurrent, handoff, group chat, Magentic-One, " +
+             "declarative agents & workflows via YAML, function calling & tool/plugin integration, " +
+             "A2A (Agent-to-Agent) protocol & MCP tool discovery, " +
+             "migration assistants from Semantic Kernel & AutoGen"),
+
+            ("MCP – Model Context Protocol",
+             "Created by Anthropic, adopted across the AI ecosystem, " +
+             "how MCP works under the hood: server discovery, tool invocation, structured messaging"),
+        }),
+    };
+
+            // ── Render ───────────────────────────────────────────────────────────────
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine(top);
+            sb.AppendLine(C("DWX 2026  ·  MASTER CLASS"));
+            sb.AppendLine(C("Architecting and Development of Custom Agents"));
+            sb.AppendLine(C(""));
+            sb.AppendLine(C("Dr. Damir Dobric"));
+            sb.AppendLine(C("Lead Software Architect · daenet GmbH / ACP Digital"));
+            sb.AppendLine(C("Microsoft Regional Director  ·  MVP: AI"));
+            sb.AppendLine(mid);
+            sb.AppendLine(C("GitHub: https://github.com/ddobric/semantic-kernel-training"));
+            sb.AppendLine(bot);
+            sb.AppendLine();
+
+            foreach (var (time, title, topics) in sessions)
+            {
+                sb.AppendLine(top);
+                sb.AppendLine(L($"  {time}   {title}"));
+                sb.AppendLine(mid);
+
+                foreach (var (name, desc) in topics)
+                {
+                    sb.AppendLine(L($"  ▶  {name}"));
+                    foreach (var line in Wrap(desc, W - 8))
+                        sb.AppendLine(L($"       {line}"));
+                    sb.AppendLine(L(""));
+                }
+
+                sb.AppendLine(bot);
+                sb.AppendLine();
+            }
+
+            return sb.ToString();
+        }
+
+
         [McpServerTool, Description("Show the agenda for the tutorial.")]
         public string ShowTutorialAgenda()
         {

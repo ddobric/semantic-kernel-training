@@ -85,7 +85,7 @@ namespace AgentsWithSkills.FileBasedSkills
 
             Console.WriteLine($"Agent: {response.Text}");
 
-            response = await agent.RunAsync("Create a scientific paper from c:\\temp\\brk245_summary.docx. Author Damir DObric. Title: hopla homplara");
+            response = await agent.RunAsync("Create a scientific paper from c:\\temp\\brk245_summary.docx. Author/Affiliation Damir Dobric. Title: Crazzy SKill Test. Use default cover: yes. Output path: crazzyskilltest.pdf. If you cannot create it provide exact instructions how to create environment.");
 
             Console.WriteLine($"Agent: {response.Text}");
         }

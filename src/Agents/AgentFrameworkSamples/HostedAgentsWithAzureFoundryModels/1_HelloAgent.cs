@@ -15,6 +15,29 @@ namespace HostedAgentsWithAzureFoundryModels
     /// </summary>
     public class HelloAgent
     {
+        public static async Task RunWithKeyAsync()
+        {
+            Helpers.GetAzureEndpointAndModelDeployment(out var endpoint, out var deploymentName);
+
+            // Build the agent: AzureOpenAIClient → ChatClient → AIAgent
+            AIAgent agent = new AzureOpenAIClient(
+                new Uri("https://**.services.ai.azure.com/"),
+                new Azure.AzureKeyCredential("***"!))
+                .GetChatClient("gpt-5.4")
+                .AsAIAgent(instructions: "You are good at telling jokes.", name: nameof(HelloAgent));
+
+            // Non-streaming invocation — returns the full response at once.
+            AgentResponse agentResp = await agent.RunAsync("Tell me a joke about Germany.");
+            Console.WriteLine(agentResp);
+
+            // Streaming invocation — yields incremental updates as they arrive.
+            await foreach (AgentResponseUpdate update in agent.RunStreamingAsync("Tell me a joke about Germany."))
+            {
+                Console.WriteLine(update);
+            }
+        }
+
+
         /// <summary>
         /// Scenario 1: Agent Construction and Basic Usage.
         /// Creates an AIAgent from an AzureOpenAI ChatClient, then invokes it
@@ -32,11 +55,11 @@ namespace HostedAgentsWithAzureFoundryModels
                 .AsAIAgent(instructions: "You are good at telling jokes.", name: nameof(HelloAgent));
         
             // Non-streaming invocation — returns the full response at once.
-            AgentResponse agentResp = await agent.RunAsync("Tell me a joke about a pirate.");
+            AgentResponse agentResp = await agent.RunAsync("Tell me a joke about Germany.");
             Console.WriteLine(agentResp);
 
             // Streaming invocation — yields incremental updates as they arrive.
-            await foreach (AgentResponseUpdate update in agent.RunStreamingAsync("Tell me a joke about a pirate."))
+            await foreach (AgentResponseUpdate update in agent.RunStreamingAsync("Tell me a joke about Germany."))
             {
                 Console.WriteLine(update);
             }
@@ -140,9 +163,17 @@ namespace HostedAgentsWithAzureFoundryModels
         /// The [Description] attributes provide the agent with metadata to decide when and how to call it.
         /// </summary>
         [Description("Sends the drone to the location.")]
-        protected static string SendDrone([Description("The name of the city on the planet earth.")] string location)
+        protected static string SendDrone([Description("The name of the city on the planet earth.")] string location,
+            [Description("The PIN code for the location.")] string? pin = null)
         {
-            return "I'm done";
+            if(pin == "1234")
+            {
+                return $"Drone has been sent to {location}";
+            }
+            else
+            {
+                return $"Please enter the PIN code.";
+            }
         }
 
 

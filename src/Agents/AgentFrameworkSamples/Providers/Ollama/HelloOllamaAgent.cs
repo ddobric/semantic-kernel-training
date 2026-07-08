@@ -23,7 +23,7 @@ namespace AgentFramework_Samples.Providers.Ollama
         /// </summary>
         public static async Task RunAsync()
         {
-            var endpoint = Environment.GetEnvironmentVariable("OLLAMA_ENDPOINT") ?? "127.0.0.1:11434";
+            var endpoint = Environment.GetEnvironmentVariable("OLLAMA_ENDPOINT") ?? "http://127.0.0.1:11437";
             var modelName = Environment.GetEnvironmentVariable("OLLAMA_MODEL_NAME") ?? "gpt-oss:latest";
 
             // OllamaApiClient implements IChatClient, so it can be wrapped as an AIAgent directly.
