@@ -14,7 +14,7 @@ namespace AgentFramework_Samples.Providers.Anthropic
         /// dotnet add package Azure.Identity
         /// </summary>
         /// <returns></returns>
-        public static async Task RunAsync()
+        public static async Task RunHostedAtAnthropicAsync()
         {
             var apiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
             var deploymentName = Environment.GetEnvironmentVariable("ANTHROPIC_DEPLOYMENT_NAME") ?? "claude-haiku-4-5";

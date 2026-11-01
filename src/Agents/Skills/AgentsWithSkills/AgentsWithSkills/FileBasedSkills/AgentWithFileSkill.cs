@@ -35,10 +35,6 @@ namespace AgentsWithSkills.FileBasedSkills
                  
             };
 
-            //var skillsProvider2 = new AgentSkillsProvider(
-            //    Path.Combine(AppContext.BaseDirectory, "FileBasedSkills\\Skills"),
-            //    fileOptions: fileOptions);
-
             // --- Logger Factory Setup ---
             using ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
             {
@@ -56,10 +52,6 @@ namespace AgentsWithSkills.FileBasedSkills
                 options: opts,
                 fileOptions: fileOptions);
 
-            // Discover skills from the 'skills' directory
-            //var skillsProvider = new AgentSkillsProvider(
-            //    Path.Combine(AppContext.BaseDirectory, "Skills"));
-
             // --- Agent Setup ---
             AIAgent agent = new AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential())
                 .GetResponsesClient()
@@ -68,7 +60,7 @@ namespace AgentsWithSkills.FileBasedSkills
                     Name = "SkilledAgent",
                     ChatOptions = new()
                     {
-                        Instructions = "You are a helpful assistant that can convert units.",
+                        Instructions = "You are a helpful assistant that supports various skills.",
                     },
                     AIContextProviders = [skillsProvider],
                 },
@@ -77,15 +69,15 @@ namespace AgentsWithSkills.FileBasedSkills
             // --- Example: Unit conversion ---
             Console.WriteLine(new string('-', 60));
 
-            AgentResponse response = await agent.RunAsync("How many kilometers is a marathon (26.2 miles)? And how many pounds is 75 kilograms? Use unit-converter skill.");
+            AgentResponse response = await agent.RunAsync("List available skills.");
+
+            response = await agent.RunAsync("How many kilometers is a marathon 10 miles? And how many pounds is 75 kilograms? Use unit-converter skill.");
 
             Console.WriteLine($"Agent: {response.Text}");
 
-            response = await agent.RunAsync("List available skills.");
-
-            Console.WriteLine($"Agent: {response.Text}");
-
+            #region Test
             response = await agent.RunAsync("Create a scientific paper from c:\\temp\\brk245_summary.docx. Author/Affiliation Damir Dobric. Title: Crazzy SKill Test. Use default cover: yes. Output path: crazzyskilltest.pdf. If you cannot create it provide exact instructions how to create environment.");
+            #endregion
 
             Console.WriteLine($"Agent: {response.Text}");
         }

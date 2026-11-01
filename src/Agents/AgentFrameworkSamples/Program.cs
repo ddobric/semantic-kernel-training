@@ -31,13 +31,13 @@ namespace AzureFoundrySkAgent
             // ═══════════════════════════════════════════════
 
             // Scenario 1: Basic agent construction & invocation
-            await HelloAgent.RunWithKeyAsync();
+            //await HelloAgent.RunWithKeyAsync();
 
             // Scenario 1: Basic agent construction & invocation
-            await HelloAgent.RunAsync();
+            //await HelloAgent.RunAsync();
 
             // Scenario 2: Multi-turn conversations with sessions
-            //await HelloAgent.RunMultiturnAsync();
+           // await HelloAgent.RunMultiturnAsync();
 
             // Scenario 3: Agent with function tools
             //await HelloAgent.RunWithToolsAsync();
@@ -68,7 +68,7 @@ namespace AzureFoundrySkAgent
             // ═══════════════════════════════════════════════
 
             // Three-agent architecture: Intent → Plan → Task execution
-            await SimpleClawSession.RunAsync();
+            //await SimpleClawSession.RunAsync();
 
             // ═══════════════════════════════════════════════
             //  Lighting Plugin
@@ -84,7 +84,7 @@ namespace AzureFoundrySkAgent
             //await LocalHostedMcpTool.RunAsync();
 
             // Remote MCP server via HTTP (e.g. Microsoft Learn)
-            //await HttpHostedMcpTool.RunAsync();
+            // await HttpHostedMcpTool.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -115,7 +115,7 @@ namespace AzureFoundrySkAgent
             //  PROVIDERS — Anthropic
             // ═══════════════════════════════════════════════
 
-            //await HelloAnthropicAgent.RunAsync();
+            await HelloAnthropicAgent.RunHostedAtAnthropicAsync();
 
 
             // ═══════════════════════════════════════════════

@@ -17,21 +17,19 @@ namespace HostedAgentsWithAzureFoundryModels
     {
         public static async Task RunWithKeyAsync()
         {
-            Helpers.GetAzureEndpointAndModelDeployment(out var endpoint, out var deploymentName);
-
             // Build the agent: AzureOpenAIClient → ChatClient → AIAgent
             AIAgent agent = new AzureOpenAIClient(
-                new Uri("https://**.services.ai.azure.com/"),
-                new Azure.AzureKeyCredential("***"!))
+                new Uri(Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDINGMODELURL")!),
+                new Azure.AzureKeyCredential(Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDINGMODELKEY")!))
                 .GetChatClient("gpt-5.4")
-                .AsAIAgent(instructions: "You are good at telling jokes.", name: nameof(HelloAgent));
+                .AsAIAgent(instructions: "You help to find information about microsoft events.", name: nameof(HelloAgent));
 
             // Non-streaming invocation — returns the full response at once.
-            AgentResponse agentResp = await agent.RunAsync("Tell me a joke about Germany.");
+            AgentResponse agentResp = await agent.RunAsync("Tell me something about AI Tour in Cologne.");
             Console.WriteLine(agentResp);
 
             // Streaming invocation — yields incremental updates as they arrive.
-            await foreach (AgentResponseUpdate update in agent.RunStreamingAsync("Tell me a joke about Germany."))
+            await foreach (AgentResponseUpdate update in agent.RunStreamingAsync("Tell me something about AI Tour in Cologne.."))
             {
                 Console.WriteLine(update);
             }
