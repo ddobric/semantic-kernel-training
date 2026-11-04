@@ -42,9 +42,9 @@ namespace AgentsWithSkills.FileBasedSkills
                 builder.SetMinimumLevel(LogLevel.Trace);
             });
 
-            // --- Skills Provider ---
-            // Discovers skills from the 'skills' directory containing SKILL.md files.
-            // The script runner runs file-based scripts (e.g. Python) as local subprocesses.
+            //
+            // Discovers skills from the 'Skills' directory containing SKILL.md files.
+            // The SubprocessScriptRunner.RunAsync runs file-based scripts (e.g. Python) as local subprocesses.
             var skillsProvider = new AgentSkillsProvider(
                 Path.Combine(AppContext.BaseDirectory, "FileBasedSkills\\Skills"),  
                 SubprocessScriptRunner.RunAsync,
@@ -52,7 +52,6 @@ namespace AgentsWithSkills.FileBasedSkills
                 options: opts,
                 fileOptions: fileOptions);
 
-            // --- Agent Setup ---
             AIAgent agent = new AzureOpenAIClient(new Uri(endpoint), new DefaultAzureCredential())
                 .GetResponsesClient()
                 .AsAIAgent(new ChatClientAgentOptions
@@ -70,8 +69,12 @@ namespace AgentsWithSkills.FileBasedSkills
             Console.WriteLine(new string('-', 60));
 
             AgentResponse response = await agent.RunAsync("List available skills.");
+            Console.WriteLine(response.Text);
 
-            response = await agent.RunAsync("How many kilometers is a marathon 10 miles? And how many pounds is 75 kilograms? Use unit-converter skill.");
+            response = await agent.RunAsync("List available tools.");
+            Console.WriteLine(response.Text);
+
+            response = await agent.RunAsync("How many kilometers is a marathon 10 miles? And how many pounds is 75 kilograms?");
 
             Console.WriteLine($"Agent: {response.Text}");
 

@@ -36,7 +36,7 @@ namespace A2AConsumerApp
             //    "tasks/send" message and returns the agent's text response.
             Console.WriteLine(await agent.RunAsync("Hello!"));
 
-            Console.WriteLine("Press any key to continue...");
+            Console.WriteLine("Press enter key to continue...");
             Console.ReadLine();
 
             Console.WriteLine(await agent.RunAsync("For which cities you can provide me a weather?"));

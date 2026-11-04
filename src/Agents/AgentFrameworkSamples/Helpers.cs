@@ -99,7 +99,21 @@ namespace AgentFramework_Samples
         public static void GetOpenAIModelAndKey(out string apiKey, out string model)
         {
             apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new InvalidOperationException("OPENAI_API_KEY is not set.");
-            model = Environment.GetEnvironmentVariable("OPENAI_CHAT_MODEL_NAME") ?? "gpt-5.4-mini";
+            model = Environment.GetEnvironmentVariable("OPENAI_CHAT_MODEL_NAME") ?? "gpt-5.4-mini";           
+        }
+
+        public static void GetAnthropicModelAndKey(out string apiKey, out string model, out string resourceName)
+        {
+            apiKey = Environment.GetEnvironmentVariable("ANTHROPIC_FOUNDRY_APIKEY") ?? throw new InvalidOperationException("ANTHROPIC_API_KEY is not set.");
+            model = Environment.GetEnvironmentVariable("ANTHROPIC_FOUNDRY_CHAT_MODEL_NAME") ?? "claude-sonnet-5";
+            string endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? throw new InvalidOperationException("AZURE_OPENAI_ENDPOINT is not set.");
+
+            if (!Uri.TryCreate(endpoint, UriKind.Absolute, out Uri? uri) || string.IsNullOrWhiteSpace(uri.Host))
+            {
+                throw new InvalidOperationException("AZURE_OPENAI_ENDPOINT must be a valid absolute URL.");
+            }
+
+            resourceName = uri.Host.Split('.', StringSplitOptions.RemoveEmptyEntries)[0];
         }
 
         public static void GetAzureEndpointAndModelDeployment(out string apiKey, out string model)

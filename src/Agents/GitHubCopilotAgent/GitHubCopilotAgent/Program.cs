@@ -56,7 +56,7 @@ namespace GitHubCopilotAgent
                     {
                         Command = "npx",
                         Args = ["-y", "@playwright/mcp@latest", "--user-data-dir", "c:\\temp\\pwsession"],
-                        Tools = ["*"],
+                        Tools = ["*"]
                     },
 
                 },

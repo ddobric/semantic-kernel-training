@@ -84,7 +84,7 @@ namespace AzureFoundrySkAgent
             //await LocalHostedMcpTool.RunAsync();
 
             // Remote MCP server via HTTP (e.g. Microsoft Learn)
-            // await HttpHostedMcpTool.RunAsync();
+            await HttpHostedMcpTool.RunAsync();
 
 
             // ═══════════════════════════════════════════════
@@ -115,8 +115,9 @@ namespace AzureFoundrySkAgent
             //  PROVIDERS — Anthropic
             // ═══════════════════════════════════════════════
 
-            await HelloAnthropicAgent.RunHostedAtAnthropicAsync();
+            //await HelloAnthropicAgent.RunHostedAtAnthropicAsync();
 
+            await HelloAnthropicAgent.RunFoundryAsync();
 
             // ═══════════════════════════════════════════════
             //  PROVIDERS — Ollama (local models)

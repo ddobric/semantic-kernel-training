@@ -41,6 +41,7 @@ namespace AgentFramework_Samples.MCP
             }));
 
             await ListMcpToolsAsync(mcpSampleClient);
+
             var sampleServerMcpTools = await mcpSampleClient.ListToolsAsync().ConfigureAwait(false);
 
             // ── MCP Server 2: GitHub MCP (via npx) ──
